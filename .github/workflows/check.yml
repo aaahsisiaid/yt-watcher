@@ -1,0 +1,42 @@
+name: YT Playlist Watcher
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # 10分ごと
+  workflow_dispatch:          # 手動実行も可
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write         # state.json をコミットするため
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install yt-dlp requests google-auth google-auth-oauthlib google-api-python-client pywebpush
+
+      - name: Run playlist check
+        env:
+          YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
+          VAPID_PRIVATE_KEY:  ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_PUBLIC_KEY:   ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_EMAIL:        ${{ secrets.VAPID_EMAIL }}
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          PLAYLISTS_JSON:     ${{ secrets.PLAYLISTS_JSON }}
+          SUBSCRIPTIONS_JSON: ${{ secrets.SUBSCRIPTIONS_JSON }}
+        run: python check.py
+
+      - name: Commit state
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "chore: update state [skip ci]"
+          git push
