@@ -141,7 +141,7 @@ button{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-f
 // ─── Config ───────────────────────────────────────────────────────────────────
 // GitHub Pagesの場合はリポジトリのVAPID公開鍵を直接埋め込む
 // (動的取得不要 — バックエンドがないため)
-const VAPID_PUBLIC_KEY = '__VAPID_PUBLIC_KEY__'; // デプロイ時に差し替え
+const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc'; // デプロイ時に差し替え
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let swReg = null, pushSub = null;
@@ -168,8 +168,8 @@ async function togglePush() {
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') { alert('通知が許可されていません'); return; }
 
-    if (VAPID_PUBLIC_KEY === '__VAPID_PUBLIC_KEY__') {
-      alert('VAPID_PUBLIC_KEY が設定されていません。\nindex.html の __VAPID_PUBLIC_KEY__ を置き換えてください。');
+    if (VAPID_PUBLIC_KEY === 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc') {
+      alert('VAPID_PUBLIC_KEY が設定されていません。\nindex.html の BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc を置き換えてください。');
       return;
     }
 
