@@ -1,7 +1,7 @@
 const CACHE = 'yt-watcher-v1';
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/yt-watcher/', '/yt-watcher/index.html', '/yt-watcher/manifest.json'])));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/yt-watcher/'])));
   self.skipWaiting();
 });
 
