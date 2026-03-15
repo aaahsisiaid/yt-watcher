@@ -7,74 +7,47 @@
 <link rel="manifest" href="manifest.json">
 <title>YT Watcher</title>
 <style>
-:root {
-  --bg:#0a0a0f; --bg2:#111118; --bg3:#1a1a24; --border:#2a2a38;
-  --accent:#7fffb2; --accent2:#ff7f50; --accent3:#7fb8ff;
-  --text:#e0e0e8; --muted:#666678; --danger:#ff4466; --r:6px;
-}
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a38;--accent:#7fffb2;--accent2:#ff7f50;--accent3:#7fb8ff;--text:#e0e0e8;--muted:#666678;--danger:#ff4466;--r:6px}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:13px}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-
-/* menubar */
-#bar{position:fixed;top:0;left:0;right:0;height:28px;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;z-index:100}
-.dots{display:flex;gap:6px;padding:0 12px}
-.dot{width:11px;height:11px;border-radius:50%}
+#bar{position:fixed;top:0;left:0;right:0;height:28px;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:100}
+.dots{display:flex;gap:6px;padding:0 12px}.dot{width:11px;height:11px;border-radius:50%}
 .dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c840}
 .bar-title{padding:0 12px;font-weight:bold;color:var(--accent);font-size:12px}
-.spacer{flex:1}
-.bar-right{display:flex;align-items:center;gap:8px;padding:0 12px}
+.spacer{flex:1}.bar-right{display:flex;align-items:center;gap:8px;padding:0 12px}
 .badge{font-size:10px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#000;font-weight:bold;cursor:pointer}
-.badge.off{background:var(--muted)}
-.badge.warn{background:var(--accent2)}
-
-/* layout */
+.badge.off{background:var(--muted)}.badge.warn{background:var(--accent2)}
 #app{display:flex;flex-direction:column;height:100vh;padding-top:28px}
-
-/* hero */
 #hero{padding:40px 24px 24px;text-align:center;border-bottom:1px solid var(--border)}
 #hero h1{font-size:22px;color:var(--accent);letter-spacing:.05em;margin-bottom:6px}
 #hero p{font-size:11px;color:var(--muted);line-height:1.8}
-
-/* push section */
 #push-section{padding:20px 24px;border-bottom:1px solid var(--border)}
 .section-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
 .push-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 button{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
 .btn-accent{background:var(--accent);color:#000;font-weight:bold}
-.btn-accent:hover{filter:brightness(1.1)}
+.btn-accent:hover{filter:brightness(1.1)}.btn-accent:disabled{opacity:.5;cursor:not-allowed}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-.btn-sm{padding:4px 10px;font-size:10px}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}.btn-sm{padding:4px 10px;font-size:10px}
 .push-hint{font-size:11px;color:var(--muted);line-height:1.6}
-
-/* notif list */
 #notif-section{flex:1;overflow-y:auto;padding:20px 24px}
 .notif-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
 .ni-title{font-weight:bold;color:var(--accent);margin-bottom:3px;font-size:12px}
 .ni-body{color:var(--text);line-height:1.5;font-size:12px}
 .ni-time{font-size:10px;color:var(--muted);margin-top:4px}
 .ni-link{display:inline-block;margin-top:6px;font-size:10px;color:var(--accent3);text-decoration:none}
-.ni-link:hover{text-decoration:underline}
 .empty{text-align:center;padding:60px 20px;color:var(--muted);line-height:2;font-size:12px}
-
-/* setup card */
-.setup-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px}
-.setup-card code{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:11px;color:var(--accent2);font-family:inherit}
-.setup-card ol{margin:8px 0 0 16px;line-height:2;font-size:11px;color:var(--muted)}
-
-/* sub display */
-#sub-box{margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;font-size:10px;word-break:break-all;color:var(--muted);display:none}
+.status-msg{font-size:11px;margin-top:8px;padding:6px 10px;border-radius:var(--r);display:none}
+.status-msg.ok{background:rgba(127,255,178,.1);border:1px solid var(--accent);color:var(--accent);display:block}
+.status-msg.err{background:rgba(255,68,102,.1);border:1px solid var(--danger);color:var(--danger);display:block}
+.status-msg.loading{background:rgba(127,184,255,.1);border:1px solid var(--accent3);color:var(--accent3);display:block}
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <div id="bar">
-  <div class="dots">
-    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-  </div>
+  <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
   <span class="bar-title">YT Watcher</span>
   <div class="spacer"></div>
   <div class="bar-right">
@@ -82,174 +55,105 @@ button{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-f
     <span class="badge off" id="notif-badge" onclick="clearNotifs()">0件</span>
   </div>
 </div>
-
 <div id="app">
   <div id="hero">
     <h1>YT Playlist Watcher</h1>
-    <p>GitHub Actionsが10分ごとにプレイリストを監視<br>新着動画をPush通知 → Google Driveに自動ダウンロード</p>
+    <p>GitHub Actionsが10分ごとにプレイリストを監視<br>新着動画をPush通知</p>
   </div>
-
   <div id="push-section">
     <div class="section-title">Push通知の設定</div>
     <div class="push-row">
       <button class="btn-accent" id="push-btn" onclick="togglePush()">通知を有効にする</button>
-      <span class="push-hint" id="push-hint">有効にすると新着動画・ダウンロード完了を通知します</span>
+      <span class="push-hint" id="push-hint">有効にするとこのデバイスに通知が届きます</span>
     </div>
-    <!-- Push購読情報 (GitHubシークレットに貼り付ける用) -->
-    <div id="sub-box">
-      <div style="color:var(--accent);margin-bottom:4px;font-size:10px">▼ GitHubシークレット SUBSCRIPTIONS_JSON に貼り付けてください</div>
-      <div id="sub-json"></div>
-      <button class="btn-outline btn-sm" style="margin-top:8px" onclick="copySubJson()">コピー</button>
-    </div>
+    <div class="status-msg" id="status-msg"></div>
   </div>
-
   <div id="notif-section">
     <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
       <span>受信した通知</span>
       <button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button>
     </div>
-
-    <!-- セットアップガイド (初回のみ表示) -->
-    <div id="setup-guide">
-      <div class="setup-card">
-        <div style="color:var(--accent);margin-bottom:8px;font-size:12px">セットアップ手順</div>
-        <ol>
-          <li>このページを開いて「通知を有効にする」をクリック</li>
-          <li>表示されたJSONを <code>SUBSCRIPTIONS_JSON</code> シークレットに貼り付け</li>
-          <li><code>PLAYLISTS_JSON</code> に監視プレイリストを設定</li>
-          <li>GitHub Actions が自動で10分ごとに実行されます</li>
-        </ol>
-      </div>
-      <div class="setup-card">
-        <div style="color:var(--accent);margin-bottom:8px;font-size:12px">PLAYLISTS_JSON の例</div>
-        <pre style="font-size:10px;color:var(--muted);line-height:1.8;overflow-x:auto">[
-  {
-    "id": "PLxxxxxxxxxxxxxxxx",
-    "title": "お気に入りPL",
-    "autoDownload": true,
-    "driveFolder": "GoogleDriveのフォルダID"
-  }
-]</pre>
-      </div>
-    </div>
-
     <div id="notif-list"></div>
   </div>
 </div>
-
 <script>
-// ─── Config ───────────────────────────────────────────────────────────────────
-// GitHub Pagesの場合はリポジトリのVAPID公開鍵を直接埋め込む
-// (動的取得不要 — バックエンドがないため)
-const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc'; // デプロイ時に差し替え
+const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
+const WORKER_URL      = 'https://yt-push-register.a6068376.workers.dev';
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let swReg = null, pushSub = null;
-let notifs = JSON.parse(localStorage.getItem('yt_notifs') || '[]');
+let swReg=null,pushSub=null;
+let notifs=JSON.parse(localStorage.getItem('yt_notifs')||'[]');
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-(async () => {
-  if (!('serviceWorker' in navigator)) return;
-  swReg = await navigator.serviceWorker.register('sw.js');
-  pushSub = await swReg.pushManager.getSubscription();
-  updateUI();
-  renderNotifs();
+(async()=>{
+  if(!('serviceWorker' in navigator))return;
+  try{
+    swReg=await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    pushSub=await swReg.pushManager.getSubscription();
+    updateUI();renderNotifs();
+  }catch(e){console.error('SW:',e)}
 })();
 
-// ─── Push toggle ──────────────────────────────────────────────────────────────
-async function togglePush() {
-  if (!swReg) { alert('Service Workerが利用できません'); return; }
-
-  if (pushSub) {
-    await pushSub.unsubscribe();
-    pushSub = null;
-    $('sub-box').style.display = 'none';
-  } else {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') { alert('通知が許可されていません'); return; }
-
-    if (VAPID_PUBLIC_KEY === '__VAPID_PUBLIC_KEY__') {
-      alert('VAPID_PUBLIC_KEY が設定されていません。\nindex.html の __VAPID_PUBLIC_KEY__ を置き換えてください。');
-      return;
-    }
-
-    pushSub = await swReg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY)
+async function togglePush(){
+  if(!swReg){showStatus('Service Workerが利用できません','err');return}
+  if(pushSub){
+    await pushSub.unsubscribe();pushSub=null;updateUI();
+    showStatus('通知をOFFにしました','ok');return;
+  }
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){showStatus('通知が許可されていません','err');return}
+  showStatus('登録中...','loading');
+  $('push-btn').disabled=true;
+  try{
+    await navigator.serviceWorker.ready;
+    pushSub=await swReg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlB64ToUint8(VAPID_PUBLIC_KEY)
     });
-
-    // 購読情報を表示 → ユーザーがGitHubシークレットに貼り付ける
-    const subJson = JSON.stringify([pushSub.toJSON()], null, 2);
-    $('sub-json').textContent = subJson;
-    $('sub-box').style.display = 'block';
-    localStorage.setItem('yt_sub', JSON.stringify(pushSub.toJSON()));
-  }
-  updateUI();
+    const res=await fetch(WORKER_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({subscription:pushSub.toJSON()})
+    });
+    if(!res.ok)throw new Error(`Worker error: ${res.status}`);
+    updateUI();showStatus('このデバイスに通知が届くようになりました','ok');
+  }catch(e){
+    showStatus('エラー: '+e.message,'err');console.error(e);
+  }finally{$('push-btn').disabled=false}
 }
 
-function copySubJson() {
-  navigator.clipboard.writeText($('sub-json').textContent);
-  alert('コピーしました！GitHubシークレット SUBSCRIPTIONS_JSON に貼り付けてください');
+function showStatus(msg,type){const el=$('status-msg');el.textContent=msg;el.className='status-msg '+type}
+function updateUI(){
+  const on=!!pushSub;
+  $('push-btn').textContent=on?'🔔 通知ON — タップでOFF':'通知を有効にする';
+  $('push-hint').textContent=on?'新着動画・ダウンロード完了を通知します':'有効にするとこのデバイスに通知が届きます';
+  $('push-badge').textContent=on?'PUSH ON':'PUSH OFF';
+  $('push-badge').className=on?'badge':'badge off';
 }
-
-// ─── UI ───────────────────────────────────────────────────────────────────────
-function updateUI() {
-  const on = !!pushSub;
-  $('push-btn').textContent = on ? '🔔 通知ON — クリックでOFF' : '通知を有効にする';
-  $('push-hint').textContent = on
-    ? '新着動画・ダウンロード完了を通知します'
-    : '有効にすると新着動画・ダウンロード完了を通知します';
-  $('push-badge').textContent = on ? 'PUSH ON' : 'PUSH OFF';
-  $('push-badge').className = on ? 'badge' : 'badge off';
-  if (on) $('setup-guide').style.display = 'none';
-}
-
-function renderNotifs() {
-  const el = $('notif-list');
-  $('notif-badge').textContent = `${notifs.length}件`;
-  $('notif-badge').className = notifs.length ? 'badge warn' : 'badge off';
-
-  if (!notifs.length) {
-    el.innerHTML = '<div class="empty">まだ通知はありません<br>GitHub Actionsが10分ごとにチェックします</div>';
-    return;
-  }
-  el.innerHTML = notifs.map(n => `
+function renderNotifs(){
+  const el=$('notif-list');
+  $('notif-badge').textContent=`${notifs.length}件`;
+  $('notif-badge').className=notifs.length?'badge warn':'badge off';
+  if(!notifs.length){el.innerHTML='<div class="empty">まだ通知はありません<br>GitHub Actionsが10分ごとにチェックします</div>';return}
+  el.innerHTML=notifs.map(n=>`
     <div class="notif-item">
       <div class="ni-title">${n.title}</div>
       <div class="ni-body">${n.body}</div>
-      ${n.url ? `<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>` : ''}
+      ${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}
       <div class="ni-time">${fmtTime(n.time)}</div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-function clearNotifs() {
-  notifs = [];
-  localStorage.setItem('yt_notifs', '[]');
-  renderNotifs();
-}
-
-// ─── SW message (Pushで届いた通知をlocalStorageに追加) ────────────────────────
-navigator.serviceWorker?.addEventListener('message', e => {
-  if (e.data?.type === 'push') {
-    notifs.unshift({ ...e.data, time: new Date().toISOString() });
-    if (notifs.length > 50) notifs = notifs.slice(0, 50);
-    localStorage.setItem('yt_notifs', JSON.stringify(notifs));
+function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');renderNotifs()}
+navigator.serviceWorker?.addEventListener('message',e=>{
+  if(e.data?.type==='push'){
+    notifs.unshift({...e.data,time:new Date().toISOString()});
+    if(notifs.length>50)notifs=notifs.slice(0,50);
+    localStorage.setItem('yt_notifs',JSON.stringify(notifs));
     renderNotifs();
   }
 });
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const fmtTime = iso => {
-  const d = new Date(iso);
-  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-};
-function urlB64ToUint8(b) {
-  const pad = '='.repeat((4 - b.length % 4) % 4);
-  const raw = atob((b + pad).replace(/-/g, '+').replace(/_/g, '/'));
-  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
-}
+const $=id=>document.getElementById(id);
+const fmtTime=iso=>{const d=new Date(iso);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
 </script>
 </body>
 </html>
