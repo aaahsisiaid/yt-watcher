@@ -3,13 +3,17 @@ name: YT Playlist Watcher
 on:
   schedule:
     - cron: '*/10 * * * *'   # 10分ごと
-  workflow_dispatch:          # 手動実行も可
+  workflow_dispatch:
+
+concurrency:
+  group: yt-playlist-watcher
+  cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
     permissions:
-      contents: write         # state.json をコミットするため
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +41,9 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add state.json
           git diff --cached --quiet || git commit -m "chore: update state [skip ci]"
-          git push
+
+          git pull --rebase origin main
+          git push origin HEAD:main
