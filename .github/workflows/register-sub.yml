@@ -17,25 +17,21 @@ jobs:
           NEW_SUBS: ${{ github.event.client_payload.all_subs }}
           REPO: ${{ github.repository }}
         run: |
-          python3 - <<'EOF'
+          python3 << 'PYEOF'
           import json, os, urllib.request, base64
           from nacl import public
-
           new_value = os.environ["NEW_SUBS"]
-          token     = os.environ["GH_PAT"]
-          repo      = os.environ["REPO"]
-
+          token = os.environ["GH_PAT"]
+          repo = os.environ["REPO"]
           req = urllib.request.Request(
             f"https://api.github.com/repos/{repo}/actions/secrets/public-key",
             headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
           )
           with urllib.request.urlopen(req) as r:
             pk = json.loads(r.read())
-
-          pk_bytes   = base64.b64decode(pk["key"])
+          pk_bytes = base64.b64decode(pk["key"])
           sealed_box = public.SealedBox(public.PublicKey(pk_bytes))
-          encrypted  = base64.b64encode(sealed_box.encrypt(new_value.encode())).decode()
-
+          encrypted = base64.b64encode(sealed_box.encrypt(new_value.encode())).decode()
           body = json.dumps({"encrypted_value": encrypted, "key_id": pk["key_id"]}).encode()
           req2 = urllib.request.Request(
             f"https://api.github.com/repos/{repo}/actions/secrets/SUBSCRIPTIONS_JSON",
@@ -44,4 +40,4 @@ jobs:
           )
           with urllib.request.urlopen(req2) as r:
             print(f"Updated: {r.status}")
-          EOF
+          PYEOF
