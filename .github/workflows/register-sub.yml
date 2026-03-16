@@ -1,0 +1,46 @@
+name: Register Push Subscription
+
+on:
+  repository_dispatch:
+    types: [register-subscription]
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update SUBSCRIPTIONS_JSON secret
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          NEW_SUBS: ${{ github.event.client_payload.all_subs }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, urllib.request, base64, subprocess, sys
+
+          new_value = os.environ["NEW_SUBS"]
+          token     = os.environ["GH_PAT"]
+          repo      = os.environ["REPO"]
+
+          subprocess.check_call([sys.executable, "-m", "pip", "install", "PyNaCl", "-q"])
+          from nacl import encoding, public
+
+          req = urllib.request.Request(
+            f"https://api.github.com/repos/{repo}/actions/secrets/public-key",
+            headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
+          )
+          with urllib.request.urlopen(req) as r:
+            pk = json.loads(r.read())
+
+          pk_bytes   = base64.b64decode(pk["key"])
+          sealed_box = public.SealedBox(public.PublicKey(pk_bytes))
+          encrypted  = base64.b64encode(sealed_box.encrypt(new_value.encode())).decode()
+
+          body = json.dumps({"encrypted_value": encrypted, "key_id": pk["key_id"]}).encode()
+          req2 = urllib.request.Request(
+            f"https://api.github.com/repos/{repo}/actions/secrets/SUBSCRIPTIONS_JSON",
+            data=body, method="PUT",
+            headers={"Authorization": f"token {token}", "Accept": "application/vnd.github+json", "Content-Type": "application/json"}
+          )
+          with urllib.request.urlopen(req2) as r:
+            print(f"Updated: {r.status}")
+          EOF
