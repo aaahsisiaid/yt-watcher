@@ -1,4 +1,4 @@
-const CACHE = 'yt-watcher-v1';
+const CACHE = 'yt-watcher-v2';
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/yt-watcher/'])));
@@ -23,36 +23,26 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Push受信
 self.addEventListener('push', e => {
   let data = {};
   try { data = e.data.json(); } catch {}
-
   const title = data.title || 'YT Watcher';
   const body  = data.body  || '';
-  const url   = data.url   || '/';
-
+  const url   = data.url   || '/yt-watcher/';
   e.waitUntil(Promise.all([
     self.registration.showNotification(title, {
       body,
-      icon:    '/icon-192.png',
-      badge:   '/icon-192.png',
-      tag:     'yt-watcher',
-      data:    { url },
-      actions: url ? [{ action: 'open', title: '開く' }] : []
+      tag:  'yt-watcher',
+      data: { url }
     }),
-    // アプリが開いていればメッセージも送る
     self.clients.matchAll({ type: 'window' }).then(clients => {
-      for (const c of clients) {
-        c.postMessage({ type: 'push', title, body, url });
-      }
+      for (const c of clients) c.postMessage({ type: 'push', title, body, url });
     })
   ]));
 });
 
-// 通知クリック
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = e.notification.data?.url || '/';
+  const url = e.notification.data?.url || '/yt-watcher/';
   e.waitUntil(clients.openWindow(url));
 });
