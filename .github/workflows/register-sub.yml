@@ -11,7 +11,7 @@ jobs:
       - name: Install PyNaCl
         run: pip install PyNaCl
 
-      - name: Update secret
+      - name: Update SUBSCRIPTIONS_JSON secret
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           NEW_SUBS: ${{ github.event.client_payload.all_subs }}
@@ -32,7 +32,8 @@ jobs:
           with urllib.request.urlopen(req) as r:
             pk = json.loads(r.read())
 
-          sealed_box = public.SealedBox(public.PublicKey(base64.b64decode(pk["key"])))
+          pk_bytes   = base64.b64decode(pk["key"])
+          sealed_box = public.SealedBox(public.PublicKey(pk_bytes))
           encrypted  = base64.b64encode(sealed_box.encrypt(new_value.encode())).decode()
 
           body = json.dumps({"encrypted_value": encrypted, "key_id": pk["key_id"]}).encode()
