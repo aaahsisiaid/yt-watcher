@@ -1,22 +1,5 @@
-name: Register Push Subscription
-
-on:
-  repository_dispatch:
-    types: [register-subscription]
-
-jobs:
-  register:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install PyNaCl
-        run: pip install PyNaCl
-
-      - name: Update SUBSCRIPTIONS_JSON secret
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-          NEW_SUBS: ${{ github.event.client_payload.all_subs }}
-          REPO: ${{ github.repository }}
-        run: |
+run: |
+          pip install PyNaCl -q
           python3 - <<'EOF'
           import json, os, urllib.request, base64
           from nacl import public
