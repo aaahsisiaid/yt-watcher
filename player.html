@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000">
+<title>Player</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
+#yt{position:absolute;inset:0;pointer-events:none}
+#yt iframe{width:100%;height:100%;border:none}
+/* controls overlay */
+#ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:0;transition:opacity .3s}
+#ctrl.hidden{opacity:0;pointer-events:none}
+/* top bar */
+#top{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(#000a,transparent)}
+#back{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;line-height:1}
+#ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
+/* bottom bar */
+#bot{padding:8px 14px 16px;background:linear-gradient(transparent,#000a)}
+/* seek bar */
+#seek-wrap{position:relative;height:20px;display:flex;align-items:center;margin-bottom:6px;cursor:pointer;touch-action:none}
+#seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.25);border-radius:2px}
+#seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.4);border-radius:2px;width:0}
+#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0}
+#seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px;transition:transform .1s}
+#seek-wrap:active #seek-thumb{transform:translateX(-50%) scale(1.4)}
+/* time + controls row */
+#row{display:flex;align-items:center;gap:12px}
+#time{font-size:11px;color:#bbb;min-width:90px}
+.spacer{flex:1}
+/* icon buttons */
+.ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:50%;transition:background .15s}
+.ibtn:active{background:rgba(255,255,255,.2)}
+/* quality menu */
+#q-menu{position:absolute;bottom:70px;right:14px;background:#111;border:1px solid #333;border-radius:8px;overflow:hidden;display:none;z-index:10}
+#q-menu.open{display:block}
+#q-menu button{display:block;width:100%;padding:10px 20px;background:none;border:none;color:#ddd;font-size:12px;font-family:inherit;cursor:pointer;text-align:left}
+#q-menu button:hover,#q-menu button.active{background:#222;color:#7fffb2}
+/* speed badge */
+#speed-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#7fffb2;padding:8px 20px;border-radius:20px;font-size:14px;pointer-events:none;opacity:0;transition:opacity .2s}
+#speed-badge.show{opacity:1}
+/* buffer spinner */
+#spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+/* play overlay (tap center) */
+#play-area{position:absolute;top:60px;left:0;right:0;bottom:80px}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="yt"><div id="player"></div></div>
+<div id="spinner"></div>
+<div id="speed-badge">2x</div>
+
+<div id="ctrl">
+  <div id="top">
+    <button id="back" onclick="history.back()">&#8592;</button>
+    <div id="ttl"></div>
+  </div>
+
+  <div id="play-area" id="tap-zone"></div>
+
+  <div id="bot">
+    <div id="seek-wrap">
+      <div id="seek-bg"></div>
+      <div id="seek-buf"></div>
+      <div id="seek-fill"></div>
+      <div id="seek-thumb"></div>
+    </div>
+    <div id="row">
+      <span id="time">0:00 / 0:00</span>
+      <div class="spacer"></div>
+      <button class="ibtn" id="pip-btn" title="PiP">&#9974;</button>
+      <button class="ibtn" id="q-btn" title="画質">&#9881;</button>
+      <button class="ibtn" id="fs-btn" title="全画面">&#10064;</button>
+    </div>
+  </div>
+</div>
+
+<div id="q-menu">
+  <button onclick="setQuality('hd1080')">1080p</button>
+  <button onclick="setQuality('hd720')">720p</button>
+  <button onclick="setQuality('large')">480p</button>
+  <button onclick="setQuality('medium')">360p</button>
+  <button onclick="setQuality('small')">240p</button>
+  <button onclick="setQuality('tiny')">144p</button>
+  <button onclick="setQuality('auto')" class="active">自動</button>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const videoId = params.get('v') || '';
+const title   = params.get('t') || '';
+document.getElementById('ttl').textContent = decodeURIComponent(title);
+
+let player, dur=0, isSeeking=false, longPressTimer=null, isLongPress=false;
+let ctrlTimer=null, ctrlVisible=true;
+
+function showCtrl(){
+  const c=document.getElementById('ctrl');
+  c.classList.remove('hidden');
+  ctrlVisible=true;
+  clearTimeout(ctrlTimer);
+  ctrlTimer=setTimeout(hideCtrl, 3000);
+}
+function hideCtrl(){
+  document.getElementById('ctrl').classList.add('hidden');
+  ctrlVisible=false;
+}
+
+// YouTube IFrame API
+const tag=document.createElement('script');
+tag.src='https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+window.onYouTubeIframeAPIReady=()=>{
+  player=new YT.Player('player',{
+    videoId,
+    playerVars:{autoplay:1,controls:0,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3},
+    events:{
+      onReady: e=>{ e.target.playVideo(); showCtrl(); },
+      onStateChange: e=>{
+        const s=document.getElementById('spinner');
+        if(e.data===YT.PlayerState.BUFFERING) s.style.display='block';
+        else s.style.display='none';
+        if(e.data===YT.PlayerState.PLAYING) startTick();
+      }
+    }
+  });
+};
+
+// Tick
+let tickId;
+function startTick(){
+  clearInterval(tickId);
+  tickId=setInterval(()=>{
+    if(!player||!player.getCurrentTime)return;
+    const cur=player.getCurrentTime();
+    dur=player.getDuration()||0;
+    updateSeek(cur,dur);
+    document.getElementById('time').textContent=fmt(cur)+' / '+fmt(dur);
+  },500);
+}
+
+function fmt(s){
+  s=Math.floor(s||0);
+  const m=Math.floor(s/60),sec=s%60;
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+function updateSeek(cur,d){
+  if(!d||isSeeking)return;
+  const pct=(cur/d)*100;
+  document.getElementById('seek-fill').style.width=pct+'%';
+  document.getElementById('seek-thumb').style.left=pct+'%';
+  try{
+    const buf=player.getVideoLoadedFraction()*100;
+    document.getElementById('seek-buf').style.width=buf+'%';
+  }catch{}
+}
+
+// Seek bar touch/mouse
+const sw=document.getElementById('seek-wrap');
+function seekAt(e){
+  const r=sw.getBoundingClientRect();
+  const x=Math.max(0,Math.min((e.touches?e.touches[0].clientX:e.clientX)-r.left,r.width));
+  const pct=x/r.width;
+  document.getElementById('seek-fill').style.width=(pct*100)+'%';
+  document.getElementById('seek-thumb').style.left=(pct*100)+'%';
+  if(player&&player.seekTo) player.seekTo(pct*dur,true);
+}
+sw.addEventListener('touchstart',e=>{isSeeking=true;seekAt(e);e.stopPropagation();},{passive:true});
+sw.addEventListener('touchmove',e=>{if(isSeeking)seekAt(e);e.stopPropagation();},{passive:true});
+sw.addEventListener('touchend',e=>{isSeeking=false;e.stopPropagation();},{passive:true});
+sw.addEventListener('mousedown',e=>{isSeeking=true;seekAt(e);});
+window.addEventListener('mousemove',e=>{if(isSeeking)seekAt(e);});
+window.addEventListener('mouseup',()=>{isSeeking=false;});
+
+// Tap play/pause (center area)
+document.getElementById('play-area').addEventListener('click',()=>{
+  if(!player)return;
+  showCtrl();
+  const s=player.getPlayerState();
+  if(s===YT.PlayerState.PLAYING) player.pauseVideo();
+  else player.playVideo();
+});
+
+// Long press = 2x speed
+document.getElementById('play-area').addEventListener('touchstart',e=>{
+  isLongPress=false;
+  longPressTimer=setTimeout(()=>{
+    isLongPress=true;
+    if(player) player.setPlaybackRate(2);
+    const b=document.getElementById('speed-badge');
+    b.textContent='2x';b.classList.add('show');
+  },500);
+},{passive:true});
+document.getElementById('play-area').addEventListener('touchend',()=>{
+  clearTimeout(longPressTimer);
+  if(isLongPress){
+    if(player) player.setPlaybackRate(1);
+    const b=document.getElementById('speed-badge');
+    b.textContent='1x';
+    setTimeout(()=>b.classList.remove('show'),800);
+  }
+  isLongPress=false;
+});
+document.getElementById('play-area').addEventListener('touchmove',()=>{
+  clearTimeout(longPressTimer);
+},{passive:true});
+
+// Ctrl visibility on tap
+document.getElementById('ctrl').addEventListener('click',e=>{
+  if(e.target===document.getElementById('play-area'))return;
+  showCtrl();
+});
+
+// Fullscreen + auto landscape
+document.getElementById('fs-btn').addEventListener('click',async()=>{
+  const el=document.documentElement;
+  if(!document.fullscreenElement){
+    try{
+      await el.requestFullscreen({navigationUI:'hide'});
+      await screen.orientation?.lock('landscape').catch(()=>{});
+    }catch{}
+  } else {
+    await document.exitFullscreen();
+    await screen.orientation?.unlock();
+  }
+});
+
+document.addEventListener('fullscreenchange',()=>{
+  const btn=document.getElementById('fs-btn');
+  btn.innerHTML=document.fullscreenElement?'&#10063;':'&#10064;';
+});
+
+// Quality
+function setQuality(q){
+  if(player) player.setPlaybackQuality(q);
+  document.querySelectorAll('#q-menu button').forEach(b=>{
+    b.classList.toggle('active', b.textContent.trim()===(
+      q==='hd1080'?'1080p':q==='hd720'?'720p':q==='large'?'480p':q==='medium'?'360p':q==='small'?'240p':q==='tiny'?'144p':'自動'
+    ));
+  });
+  document.getElementById('q-menu').classList.remove('open');
+  showCtrl();
+}
+document.getElementById('q-btn').addEventListener('click',e=>{
+  e.stopPropagation();
+  document.getElementById('q-menu').classList.toggle('open');
+  showCtrl();
+});
+
+// PiP
+document.getElementById('pip-btn').addEventListener('click',async()=>{
+  const iframe=document.querySelector('#player iframe');
+  if(iframe && document.pictureInPictureEnabled){
+    try{await iframe.requestPictureInPicture();}catch{}
+  }
+});
+
+// Prevent context menu on long press
+document.addEventListener('contextmenu',e=>e.preventDefault());
+
+// Auto-show controls initially
+showCtrl();
+</script>
+</body>
+</html>
