@@ -8,265 +8,297 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
-#yt{position:absolute;inset:0;pointer-events:none}
-#yt iframe{width:100%;height:100%;border:none}
+#wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000}
+video{width:100%;height:100%;object-fit:contain;display:block}
 /* controls overlay */
-#ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:0;transition:opacity .3s}
+#ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .25s}
 #ctrl.hidden{opacity:0;pointer-events:none}
-/* top bar */
-#top{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(#000a,transparent)}
-#back{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;line-height:1}
+#top{display:flex;align-items:center;gap:10px;padding:14px 14px 20px;background:linear-gradient(rgba(0,0,0,.7),transparent)}
+#back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:2px 8px;line-height:1}
 #ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
-/* bottom bar */
-#bot{padding:8px 14px 16px;background:linear-gradient(transparent,#000a)}
-/* seek bar */
-#seek-wrap{position:relative;height:20px;display:flex;align-items:center;margin-bottom:6px;cursor:pointer;touch-action:none}
-#seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.25);border-radius:2px}
-#seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.4);border-radius:2px;width:0}
-#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0}
-#seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px;transition:transform .1s}
-#seek-wrap:active #seek-thumb{transform:translateX(-50%) scale(1.4)}
-/* time + controls row */
-#row{display:flex;align-items:center;gap:12px}
-#time{font-size:11px;color:#bbb;min-width:90px}
-.spacer{flex:1}
-/* icon buttons */
-.ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:50%;transition:background .15s}
-.ibtn:active{background:rgba(255,255,255,.2)}
+#author{font-size:10px;color:#999}
+#bot{padding:6px 14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+/* seek */
+#seek-wrap{position:relative;height:22px;display:flex;align-items:center;margin-bottom:4px;cursor:pointer;touch-action:none}
+#seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.2);border-radius:2px}
+#seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.35);border-radius:2px;width:0}
+#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0;transition:width .1s}
+#seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px}
+/* row */
+#row{display:flex;align-items:center;gap:8px}
+.ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:20px;line-height:1;border-radius:50%}
+.ibtn:active{background:rgba(255,255,255,.15)}
+.ibtn svg{width:20px;height:20px;fill:#fff;display:block}
+#time{font-size:11px;color:#bbb;white-space:nowrap}
+.sp{flex:1}
 /* quality menu */
-#q-menu{position:absolute;bottom:70px;right:14px;background:#111;border:1px solid #333;border-radius:8px;overflow:hidden;display:none;z-index:10}
-#q-menu.open{display:block}
-#q-menu button{display:block;width:100%;padding:10px 20px;background:none;border:none;color:#ddd;font-size:12px;font-family:inherit;cursor:pointer;text-align:left}
-#q-menu button:hover,#q-menu button.active{background:#222;color:#7fffb2}
-/* speed badge */
-#speed-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#7fffb2;padding:8px 20px;border-radius:20px;font-size:14px;pointer-events:none;opacity:0;transition:opacity .2s}
+#qmenu{position:absolute;bottom:72px;right:14px;background:#111;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;display:none;z-index:20;min-width:90px}
+#qmenu.open{display:block}
+#qmenu button{display:block;width:100%;padding:9px 18px;background:none;border:none;color:#ccc;font-size:12px;font-family:inherit;cursor:pointer;text-align:left;white-space:nowrap}
+#qmenu button:active,#qmenu button.sel{background:#1e1e1e;color:#7fffb2}
+/* center overlays */
+#center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:10px}
+#play-icon{width:60px;height:60px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+#play-icon.show{opacity:1}
+#speed-badge{background:rgba(0,0,0,.7);color:#7fffb2;padding:6px 18px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s}
 #speed-badge.show{opacity:1}
-/* buffer spinner */
-#spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-/* play overlay (tap center) */
-#play-area{position:absolute;top:60px;left:0;right:0;bottom:80px}
+#spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+#err{background:rgba(200,50,50,.85);padding:10px 18px;border-radius:8px;font-size:12px;display:none;text-align:center;max-width:280px}
+/* tap zone */
+#tap{position:absolute;top:56px;left:0;right:0;bottom:72px}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div id="yt"><div id="player"></div></div>
-<div id="spinner"></div>
-<div id="speed-badge">2x</div>
+<div id="wrap">
+  <video id="v" playsinline preload="auto"></video>
 
-<div id="ctrl">
-  <div id="top">
-    <button id="back" onclick="history.back()">&#8592;</button>
-    <div id="ttl"></div>
+  <div id="center">
+    <div id="spinner"></div>
+    <div id="play-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+    <div id="speed-badge"></div>
+    <div id="err"></div>
   </div>
 
-  <div id="play-area" id="tap-zone"></div>
+  <div id="tap"></div>
 
-  <div id="bot">
-    <div id="seek-wrap">
-      <div id="seek-bg"></div>
-      <div id="seek-buf"></div>
-      <div id="seek-fill"></div>
-      <div id="seek-thumb"></div>
+  <div id="ctrl">
+    <div id="top">
+      <button id="back">&#8592;</button>
+      <div>
+        <div id="ttl"></div>
+        <div id="author"></div>
+      </div>
     </div>
-    <div id="row">
-      <span id="time">0:00 / 0:00</span>
-      <div class="spacer"></div>
-      <button class="ibtn" id="pip-btn" title="PiP">&#9974;</button>
-      <button class="ibtn" id="q-btn" title="画質">&#9881;</button>
-      <button class="ibtn" id="fs-btn" title="全画面">&#10064;</button>
+    <div id="bot">
+      <div id="seek-wrap">
+        <div id="seek-bg"></div>
+        <div id="seek-buf"></div>
+        <div id="seek-fill"></div>
+        <div id="seek-thumb"></div>
+      </div>
+      <div id="row">
+        <button class="ibtn" id="play-btn">
+          <svg id="play-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <span id="time">0:00 / 0:00</span>
+        <div class="sp"></div>
+        <button class="ibtn" id="q-btn" title="画質">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96a7.01 7.01 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.04.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </button>
+        <button class="ibtn" id="fs-btn" title="全画面">
+          <svg id="fs-svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="q-menu">
-  <button onclick="setQuality('hd1080')">1080p</button>
-  <button onclick="setQuality('hd720')">720p</button>
-  <button onclick="setQuality('large')">480p</button>
-  <button onclick="setQuality('medium')">360p</button>
-  <button onclick="setQuality('small')">240p</button>
-  <button onclick="setQuality('tiny')">144p</button>
-  <button onclick="setQuality('auto')" class="active">自動</button>
+  <div id="qmenu"></div>
 </div>
 
 <script>
+const WORKER = 'https://yt-push-register.a6068376.workers.dev';
 const params = new URLSearchParams(location.search);
 const videoId = params.get('v') || '';
-const title   = params.get('t') || '';
-document.getElementById('ttl').textContent = decodeURIComponent(title);
+const initTitle = decodeURIComponent(params.get('t') || '');
 
-let player, dur=0, isSeeking=false, longPressTimer=null, isLongPress=false;
-let ctrlTimer=null, ctrlVisible=true;
+const v = document.getElementById('v');
+let streams = [], curStreamIdx = 0;
+let ctrlTimer, ctrlVisible = true;
+let longTimer, isLong = false, isSeeking = false;
 
-function showCtrl(){
-  const c=document.getElementById('ctrl');
-  c.classList.remove('hidden');
-  ctrlVisible=true;
-  clearTimeout(ctrlTimer);
-  ctrlTimer=setTimeout(hideCtrl, 3000);
+document.getElementById('ttl').textContent = initTitle;
+document.getElementById('back').onclick = () => history.back();
+
+// Load stream info
+(async () => {
+  showSpinner(true);
+  try {
+    const res = await fetch(`${WORKER}/stream?v=${videoId}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    streams = data.streams;
+    document.getElementById('ttl').textContent = data.title || initTitle;
+    document.getElementById('author').textContent = data.author || '';
+    buildQMenu();
+    playStream(0);
+  } catch(e) {
+    showErr(e.message);
+  } finally {
+    showSpinner(false);
+  }
+})();
+
+function playStream(idx) {
+  if (!streams[idx]) return;
+  curStreamIdx = idx;
+  const t = v.currentTime;
+  v.src = streams[idx].url;
+  v.load();
+  v.currentTime = t;
+  v.play().catch(() => {});
+  document.querySelectorAll('#qmenu button').forEach((b, i) => b.classList.toggle('sel', i === idx));
 }
-function hideCtrl(){
-  document.getElementById('ctrl').classList.add('hidden');
-  ctrlVisible=false;
+
+function buildQMenu() {
+  const m = document.getElementById('qmenu');
+  m.innerHTML = streams.map((s, i) =>
+    `<button onclick="playStream(${i})">${s.quality}</button>`
+  ).join('');
 }
 
-// YouTube IFrame API
-const tag=document.createElement('script');
-tag.src='https://www.youtube.com/iframe_api';
-document.head.appendChild(tag);
+// Video events
+v.addEventListener('waiting', () => showSpinner(true));
+v.addEventListener('playing', () => showSpinner(false));
+v.addEventListener('canplay', () => showSpinner(false));
+v.addEventListener('timeupdate', tickSeek);
+v.addEventListener('progress', tickBuf);
+v.addEventListener('ended', () => updatePlayBtn(false));
+v.addEventListener('play', () => updatePlayBtn(true));
+v.addEventListener('pause', () => updatePlayBtn(false));
 
-window.onYouTubeIframeAPIReady=()=>{
-  player=new YT.Player('player',{
-    videoId,
-    playerVars:{autoplay:1,controls:0,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3},
-    events:{
-      onReady: e=>{ e.target.playVideo(); showCtrl(); },
-      onStateChange: e=>{
-        const s=document.getElementById('spinner');
-        if(e.data===YT.PlayerState.BUFFERING) s.style.display='block';
-        else s.style.display='none';
-        if(e.data===YT.PlayerState.PLAYING) startTick();
-      }
-    }
-  });
+function tickSeek() {
+  if (isSeeking) return;
+  const pct = v.duration ? (v.currentTime / v.duration) * 100 : 0;
+  document.getElementById('seek-fill').style.width = pct + '%';
+  document.getElementById('seek-fill').style.transition = 'none';
+  document.getElementById('seek-thumb').style.left = pct + '%';
+  document.getElementById('time').textContent = fmt(v.currentTime) + ' / ' + fmt(v.duration);
+}
+
+function tickBuf() {
+  if (!v.duration) return;
+  try {
+    const buf = v.buffered.length ? (v.buffered.end(v.buffered.length - 1) / v.duration) * 100 : 0;
+    document.getElementById('seek-buf').style.width = buf + '%';
+  } catch {}
+}
+
+function fmt(s) {
+  s = Math.floor(s || 0);
+  return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+}
+
+function updatePlayBtn(playing) {
+  document.getElementById('play-svg').innerHTML = playing
+    ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+}
+
+// Play/pause button
+document.getElementById('play-btn').onclick = () => {
+  v.paused ? v.play() : v.pause();
+  showCtrl();
 };
 
-// Tick
-let tickId;
-function startTick(){
-  clearInterval(tickId);
-  tickId=setInterval(()=>{
-    if(!player||!player.getCurrentTime)return;
-    const cur=player.getCurrentTime();
-    dur=player.getDuration()||0;
-    updateSeek(cur,dur);
-    document.getElementById('time').textContent=fmt(cur)+' / '+fmt(dur);
-  },500);
-}
-
-function fmt(s){
-  s=Math.floor(s||0);
-  const m=Math.floor(s/60),sec=s%60;
-  return m+':'+(sec<10?'0':'')+sec;
-}
-
-function updateSeek(cur,d){
-  if(!d||isSeeking)return;
-  const pct=(cur/d)*100;
-  document.getElementById('seek-fill').style.width=pct+'%';
-  document.getElementById('seek-thumb').style.left=pct+'%';
-  try{
-    const buf=player.getVideoLoadedFraction()*100;
-    document.getElementById('seek-buf').style.width=buf+'%';
-  }catch{}
-}
-
-// Seek bar touch/mouse
-const sw=document.getElementById('seek-wrap');
-function seekAt(e){
-  const r=sw.getBoundingClientRect();
-  const x=Math.max(0,Math.min((e.touches?e.touches[0].clientX:e.clientX)-r.left,r.width));
-  const pct=x/r.width;
-  document.getElementById('seek-fill').style.width=(pct*100)+'%';
-  document.getElementById('seek-thumb').style.left=(pct*100)+'%';
-  if(player&&player.seekTo) player.seekTo(pct*dur,true);
-}
-sw.addEventListener('touchstart',e=>{isSeeking=true;seekAt(e);e.stopPropagation();},{passive:true});
-sw.addEventListener('touchmove',e=>{if(isSeeking)seekAt(e);e.stopPropagation();},{passive:true});
-sw.addEventListener('touchend',e=>{isSeeking=false;e.stopPropagation();},{passive:true});
-sw.addEventListener('mousedown',e=>{isSeeking=true;seekAt(e);});
-window.addEventListener('mousemove',e=>{if(isSeeking)seekAt(e);});
-window.addEventListener('mouseup',()=>{isSeeking=false;});
-
-// Tap play/pause (center area)
-document.getElementById('play-area').addEventListener('click',()=>{
-  if(!player)return;
+// Tap zone — tap = play/pause, longpress = 2x
+const tap = document.getElementById('tap');
+tap.addEventListener('click', () => {
+  if (isLong) return;
+  v.paused ? v.play() : v.pause();
+  flashPlayIcon();
   showCtrl();
-  const s=player.getPlayerState();
-  if(s===YT.PlayerState.PLAYING) player.pauseVideo();
-  else player.playVideo();
 });
-
-// Long press = 2x speed
-document.getElementById('play-area').addEventListener('touchstart',e=>{
-  isLongPress=false;
-  longPressTimer=setTimeout(()=>{
-    isLongPress=true;
-    if(player) player.setPlaybackRate(2);
-    const b=document.getElementById('speed-badge');
-    b.textContent='2x';b.classList.add('show');
-  },500);
-},{passive:true});
-document.getElementById('play-area').addEventListener('touchend',()=>{
-  clearTimeout(longPressTimer);
-  if(isLongPress){
-    if(player) player.setPlaybackRate(1);
-    const b=document.getElementById('speed-badge');
-    b.textContent='1x';
-    setTimeout(()=>b.classList.remove('show'),800);
+tap.addEventListener('touchstart', e => {
+  isLong = false;
+  longTimer = setTimeout(() => {
+    isLong = true;
+    v.playbackRate = 2;
+    showBadge('2x');
+  }, 500);
+}, { passive: true });
+tap.addEventListener('touchend', () => {
+  clearTimeout(longTimer);
+  if (isLong) {
+    v.playbackRate = 1;
+    showBadge('1x', 600);
   }
-  isLongPress=false;
+  isLong = false;
 });
-document.getElementById('play-area').addEventListener('touchmove',()=>{
-  clearTimeout(longPressTimer);
-},{passive:true});
+tap.addEventListener('touchmove', () => clearTimeout(longTimer), { passive: true });
 
-// Ctrl visibility on tap
-document.getElementById('ctrl').addEventListener('click',e=>{
-  if(e.target===document.getElementById('play-area'))return;
+function flashPlayIcon() {
+  const el = document.getElementById('play-icon');
+  el.querySelector('path').setAttribute('d', v.paused
+    ? 'M8 5v14l11-7z'
+    : 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 600);
+}
+
+function showBadge(txt, dur = 99999) {
+  const b = document.getElementById('speed-badge');
+  b.textContent = txt; b.classList.add('show');
+  if (dur < 99999) setTimeout(() => b.classList.remove('show'), dur);
+}
+
+// Seek bar
+const sw = document.getElementById('seek-wrap');
+function seekAt(clientX) {
+  const r = sw.getBoundingClientRect();
+  const pct = Math.max(0, Math.min((clientX - r.left) / r.width, 1));
+  document.getElementById('seek-fill').style.width = (pct * 100) + '%';
+  document.getElementById('seek-thumb').style.left = (pct * 100) + '%';
+  v.currentTime = pct * (v.duration || 0);
+}
+sw.addEventListener('touchstart', e => { isSeeking = true; seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
+sw.addEventListener('touchmove', e => { if (isSeeking) seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
+sw.addEventListener('touchend', e => { isSeeking = false; e.stopPropagation(); }, { passive: true });
+sw.addEventListener('mousedown', e => { isSeeking = true; seekAt(e.clientX); });
+window.addEventListener('mousemove', e => { if (isSeeking) seekAt(e.clientX); });
+window.addEventListener('mouseup', () => { isSeeking = false; });
+
+// Quality menu
+document.getElementById('q-btn').onclick = e => {
+  e.stopPropagation();
+  document.getElementById('qmenu').classList.toggle('open');
   showCtrl();
+};
+document.getElementById('wrap').addEventListener('click', () => {
+  document.getElementById('qmenu').classList.remove('open');
 });
 
 // Fullscreen + auto landscape
-document.getElementById('fs-btn').addEventListener('click',async()=>{
-  const el=document.documentElement;
-  if(!document.fullscreenElement){
-    try{
-      await el.requestFullscreen({navigationUI:'hide'});
-      await screen.orientation?.lock('landscape').catch(()=>{});
-    }catch{}
+document.getElementById('fs-btn').onclick = async () => {
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+    await screen.orientation?.lock('landscape').catch(() => {});
   } else {
-    await document.exitFullscreen();
+    await document.exitFullscreen().catch(() => {});
     await screen.orientation?.unlock();
   }
+};
+document.addEventListener('fullscreenchange', () => {
+  const in_fs = !!document.fullscreenElement;
+  document.getElementById('fs-svg').innerHTML = in_fs
+    ? '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>'
+    : '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
 });
 
-document.addEventListener('fullscreenchange',()=>{
-  const btn=document.getElementById('fs-btn');
-  btn.innerHTML=document.fullscreenElement?'&#10063;':'&#10064;';
-});
-
-// Quality
-function setQuality(q){
-  if(player) player.setPlaybackQuality(q);
-  document.querySelectorAll('#q-menu button').forEach(b=>{
-    b.classList.toggle('active', b.textContent.trim()===(
-      q==='hd1080'?'1080p':q==='hd720'?'720p':q==='large'?'480p':q==='medium'?'360p':q==='small'?'240p':q==='tiny'?'144p':'自動'
-    ));
-  });
-  document.getElementById('q-menu').classList.remove('open');
-  showCtrl();
+// Controls visibility
+function showCtrl() {
+  document.getElementById('ctrl').classList.remove('hidden');
+  ctrlVisible = true;
+  clearTimeout(ctrlTimer);
+  ctrlTimer = setTimeout(() => {
+    document.getElementById('ctrl').classList.add('hidden');
+    ctrlVisible = false;
+  }, 3000);
 }
-document.getElementById('q-btn').addEventListener('click',e=>{
-  e.stopPropagation();
-  document.getElementById('q-menu').classList.toggle('open');
-  showCtrl();
-});
-
-// PiP
-document.getElementById('pip-btn').addEventListener('click',async()=>{
-  const iframe=document.querySelector('#player iframe');
-  if(iframe && document.pictureInPictureEnabled){
-    try{await iframe.requestPictureInPicture();}catch{}
-  }
-});
-
-// Prevent context menu on long press
-document.addEventListener('contextmenu',e=>e.preventDefault());
-
-// Auto-show controls initially
+document.getElementById('ctrl').addEventListener('click', showCtrl);
 showCtrl();
+
+function showSpinner(on) { document.getElementById('spinner').style.display = on ? 'block' : 'none'; }
+function showErr(msg) {
+  const e = document.getElementById('err');
+  e.textContent = 'エラー: ' + msg; e.style.display = 'block';
+}
+
+// Prevent context menu
+document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 </body>
 </html>
