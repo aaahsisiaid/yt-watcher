@@ -77,13 +77,7 @@ input[type=text]:focus{border-color:var(--accent)}
   </div>
   <div id="content"></div>
 </div>
-<div id="player-modal" onclick="closePlayer(event)">
-  <div id="player-wrap">
-    <button id="player-close" onclick="closePlayer()">✕ 閉じる</button>
-    <iframe id="player-iframe" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-  </div>
-  <div id="player-title"></div>
-</div>
+
 <script>
 const VAPID_PUBLIC_KEY='BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
 const WORKER_URL='https://yt-push-register.a6068376.workers.dev';
@@ -119,7 +113,9 @@ async function loadVideos(){
     area.innerHTML=`<div style="font-size:10px;color:var(--muted);margin-bottom:10px">${videos.length}本</div><div class="video-grid">${videos.map(v=>`<div class="video-card" onclick="playVideo('${v.id}','${v.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><img src="${v.thumb}" loading="lazy"><div class="vc-title">${v.title}</div></div>`).join('')}</div>`;
   }catch(e){area.innerHTML=`<div class="empty">エラー: ${e.message}</div>`;}
 }
-function playVideo(id,title){$('player-iframe').src=`https://www.youtube.com/embed/${id}?autoplay=1`;$('player-title').textContent=title;$('player-modal').classList.add('open');}
+function playVideo(id, title){
+  location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`;
+}
 function closePlayer(e){if(e&&e.target!==$('player-modal')&&e.target!==$('player-close'))return;$('player-modal').classList.remove('open');$('player-iframe').src='';}
 function renderNotifs(){
   updateNotifBadge();
