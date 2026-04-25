@@ -10,6 +10,7 @@
 html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
 #wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000}
 video{width:100%;height:100%;object-fit:contain;display:block}
+/* controls overlay */
 #ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .25s}
 #ctrl.hidden{opacity:0;pointer-events:none}
 #top{display:flex;align-items:center;gap:10px;padding:14px 14px 20px;background:linear-gradient(rgba(0,0,0,.7),transparent)}
@@ -17,21 +18,25 @@ video{width:100%;height:100%;object-fit:contain;display:block}
 #ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
 #author{font-size:10px;color:#999}
 #bot{padding:6px 14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+/* seek */
 #seek-wrap{position:relative;height:22px;display:flex;align-items:center;margin-bottom:4px;cursor:pointer;touch-action:none}
 #seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.2);border-radius:2px}
 #seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.35);border-radius:2px;width:0}
 #seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0;transition:width .1s}
 #seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px}
+/* row */
 #row{display:flex;align-items:center;gap:8px}
 .ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:20px;line-height:1;border-radius:50%}
 .ibtn:active{background:rgba(255,255,255,.15)}
 .ibtn svg{width:20px;height:20px;fill:#fff;display:block}
 #time{font-size:11px;color:#bbb;white-space:nowrap}
 .sp{flex:1}
+/* quality menu */
 #qmenu{position:absolute;bottom:72px;right:14px;background:#111;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;display:none;z-index:20;min-width:90px}
 #qmenu.open{display:block}
 #qmenu button{display:block;width:100%;padding:9px 18px;background:none;border:none;color:#ccc;font-size:12px;font-family:inherit;cursor:pointer;text-align:left;white-space:nowrap}
 #qmenu button:active,#qmenu button.sel{background:#1e1e1e;color:#7fffb2}
+/* center overlays */
 #center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:10px}
 #play-icon{width:60px;height:60px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 #play-icon.show{opacity:1}
@@ -40,9 +45,8 @@ video{width:100%;height:100%;object-fit:contain;display:block}
 #spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 #err{background:rgba(200,50,50,.85);padding:10px 18px;border-radius:8px;font-size:12px;display:none;text-align:center;max-width:280px}
+/* tap zone */
 #tap{position:absolute;top:56px;left:0;right:0;bottom:72px}
-#proxy-note{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#7fffb2;font-size:10px;padding:4px 10px;border-radius:10px;opacity:0;transition:opacity .4s;pointer-events:none;white-space:nowrap}
-#proxy-note.show{opacity:1}
 </style>
 </head>
 <body>
@@ -93,7 +97,6 @@ video{width:100%;height:100%;object-fit:contain;display:block}
   </div>
 
   <div id="qmenu"></div>
-  <div id="proxy-note">Worker経由で再生中</div>
 </div>
 
 <script>
@@ -110,22 +113,18 @@ let longTimer, isLong = false, isSeeking = false;
 document.getElementById('ttl').textContent = initTitle;
 document.getElementById('back').onclick = () => history.back();
 
-// Worker /proxy?url=<encoded> 経由でストリームを中継
-function makeProxyUrl(originalUrl) {
-  return `${WORKER}/proxy?url=${encodeURIComponent(originalUrl)}`;
-}
-
+// Load stream info
 (async () => {
   showSpinner(true);
   try {
     const res = await fetch(`${WORKER}/stream?v=${videoId}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    streams = data.streams.map(s => ({ ...s, proxyUrl: makeProxyUrl(s.url) }));
+    streams = data.streams;
     document.getElementById('ttl').textContent = data.title || initTitle;
     document.getElementById('author').textContent = data.author || '';
     buildQMenu();
-    await playStream(0);
+    playStream(0);
   } catch(e) {
     showErr(e.message);
   } finally {
@@ -133,24 +132,15 @@ function makeProxyUrl(originalUrl) {
   }
 })();
 
-async function playStream(idx) {
+function playStream(idx) {
   if (!streams[idx]) return;
   curStreamIdx = idx;
-  const s = streams[idx];
   const t = v.currentTime;
-  // プロキシURL経由で再生（CORS・リファラ制限を回避）
-  v.src = s.proxyUrl;
+  v.src = streams[idx].url;
   v.load();
-  if (t > 0) v.currentTime = t;
-  showProxyNote();
-  try { await v.play(); } catch(e) { console.warn('play():', e.message); }
+  v.currentTime = t;
+  v.play().catch(() => {});
   document.querySelectorAll('#qmenu button').forEach((b, i) => b.classList.toggle('sel', i === idx));
-}
-
-function showProxyNote() {
-  const el = document.getElementById('proxy-note');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
 }
 
 function buildQMenu() {
@@ -160,6 +150,7 @@ function buildQMenu() {
   ).join('');
 }
 
+// Video events
 v.addEventListener('waiting', () => showSpinner(true));
 v.addEventListener('playing', () => showSpinner(false));
 v.addEventListener('canplay', () => showSpinner(false));
@@ -168,19 +159,6 @@ v.addEventListener('progress', tickBuf);
 v.addEventListener('ended', () => updatePlayBtn(false));
 v.addEventListener('play', () => updatePlayBtn(true));
 v.addEventListener('pause', () => updatePlayBtn(false));
-
-// エラー時は次の画質にフォールバック
-v.addEventListener('error', async () => {
-  const err = v.error;
-  if (err && (err.code === 2 || err.code === 4)) {
-    if (curStreamIdx + 1 < streams.length) {
-      console.warn(`画質 ${curStreamIdx} 失敗→${curStreamIdx + 1} に切替`);
-      await playStream(curStreamIdx + 1);
-    } else {
-      showErr('再生できませんでした（地域制限・非公開の可能性）');
-    }
-  }
-});
 
 function tickSeek() {
   if (isSeeking) return;
@@ -210,11 +188,13 @@ function updatePlayBtn(playing) {
     : '<path d="M8 5v14l11-7z"/>';
 }
 
+// Play/pause button
 document.getElementById('play-btn').onclick = () => {
   v.paused ? v.play() : v.pause();
   showCtrl();
 };
 
+// Tap zone — tap = play/pause, longpress = 2x
 const tap = document.getElementById('tap');
 tap.addEventListener('click', () => {
   if (isLong) return;
@@ -232,14 +212,19 @@ tap.addEventListener('touchstart', e => {
 }, { passive: true });
 tap.addEventListener('touchend', () => {
   clearTimeout(longTimer);
-  if (isLong) { v.playbackRate = 1; showBadge('1x', 600); }
+  if (isLong) {
+    v.playbackRate = 1;
+    showBadge('1x', 600);
+  }
   isLong = false;
 });
 tap.addEventListener('touchmove', () => clearTimeout(longTimer), { passive: true });
 
 function flashPlayIcon() {
   const el = document.getElementById('play-icon');
-  el.querySelector('path').setAttribute('d', v.paused ? 'M8 5v14l11-7z' : 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
+  el.querySelector('path').setAttribute('d', v.paused
+    ? 'M8 5v14l11-7z'
+    : 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 600);
 }
@@ -250,6 +235,7 @@ function showBadge(txt, dur = 99999) {
   if (dur < 99999) setTimeout(() => b.classList.remove('show'), dur);
 }
 
+// Seek bar
 const sw = document.getElementById('seek-wrap');
 function seekAt(clientX) {
   const r = sw.getBoundingClientRect();
@@ -265,6 +251,7 @@ sw.addEventListener('mousedown', e => { isSeeking = true; seekAt(e.clientX); });
 window.addEventListener('mousemove', e => { if (isSeeking) seekAt(e.clientX); });
 window.addEventListener('mouseup', () => { isSeeking = false; });
 
+// Quality menu
 document.getElementById('q-btn').onclick = e => {
   e.stopPropagation();
   document.getElementById('qmenu').classList.toggle('open');
@@ -274,6 +261,7 @@ document.getElementById('wrap').addEventListener('click', () => {
   document.getElementById('qmenu').classList.remove('open');
 });
 
+// Fullscreen + auto landscape
 document.getElementById('fs-btn').onclick = async () => {
   if (!document.fullscreenElement) {
     await document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
@@ -290,6 +278,7 @@ document.addEventListener('fullscreenchange', () => {
     : '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
 });
 
+// Controls visibility
 function showCtrl() {
   document.getElementById('ctrl').classList.remove('hidden');
   ctrlVisible = true;
@@ -308,6 +297,7 @@ function showErr(msg) {
   e.textContent = 'エラー: ' + msg; e.style.display = 'block';
 }
 
+// Prevent context menu
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 </body>
