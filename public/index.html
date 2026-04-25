@@ -2,271 +2,157 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<meta name="theme-color" content="#000">
-<title>Player</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7fffb2">
+<link rel="manifest" href="manifest.json">
+<title>YT Watcher</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
-#yt{position:absolute;inset:0;pointer-events:none}
-#yt iframe{width:100%;height:100%;border:none}
-/* controls overlay */
-#ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:0;transition:opacity .3s}
-#ctrl.hidden{opacity:0;pointer-events:none}
-/* top bar */
-#top{display:flex;align-items:center;gap:12px;padding:12px 14px;background:linear-gradient(#000a,transparent)}
-#back{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;line-height:1}
-#ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
-/* bottom bar */
-#bot{padding:8px 14px 16px;background:linear-gradient(transparent,#000a)}
-/* seek bar */
-#seek-wrap{position:relative;height:20px;display:flex;align-items:center;margin-bottom:6px;cursor:pointer;touch-action:none}
-#seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.25);border-radius:2px}
-#seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.4);border-radius:2px;width:0}
-#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0}
-#seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px;transition:transform .1s}
-#seek-wrap:active #seek-thumb{transform:translateX(-50%) scale(1.4)}
-/* time + controls row */
-#row{display:flex;align-items:center;gap:12px}
-#time{font-size:11px;color:#bbb;min-width:90px}
-.spacer{flex:1}
-/* icon buttons */
-.ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:50%;transition:background .15s}
-.ibtn:active{background:rgba(255,255,255,.2)}
-/* quality menu */
-#q-menu{position:absolute;bottom:70px;right:14px;background:#111;border:1px solid #333;border-radius:8px;overflow:hidden;display:none;z-index:10}
-#q-menu.open{display:block}
-#q-menu button{display:block;width:100%;padding:10px 20px;background:none;border:none;color:#ddd;font-size:12px;font-family:inherit;cursor:pointer;text-align:left}
-#q-menu button:hover,#q-menu button.active{background:#222;color:#7fffb2}
-/* speed badge */
-#speed-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#7fffb2;padding:8px 20px;border-radius:20px;font-size:14px;pointer-events:none;opacity:0;transition:opacity .2s}
-#speed-badge.show{opacity:1}
-/* buffer spinner */
-#spinner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-/* play overlay (tap center) */
-#play-area{position:absolute;top:60px;left:0;right:0;bottom:80px}
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a38;--accent:#7fffb2;--accent2:#ff7f50;--accent3:#7fb8ff;--text:#e0e0e8;--muted:#666678;--danger:#ff4466;--r:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:13px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+#bar{position:fixed;top:0;left:0;right:0;height:28px;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:100}
+.dots{display:flex;gap:6px;padding:0 12px}.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c840}
+.bar-title{padding:0 12px;font-weight:bold;color:var(--accent);font-size:12px}
+.spacer{flex:1}.bar-right{display:flex;align-items:center;gap:8px;padding:0 12px}
+.badge{font-size:10px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#000;font-weight:bold;cursor:pointer}
+.badge.off{background:var(--muted)}.badge.warn{background:var(--accent2)}
+#tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);padding-top:28px}
+.tab{padding:0 18px;height:36px;line-height:36px;cursor:pointer;font-size:12px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+#app{display:flex;flex-direction:column;height:100vh}
+#content{flex:1;overflow-y:auto;padding:16px}
+button{padding:7px 16px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
+.btn-accent{background:var(--accent);color:#000;font-weight:bold}
+.btn-accent:hover{filter:brightness(1.1)}.btn-accent:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}.btn-sm{padding:4px 10px;font-size:10px}
+.section-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.push-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.push-hint{font-size:11px;color:var(--muted);line-height:1.6}
+.notif-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px}
+.ni-title{font-weight:bold;color:var(--accent);margin-bottom:3px;font-size:12px}
+.ni-body{color:var(--text);line-height:1.5;font-size:12px}
+.ni-time{font-size:10px;color:var(--muted);margin-top:4px}
+.ni-link{display:inline-block;margin-top:6px;font-size:10px;color:var(--accent3);text-decoration:none}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);line-height:2;font-size:12px}
+.status-msg{font-size:11px;margin-top:8px;padding:6px 10px;border-radius:var(--r);display:none}
+.status-msg.ok{background:rgba(127,255,178,.1);border:1px solid var(--accent);color:var(--accent);display:block}
+.status-msg.err{background:rgba(255,68,102,.1);border:1px solid var(--danger);color:var(--danger);display:block}
+.status-msg.loading{background:rgba(127,184,255,.1);border:1px solid var(--accent3);color:var(--accent3);display:block}
+.pl-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+input[type=text]{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;flex:1;min-width:180px}
+input[type=text]:focus{border-color:var(--accent)}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.video-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.video-card:hover{border-color:var(--accent)}
+.video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--bg3)}
+.vc-title{padding:8px;font-size:11px;line-height:1.4;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#player-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:200;align-items:center;justify-content:center;flex-direction:column;padding:16px}
+#player-modal.open{display:flex}
+#player-wrap{width:100%;max-width:800px;aspect-ratio:16/9;position:relative}
+#player-wrap iframe{width:100%;height:100%;border:none;border-radius:var(--r)}
+#player-title{color:var(--text);font-size:11px;margin-top:10px;max-width:800px;text-align:center;line-height:1.5}
+#player-close{position:absolute;top:-36px;right:0;background:transparent;border:1px solid var(--border);color:var(--text);padding:4px 10px;font-size:11px;border-radius:var(--r);cursor:pointer}
+#player-close:hover{border-color:var(--danger);color:var(--danger)}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-<div id="yt"><div id="player"></div></div>
-<div id="spinner"></div>
-<div id="speed-badge">2x</div>
-
-<div id="ctrl">
-  <div id="top">
-    <button id="back" onclick="history.back()">&#8592;</button>
-    <div id="ttl"></div>
-  </div>
-
-  <div id="play-area" id="tap-zone"></div>
-
-  <div id="bot">
-    <div id="seek-wrap">
-      <div id="seek-bg"></div>
-      <div id="seek-buf"></div>
-      <div id="seek-fill"></div>
-      <div id="seek-thumb"></div>
-    </div>
-    <div id="row">
-      <span id="time">0:00 / 0:00</span>
-      <div class="spacer"></div>
-      <button class="ibtn" id="pip-btn" title="PiP">&#9974;</button>
-      <button class="ibtn" id="q-btn" title="画質">&#9881;</button>
-      <button class="ibtn" id="fs-btn" title="全画面">&#10064;</button>
-    </div>
+<div id="bar">
+  <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <span class="bar-title">YT Watcher</span>
+  <div class="spacer"></div>
+  <div class="bar-right">
+    <span class="badge off" id="push-badge" onclick="togglePush()">PUSH OFF</span>
+    <span class="badge off" id="notif-badge" onclick="switchTab('notif')">0件</span>
   </div>
 </div>
-
-<div id="q-menu">
-  <button onclick="setQuality('hd1080')">1080p</button>
-  <button onclick="setQuality('hd720')">720p</button>
-  <button onclick="setQuality('large')">480p</button>
-  <button onclick="setQuality('medium')">360p</button>
-  <button onclick="setQuality('small')">240p</button>
-  <button onclick="setQuality('tiny')">144p</button>
-  <button onclick="setQuality('auto')" class="active">自動</button>
+<div id="app">
+  <div id="tabs">
+    <div class="tab active" onclick="switchTab('videos')">動画</div>
+    <div class="tab" onclick="switchTab('notif')">通知</div>
+    <div class="tab" onclick="switchTab('push')">設定</div>
+  </div>
+  <div id="content"></div>
 </div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const videoId = params.get('v') || '';
-const title   = params.get('t') || '';
-document.getElementById('ttl').textContent = decodeURIComponent(title);
-
-let player, dur=0, isSeeking=false, longPressTimer=null, isLongPress=false;
-let ctrlTimer=null, ctrlVisible=true;
-
-function showCtrl(){
-  const c=document.getElementById('ctrl');
-  c.classList.remove('hidden');
-  ctrlVisible=true;
-  clearTimeout(ctrlTimer);
-  ctrlTimer=setTimeout(hideCtrl, 3000);
+const VAPID_PUBLIC_KEY='BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
+const WORKER_URL='https://yt-push-register.a6068376.workers.dev';
+const DEFAULT_PL_ID='PLnjjLN2996nvpwoEfhe1MyMM8E7Ra6RAf';
+let swReg=null,pushSub=null,currentTab='videos';
+let notifs=JSON.parse(localStorage.getItem('yt_notifs')||'[]');
+let currentPlId=localStorage.getItem('yt_pl_id')||DEFAULT_PL_ID;
+(async()=>{
+  if(!('serviceWorker' in navigator))return;
+  try{swReg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;pushSub=await swReg.pushManager.getSubscription();updatePushBadge();}catch(e){console.error('SW:',e)}
+  switchTab('videos');
+})();
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>{t.classList.toggle('active',['videos','notif','push'][i]===tab);});
+  if(tab==='videos')renderVideos();else if(tab==='notif')renderNotifs();else renderPush();
 }
-function hideCtrl(){
-  document.getElementById('ctrl').classList.add('hidden');
-  ctrlVisible=false;
+async function renderVideos(){
+  $('content').innerHTML=`<div class="pl-row"><input type="text" id="pl-input" value="${currentPlId}" placeholder="プレイリストID または URL"><button class="btn-accent btn-sm" onclick="loadVideos()">読み込み</button></div><div id="video-area"><div class="empty">読み込み中...</div></div>`;
+  await loadVideos();
 }
-
-// YouTube IFrame API
-const tag=document.createElement('script');
-tag.src='https://www.youtube.com/iframe_api';
-document.head.appendChild(tag);
-
-window.onYouTubeIframeAPIReady=()=>{
-  player=new YT.Player('player',{
-    videoId,
-    playerVars:{autoplay:1,controls:0,rel:0,playsinline:1,modestbranding:1,iv_load_policy:3},
-    events:{
-      onReady: e=>{ e.target.playVideo(); showCtrl(); },
-      onStateChange: e=>{
-        const s=document.getElementById('spinner');
-        if(e.data===YT.PlayerState.BUFFERING) s.style.display='block';
-        else s.style.display='none';
-        if(e.data===YT.PlayerState.PLAYING) startTick();
-      }
-    }
-  });
-};
-
-// Tick
-let tickId;
-function startTick(){
-  clearInterval(tickId);
-  tickId=setInterval(()=>{
-    if(!player||!player.getCurrentTime)return;
-    const cur=player.getCurrentTime();
-    dur=player.getDuration()||0;
-    updateSeek(cur,dur);
-    document.getElementById('time').textContent=fmt(cur)+' / '+fmt(dur);
-  },500);
-}
-
-function fmt(s){
-  s=Math.floor(s||0);
-  const m=Math.floor(s/60),sec=s%60;
-  return m+':'+(sec<10?'0':'')+sec;
-}
-
-function updateSeek(cur,d){
-  if(!d||isSeeking)return;
-  const pct=(cur/d)*100;
-  document.getElementById('seek-fill').style.width=pct+'%';
-  document.getElementById('seek-thumb').style.left=pct+'%';
+async function loadVideos(){
+  const inp=$('pl-input');
+  if(inp){const raw=inp.value.trim();const m=raw.match(/[?&]list=([A-Za-z0-9_-]+)/);currentPlId=m?m[1]:raw;localStorage.setItem('yt_pl_id',currentPlId);}
+  const area=$('video-area');if(!area)return;
+  area.innerHTML='<div class="empty">読み込み中...</div>';
   try{
-    const buf=player.getVideoLoadedFraction()*100;
-    document.getElementById('seek-buf').style.width=buf+'%';
-  }catch{}
+    const res=await fetch(`${WORKER_URL}/videos?playlistId=${currentPlId}`);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const videos=await res.json();
+    if(videos.error)throw new Error(videos.error);
+    if(!videos.length){area.innerHTML='<div class="empty">動画がありません</div>';return;}
+    area.innerHTML=`<div style="font-size:10px;color:var(--muted);margin-bottom:10px">${videos.length}本</div><div class="video-grid">${videos.map(v=>`<div class="video-card" onclick="playVideo('${v.id}','${v.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><img src="${v.thumb}" loading="lazy"><div class="vc-title">${v.title}</div></div>`).join('')}</div>`;
+  }catch(e){area.innerHTML=`<div class="empty">エラー: ${e.message}</div>`;}
 }
-
-// Seek bar touch/mouse
-const sw=document.getElementById('seek-wrap');
-function seekAt(e){
-  const r=sw.getBoundingClientRect();
-  const x=Math.max(0,Math.min((e.touches?e.touches[0].clientX:e.clientX)-r.left,r.width));
-  const pct=x/r.width;
-  document.getElementById('seek-fill').style.width=(pct*100)+'%';
-  document.getElementById('seek-thumb').style.left=(pct*100)+'%';
-  if(player&&player.seekTo) player.seekTo(pct*dur,true);
+function playVideo(id, title){
+  location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`;
 }
-sw.addEventListener('touchstart',e=>{isSeeking=true;seekAt(e);e.stopPropagation();},{passive:true});
-sw.addEventListener('touchmove',e=>{if(isSeeking)seekAt(e);e.stopPropagation();},{passive:true});
-sw.addEventListener('touchend',e=>{isSeeking=false;e.stopPropagation();},{passive:true});
-sw.addEventListener('mousedown',e=>{isSeeking=true;seekAt(e);});
-window.addEventListener('mousemove',e=>{if(isSeeking)seekAt(e);});
-window.addEventListener('mouseup',()=>{isSeeking=false;});
-
-// Tap play/pause (center area)
-document.getElementById('play-area').addEventListener('click',()=>{
-  if(!player)return;
-  showCtrl();
-  const s=player.getPlayerState();
-  if(s===YT.PlayerState.PLAYING) player.pauseVideo();
-  else player.playVideo();
-});
-
-// Long press = 2x speed
-document.getElementById('play-area').addEventListener('touchstart',e=>{
-  isLongPress=false;
-  longPressTimer=setTimeout(()=>{
-    isLongPress=true;
-    if(player) player.setPlaybackRate(2);
-    const b=document.getElementById('speed-badge');
-    b.textContent='2x';b.classList.add('show');
-  },500);
-},{passive:true});
-document.getElementById('play-area').addEventListener('touchend',()=>{
-  clearTimeout(longPressTimer);
-  if(isLongPress){
-    if(player) player.setPlaybackRate(1);
-    const b=document.getElementById('speed-badge');
-    b.textContent='1x';
-    setTimeout(()=>b.classList.remove('show'),800);
-  }
-  isLongPress=false;
-});
-document.getElementById('play-area').addEventListener('touchmove',()=>{
-  clearTimeout(longPressTimer);
-},{passive:true});
-
-// Ctrl visibility on tap
-document.getElementById('ctrl').addEventListener('click',e=>{
-  if(e.target===document.getElementById('play-area'))return;
-  showCtrl();
-});
-
-// Fullscreen + auto landscape
-document.getElementById('fs-btn').addEventListener('click',async()=>{
-  const el=document.documentElement;
-  if(!document.fullscreenElement){
-    try{
-      await el.requestFullscreen({navigationUI:'hide'});
-      await screen.orientation?.lock('landscape').catch(()=>{});
-    }catch{}
-  } else {
-    await document.exitFullscreen();
-    await screen.orientation?.unlock();
-  }
-});
-
-document.addEventListener('fullscreenchange',()=>{
-  const btn=document.getElementById('fs-btn');
-  btn.innerHTML=document.fullscreenElement?'&#10063;':'&#10064;';
-});
-
-// Quality
-function setQuality(q){
-  if(player) player.setPlaybackQuality(q);
-  document.querySelectorAll('#q-menu button').forEach(b=>{
-    b.classList.toggle('active', b.textContent.trim()===(
-      q==='hd1080'?'1080p':q==='hd720'?'720p':q==='large'?'480p':q==='medium'?'360p':q==='small'?'240p':q==='tiny'?'144p':'自動'
-    ));
-  });
-  document.getElementById('q-menu').classList.remove('open');
-  showCtrl();
+function closePlayer(e){if(e&&e.target!==$('player-modal')&&e.target!==$('player-close'))return;$('player-modal').classList.remove('open');$('player-iframe').src='';}
+function renderNotifs(){
+  updateNotifBadge();
+  if(!notifs.length){$('content').innerHTML='<div class="empty">まだ通知はありません<br>GitHub Actionsが10分ごとにチェックします</div>';return;}
+  $('content').innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button></div>`+notifs.map(n=>`<div class="notif-item"><div class="ni-title">${n.title}</div><div class="ni-body">${n.body}</div>${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}<div class="ni-time">${fmtTime(n.time)}</div></div>`).join('');
 }
-document.getElementById('q-btn').addEventListener('click',e=>{
-  e.stopPropagation();
-  document.getElementById('q-menu').classList.toggle('open');
-  showCtrl();
+function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');renderNotifs();}
+function renderPush(){
+  const on=!!pushSub;
+  $('content').innerHTML=`<div class="section-title">Push通知</div><div class="push-row"><button class="btn-accent" id="push-btn" onclick="togglePush()">${on?'🔔 通知ON — タップでOFF':'通知を有効にする'}</button><span class="push-hint">${on?'新着動画・ダウンロード完了を通知します':'有効にするとこのデバイスに通知が届きます'}</span></div><div class="status-msg" id="status-msg"></div>`;
+}
+async function togglePush(){
+  if(!swReg){alert('Service Workerが利用できません');return;}
+  if(pushSub){await pushSub.unsubscribe();pushSub=null;updatePushBadge();if(currentTab==='push')renderPush();return;}
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){alert('通知が許可されていません');return;}
+  if(currentTab==='push'){renderPush();showStatus('登録中...','loading');}
+  const btn=$('push-btn');if(btn)btn.disabled=true;
+  try{
+    await navigator.serviceWorker.ready;
+    pushSub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC_KEY)});
+    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:pushSub.toJSON()})});
+    if(!res.ok)throw new Error(`Worker error: ${res.status}`);
+    updatePushBadge();showStatus('このデバイスに通知が届くようになりました','ok');
+    if(currentTab==='push')renderPush();
+  }catch(e){showStatus('エラー: '+e.message,'err');}
+  finally{if(btn)btn.disabled=false;}
+}
+function showStatus(msg,type){const el=$('status-msg');if(el){el.textContent=msg;el.className='status-msg '+type;}}
+function updatePushBadge(){const on=!!pushSub;$('push-badge').textContent=on?'PUSH ON':'PUSH OFF';$('push-badge').className=on?'badge':'badge off';}
+function updateNotifBadge(){$('notif-badge').textContent=`${notifs.length}件`;$('notif-badge').className=notifs.length?'badge warn':'badge off';}
+navigator.serviceWorker?.addEventListener('message',e=>{
+  if(e.data?.type==='push'){notifs.unshift({...e.data,time:new Date().toISOString()});if(notifs.length>50)notifs=notifs.slice(0,50);localStorage.setItem('yt_notifs',JSON.stringify(notifs));updateNotifBadge();if(currentTab==='notif')renderNotifs();}
 });
-
-// PiP
-document.getElementById('pip-btn').addEventListener('click',async()=>{
-  const iframe=document.querySelector('#player iframe');
-  if(iframe && document.pictureInPictureEnabled){
-    try{await iframe.requestPictureInPicture();}catch{}
-  }
-});
-
-// Prevent context menu on long press
-document.addEventListener('contextmenu',e=>e.preventDefault());
-
-// Auto-show controls initially
-showCtrl();
+const $=id=>document.getElementById(id);
+const fmtTime=iso=>{const d=new Date(iso);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
 </script>
 </body>
 </html>
