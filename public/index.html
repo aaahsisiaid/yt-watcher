@@ -7,33 +7,36 @@
 <link rel="manifest" href="manifest.json">
 <title>YT Watcher</title>
 <style>
-:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a38;--accent:#7fffb2;--accent2:#ff7f50;--accent3:#7fb8ff;--text:#e0e0e8;--muted:#666678;--danger:#ff4466;--r:6px;--tab-h:34px}
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a38;--accent:#7fffb2;--accent2:#ff7f50;--accent3:#7fb8ff;--text:#e0e0e8;--muted:#666678;--danger:#ff4466;--r:6px;--bar:28px;--tab:34px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:13px;overflow:hidden}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
 /* ── Menu bar ── */
-#bar{position:fixed;top:0;left:0;right:0;height:28px;background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:200}
+#bar{position:fixed;top:0;left:0;right:0;height:var(--bar);background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:200}
 .dots{display:flex;gap:6px;padding:0 12px}
 .dot{width:11px;height:11px;border-radius:50%}
 .dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c840}
-.bar-title{padding:0 10px;font-weight:bold;color:var(--accent);font-size:12px}
+.bar-title{padding:0 8px;font-weight:bold;color:var(--accent);font-size:12px}
 .spacer{flex:1}
-.bar-right{display:flex;align-items:center;gap:6px;padding:0 10px}
-.badge{font-size:10px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#000;font-weight:bold;cursor:pointer}
+.bar-right{display:flex;align-items:center;gap:5px;padding:0 8px}
+.badge{font-size:10px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#000;font-weight:bold;cursor:pointer;white-space:nowrap}
 .badge.off{background:var(--muted)}.badge.warn{background:var(--accent2)}
+.bar-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:3px 6px;font-size:11px;border-radius:4px;font-family:inherit}
+.bar-btn:hover{background:var(--bg3);color:var(--text)}
 
-/* ── Chrome-style Tab bar ── */
-#tabbar{position:fixed;top:28px;left:0;right:0;height:var(--tab-h);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 4px;overflow-x:auto;overflow-y:hidden;z-index:190;gap:1px}
-#tabbar::-webkit-scrollbar{height:3px}
-.tab-item{flex-shrink:0;height:28px;min-width:120px;max-width:200px;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;position:relative;transition:background .15s;user-select:none}
-.tab-item.active{background:var(--bg);border-color:var(--border);border-bottom-color:var(--bg)}
+/* ── Tab bar ── */
+#tabbar{position:fixed;top:var(--bar);left:0;right:0;height:var(--tab);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 4px 0 4px;overflow-x:auto;overflow-y:hidden;z-index:190;gap:1px}
+#tabbar::-webkit-scrollbar{height:2px}
+.tab-item{flex-shrink:0;height:28px;min-width:120px;max-width:200px;display:flex;align-items:center;gap:5px;padding:0 8px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;position:relative;user-select:none;transition:background .1s}
+.tab-item.active{background:var(--bg);border-bottom-color:var(--bg)}
 .tab-item.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--bg)}
-.tab-icon{font-size:12px;flex-shrink:0}
-.tab-name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
-.tab-item:not(.active) .tab-name{color:var(--muted)}
-.tab-close{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;line-height:1;padding:0}
-.tab-close:hover{background:var(--border);color:var(--text)}
+.tab-icon{font-size:11px;flex-shrink:0;color:var(--muted)}
+.tab-item.active .tab-icon{color:var(--accent)}
+.tab-name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.tab-item.active .tab-name{color:var(--text)}
+.tab-close{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;padding:0;line-height:1}
+.tab-close:hover{background:rgba(255,68,102,.2);color:var(--danger)}
 .tab-add{flex-shrink:0;width:28px;height:28px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;margin-left:2px}
 .tab-add:hover{background:var(--bg3);color:var(--accent)}
 
@@ -42,12 +45,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space 
 .pane{position:absolute;inset:0;overflow-y:auto;display:none;padding:16px}
 .pane.active{display:block}
 
-/* ── Playlist setup ── */
+/* ── Setup ── */
 .setup-box{max-width:480px;margin:40px auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
 .setup-box h2{font-size:13px;color:var(--accent);margin-bottom:16px}
-.input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-input[type=text]{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;flex:1;min-width:160px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+input[type=text]{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;width:100%}
 input[type=text]:focus{border-color:var(--accent)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
 .btn-accent{background:var(--accent);color:#000;font-weight:bold}
 .btn-accent:hover{filter:brightness(1.1)}
@@ -56,10 +61,11 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .btn-sm{padding:4px 10px;font-size:10px}
 .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
 .btn-danger:hover{background:var(--danger);color:#fff}
+.errmsg{font-size:11px;color:var(--danger);margin-top:6px;display:none}
 
-/* ── Video grid ── */
-.vid-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.vid-meta{font-size:10px;color:var(--muted)}
+/* ── Videos ── */
+.vid-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.vid-count{font-size:10px;color:var(--muted)}
 .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
 .video-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s}
 .video-card:hover{border-color:var(--accent)}
@@ -69,31 +75,34 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:12px}
 
 /* ── Notif panel ── */
-#notif-panel{position:fixed;top:28px;right:0;width:300px;bottom:0;background:var(--bg2);border-left:1px solid var(--border);z-index:180;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+#notif-panel{position:fixed;top:var(--bar);right:0;width:300px;bottom:0;background:var(--bg2);border-left:1px solid var(--border);z-index:180;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
 #notif-panel.open{transform:translateX(0)}
-.np-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.np-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .np-list{flex:1;overflow-y:auto;padding:8px}
 .notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px}
 .ni-title{font-weight:bold;color:var(--accent);font-size:11px;margin-bottom:2px}
 .ni-body{font-size:11px;color:var(--text);line-height:1.5}
-.ni-time{font-size:10px;color:var(--muted);margin-top:4px}
-.ni-link{display:inline-block;font-size:10px;color:var(--accent3);text-decoration:none;margin-top:4px}
+.ni-time{font-size:10px;color:var(--muted);margin-top:3px}
+.ni-link{display:inline-block;font-size:10px;color:var(--accent3);text-decoration:none;margin-top:3px}
 
-/* ── Push status ── */
-.status-msg{font-size:11px;margin-top:8px;padding:6px 10px;border-radius:var(--r)}
-.status-msg.ok{background:rgba(127,255,178,.1);border:1px solid var(--accent);color:var(--accent)}
-.status-msg.err{background:rgba(255,68,102,.1);border:1px solid var(--danger);color:var(--danger)}
-.status-msg.info{background:rgba(127,184,255,.1);border:1px solid var(--accent3);color:var(--accent3)}
+/* ── Recents panel ── */
+#recent-panel{position:fixed;top:var(--bar);left:0;width:260px;bottom:0;background:var(--bg2);border-right:1px solid var(--border);z-index:180;transform:translateX(-100%);transition:transform .25s;display:flex;flex-direction:column}
+#recent-panel.open{transform:translateX(0)}
+.rp-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.rp-list{flex:1;overflow-y:auto;padding:8px}
+.recent-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ri-info{flex:1;min-width:0}
+.ri-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri-pl{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri-time{font-size:10px;color:var(--muted);margin-top:2px}
 
-/* ── Tab rename modal ── */
-#rename-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center}
-#rename-modal.open{display:flex}
-.rename-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;width:320px}
-.rename-box h3{font-size:12px;color:var(--accent);margin-bottom:12px}
-.rename-box input{width:100%;margin-bottom:10px}
-
-/* ── Section title ── */
-.sec{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+/* ── Share modal ── */
+#share-modal,#rename-modal,#import-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
+#share-modal.open,#rename-modal.open,#import-modal.open{display:flex}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px;width:360px;max-width:90vw}
+.modal-box h3{font-size:12px;color:var(--accent);margin-bottom:14px}
+.share-url{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-size:10px;color:var(--muted);word-break:break-all;margin-bottom:10px;line-height:1.5;max-height:80px;overflow-y:auto}
+.sec{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -105,6 +114,8 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   <span class="bar-title">YT Watcher</span>
   <div class="spacer"></div>
   <div class="bar-right">
+    <button class="bar-btn" onclick="toggleRecent()">最近</button>
+    <button class="bar-btn" onclick="openShare()">共有</button>
     <span class="badge off" id="push-badge" onclick="togglePush()">PUSH OFF</span>
     <span class="badge off" id="notif-badge" onclick="toggleNotifPanel()">0件</span>
   </div>
@@ -112,11 +123,10 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 
 <!-- Tab bar -->
 <div id="tabbar">
-  <!-- tabs rendered by JS -->
   <button class="tab-add" onclick="addTab()" title="新しいタブ">+</button>
 </div>
 
-<!-- Content panes (rendered by JS) -->
+<!-- Panes -->
 <div id="app"></div>
 
 <!-- Notification panel -->
@@ -128,14 +138,52 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   <div class="np-list" id="np-list"></div>
 </div>
 
+<!-- Recents panel -->
+<div id="recent-panel">
+  <div class="rp-header">最近削除したタブ</div>
+  <div class="rp-list" id="rp-list"></div>
+</div>
+
 <!-- Rename modal -->
 <div id="rename-modal">
-  <div class="rename-box">
+  <div class="modal-box">
     <h3>タブ名を変更</h3>
-    <input type="text" id="rename-input" placeholder="タブ名">
-    <div style="display:flex;gap:8px">
+    <div class="field">
+      <input type="text" id="rename-input" placeholder="タブ名">
+    </div>
+    <div class="btn-row">
       <button class="btn-accent" onclick="confirmRename()">保存</button>
-      <button class="btn-outline" onclick="closeRename()">キャンセル</button>
+      <button class="btn-outline" onclick="closeModal('rename-modal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share modal -->
+<div id="share-modal">
+  <div class="modal-box">
+    <h3>プレイリストを共有</h3>
+    <div class="sec">共有するタブを選択</div>
+    <div id="share-checks" style="margin-bottom:12px"></div>
+    <div id="share-url-box" style="display:none">
+      <div class="sec">共有URL</div>
+      <div class="share-url" id="share-url-text"></div>
+      <button class="btn-accent btn-sm" onclick="copyShareUrl()">URLをコピー</button>
+    </div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn-accent" onclick="generateShareUrl()">URLを生成</button>
+      <button class="btn-outline" onclick="closeModal('share-modal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div id="import-modal">
+  <div class="modal-box">
+    <h3>プレイリストをインポート</h3>
+    <div style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:14px" id="import-preview"></div>
+    <div class="btn-row">
+      <button class="btn-accent" onclick="confirmImport()">追加</button>
+      <button class="btn-outline" onclick="closeModal('import-modal')">キャンセル</button>
     </div>
   </div>
 </div>
@@ -144,24 +192,22 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 const WORKER = 'https://yt-push-register.a6068376.workers.dev';
 const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
 
-// ── State ────────────────────────────────────────────────────────────────────
-let tabs = JSON.parse(localStorage.getItem('yt_tabs') || '[]');
+// ── State ─────────────────────────────────────────────────────────────────────
+let tabs    = JSON.parse(localStorage.getItem('yt_tabs')   || '[]');
+let recents = JSON.parse(localStorage.getItem('yt_recent') || '[]'); // 削除したタブ履歴
+let notifs  = JSON.parse(localStorage.getItem('yt_notifs') || '[]');
 let activeTabId = localStorage.getItem('yt_active_tab') || null;
-let notifs = JSON.parse(localStorage.getItem('yt_notifs') || '[]');
-let swReg = null, pushSub = null, notifOpen = false;
+let swReg = null, pushSub = null;
+let notifOpen = false, recentOpen = false;
 let renameTabId = null;
-let videoCache = {}; // tabId → videos[]
+let videoCache = {};
+let pendingImport = null;
 
-if (!tabs.length) {
-  tabs = [newTab('プレイリスト 1', '')];
-  saveTabs();
-}
-if (!activeTabId || !tabs.find(t => t.id === activeTabId)) {
-  activeTabId = tabs[0].id;
-}
+if (!tabs.length) { tabs = [newTab('プレイリスト 1', '')]; saveTabs(); }
+if (!activeTabId || !tabs.find(t => t.id === activeTabId)) activeTabId = tabs[0].id;
 
 function newTab(name, playlistId) {
-  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2), name, playlistId };
+  return { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), name, playlistId, createdAt: Date.now() };
 }
 
 function saveTabs() {
@@ -169,8 +215,23 @@ function saveTabs() {
   localStorage.setItem('yt_active_tab', activeTabId);
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────────
+function saveRecents() {
+  localStorage.setItem('yt_recent', JSON.stringify(recents));
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
+  // Check for import URL param
+  const params = new URLSearchParams(location.search);
+  const importData = params.get('import');
+  if (importData) {
+    try {
+      const decoded = JSON.parse(atob(importData));
+      if (Array.isArray(decoded)) { pendingImport = decoded; showImportModal(decoded); }
+    } catch {}
+    history.replaceState({}, '', location.pathname);
+  }
+
   if ('serviceWorker' in navigator) {
     try {
       swReg = await navigator.serviceWorker.register('sw.js');
@@ -188,27 +249,25 @@ function saveTabs() {
 function renderTabBar() {
   const bar = document.getElementById('tabbar');
   const addBtn = bar.querySelector('.tab-add');
-  // Remove old tab items
   bar.querySelectorAll('.tab-item').forEach(el => el.remove());
-
   tabs.forEach(tab => {
     const el = document.createElement('div');
     el.className = 'tab-item' + (tab.id === activeTabId ? ' active' : '');
     el.dataset.id = tab.id;
     el.innerHTML = `
       <span class="tab-icon">${tab.playlistId ? '▶' : '○'}</span>
-      <span class="tab-name">${escHtml(tab.name)}</span>
-      <button class="tab-close" onclick="closeTab(event,'${tab.id}')">×</button>`;
+      <span class="tab-name">${esc(tab.name)}</span>
+      <button class="tab-close" title="閉じる">×</button>`;
+    el.querySelector('.tab-close').addEventListener('click', e => { e.stopPropagation(); closeTab(tab.id); });
     el.addEventListener('click', () => switchTab(tab.id));
     el.addEventListener('dblclick', () => openRename(tab.id));
     bar.insertBefore(el, addBtn);
   });
-
-  // Scroll active tab into view
-  const activeEl = bar.querySelector('.tab-item.active');
-  if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+  const active = bar.querySelector('.tab-item.active');
+  if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center' });
 }
 
+// ── App / Panes ───────────────────────────────────────────────────────────────
 function renderApp() {
   const app = document.getElementById('app');
   app.innerHTML = '';
@@ -224,92 +283,99 @@ function renderApp() {
 function renderPane(tab) {
   const pane = document.getElementById('pane-' + tab.id);
   if (!pane) return;
-  if (!tab.playlistId) {
-    renderSetup(pane, tab);
-  } else {
-    renderVideos(pane, tab);
-  }
+  tab.playlistId ? renderVideos(pane, tab) : renderSetup(pane, tab);
 }
 
-// ── Setup screen ──────────────────────────────────────────────────────────────
+// ── Setup ─────────────────────────────────────────────────────────────────────
 function renderSetup(pane, tab) {
   pane.innerHTML = `
     <div class="setup-box">
       <h2>プレイリストを設定</h2>
-      <div class="sec">プレイリストURL または ID</div>
-      <div class="input-row">
-        <input type="text" id="pl-url-${tab.id}" placeholder="https://www.youtube.com/playlist?list=PL...">
+      <div class="field">
+        <label>タブ名</label>
+        <input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名">
       </div>
-      <div class="input-row">
-        <input type="text" id="pl-name-${tab.id}" value="${escHtml(tab.name)}" placeholder="タブ名">
+      <div class="field">
+        <label>プレイリストURL または ID</label>
+        <input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://www.youtube.com/playlist?list=PL...">
+      </div>
+      <div class="errmsg" id="se-${tab.id}"></div>
+      <div class="btn-row">
         <button class="btn-accent" onclick="saveTabPlaylist('${tab.id}')">保存</button>
+        ${tab.playlistId ? `<button class="btn-outline" onclick="cancelSetup('${tab.id}')">キャンセル</button>` : ''}
       </div>
-      <div id="pl-err-${tab.id}" class="status-msg err" style="display:none"></div>
     </div>`;
 }
 
+function cancelSetup(tabId) {
+  const tab = tabs.find(t => t.id === tabId);
+  const pane = document.getElementById('pane-' + tabId);
+  if (tab && pane && tab.playlistId) renderVideos(pane, tab);
+}
+
 function saveTabPlaylist(tabId) {
-  const raw = document.getElementById(`pl-url-${tabId}`)?.value.trim() || '';
-  const name = document.getElementById(`pl-name-${tabId}`)?.value.trim() || '';
-  const m = raw.match(/[?&]list=([A-Za-z0-9_-]+)/);
-  const plId = m ? m[1] : raw;
+  const nameEl = document.getElementById(`sn-${tabId}`);
+  const plEl   = document.getElementById(`sp-${tabId}`);
+  const errEl  = document.getElementById(`se-${tabId}`);
+  const raw    = plEl?.value.trim() || '';
+  const name   = nameEl?.value.trim() || '';
+  const m      = raw.match(/[?&]list=([A-Za-z0-9_-]+)/);
+  const plId   = m ? m[1] : raw;
+
   if (!plId) {
-    document.getElementById(`pl-err-${tabId}`).textContent = 'URLまたはIDを入力してください';
-    document.getElementById(`pl-err-${tabId}`).style.display = 'block';
+    if (errEl) { errEl.textContent = 'URLまたはIDを入力してください'; errEl.style.display = 'block'; }
     return;
   }
   const tab = tabs.find(t => t.id === tabId);
-  if (tab) {
-    tab.playlistId = plId;
-    if (name) tab.name = name;
-    saveTabs();
-    syncPlaylistsToGitHub();
-    renderTabBar();
-    renderPane(tab);
-  }
+  if (!tab) return;
+  tab.playlistId = plId;
+  if (name) tab.name = name;
+  delete videoCache[tabId]; // キャッシュクリア
+  saveTabs();
+  syncPlaylistsToGitHub();
+  renderTabBar();
+  renderPane(tab);
 }
 
 // ── Videos ───────────────────────────────────────────────────────────────────
 async function renderVideos(pane, tab) {
-  if (videoCache[tab.id]) {
-    renderVideoGrid(pane, tab, videoCache[tab.id]);
-    return;
-  }
   pane.innerHTML = `
     <div class="vid-header">
-      <span style="font-size:12px;color:var(--accent)">${escHtml(tab.name)}</span>
-      <span class="vid-meta" id="vid-meta-${tab.id}"></span>
-      <div class="spacer"></div>
+      <span style="font-size:12px;color:var(--accent)">${esc(tab.name)}</span>
+      <span class="vid-count" id="vc-${tab.id}"></span>
+      <div style="flex:1"></div>
       <button class="btn-outline btn-sm" onclick="editTabPlaylist('${tab.id}')">設定</button>
       <button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button>
     </div>
-    <div id="vid-grid-${tab.id}" class="loading">読み込み中...</div>`;
+    <div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
 
+  if (videoCache[tab.id]) {
+    renderGrid(tab.id, videoCache[tab.id]);
+    return;
+  }
   try {
-    const res = await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
-    const videos = await res.json();
-    if (videos.error) throw new Error(videos.error);
-    videoCache[tab.id] = videos;
-    renderVideoGrid(pane, tab, videos);
+    const res  = await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    videoCache[tab.id] = data;
+    renderGrid(tab.id, data);
   } catch(e) {
-    const el = document.getElementById(`vid-grid-${tab.id}`);
-    if (el) el.innerHTML = `<div class="empty">エラー: ${e.message}</div>`;
+    const el = document.getElementById(`vg-${tab.id}`);
+    if (el) el.innerHTML = `<div class="empty">エラー: ${esc(e.message)}</div>`;
   }
 }
 
-function renderVideoGrid(pane, tab, videos) {
-  const meta = document.getElementById(`vid-meta-${tab.id}`);
-  if (meta) meta.textContent = videos.length + '本';
-
-  const grid = document.getElementById(`vid-grid-${tab.id}`);
-  if (!grid) return;
-  if (!videos.length) { grid.innerHTML = '<div class="empty">動画がありません</div>'; return; }
-
-  grid.className = 'video-grid';
-  grid.innerHTML = videos.map(v => `
+function renderGrid(tabId, videos) {
+  const vc = document.getElementById(`vc-${tabId}`);
+  const vg = document.getElementById(`vg-${tabId}`);
+  if (vc) vc.textContent = videos.length + '本';
+  if (!vg) return;
+  if (!videos.length) { vg.innerHTML = '<div class="empty">動画がありません</div>'; return; }
+  vg.className = 'video-grid';
+  vg.innerHTML = videos.map(v => `
     <div class="video-card" onclick="playVideo('${v.id}','${escAttr(v.title)}')">
       <img src="${v.thumb}" loading="lazy" onerror="this.style.background='var(--bg3)'">
-      <div class="vc-title">${escHtml(v.title)}</div>
+      <div class="vc-title">${esc(v.title)}</div>
     </div>`).join('');
 }
 
@@ -317,17 +383,17 @@ function playVideo(id, title) {
   location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`;
 }
 
-async function refreshTab(tabId) {
-  delete videoCache[tabId];
-  const tab = tabs.find(t => t.id === tabId);
-  const pane = document.getElementById('pane-' + tabId);
-  if (tab && pane) renderVideos(pane, tab);
-}
-
 function editTabPlaylist(tabId) {
-  const tab = tabs.find(t => t.id === tabId);
+  const tab  = tabs.find(t => t.id === tabId);
   const pane = document.getElementById('pane-' + tabId);
   if (tab && pane) renderSetup(pane, tab);
+}
+
+async function refreshTab(tabId) {
+  delete videoCache[tabId];
+  const tab  = tabs.find(t => t.id === tabId);
+  const pane = document.getElementById('pane-' + tabId);
+  if (tab && pane) renderVideos(pane, tab);
 }
 
 // ── Tab management ────────────────────────────────────────────────────────────
@@ -336,11 +402,11 @@ function switchTab(id) {
   saveTabs();
   document.querySelectorAll('.tab-item').forEach(el => el.classList.toggle('active', el.dataset.id === id));
   document.querySelectorAll('.pane').forEach(el => {
-    const isActive = el.id === 'pane-' + id;
-    el.classList.toggle('active', isActive);
-    if (isActive) {
+    const active = el.id === 'pane-' + id;
+    el.classList.toggle('active', active);
+    if (active && !el.children.length) {
       const tab = tabs.find(t => t.id === id);
-      if (tab && !el.querySelector('.video-grid, .setup-box, .loading')) renderPane(tab);
+      if (tab) renderPane(tab);
     }
   });
 }
@@ -350,64 +416,143 @@ function addTab() {
   tabs.push(tab);
   activeTabId = tab.id;
   saveTabs();
-  // Add pane
   const pane = document.createElement('div');
   pane.className = 'pane active';
   pane.id = 'pane-' + tab.id;
   document.getElementById('app').appendChild(pane);
   renderSetup(pane, tab);
-  renderTabBar();
   document.querySelectorAll('.pane').forEach(el => el.classList.toggle('active', el.id === 'pane-' + tab.id));
+  renderTabBar();
 }
 
-function closeTab(e, id) {
-  e.stopPropagation();
-  if (tabs.length === 1) return; // 最後のタブは消せない
+function closeTab(id) {
+  if (tabs.length === 1) return;
   const idx = tabs.findIndex(t => t.id === id);
+  const tab = tabs[idx];
+
+  // Recents に追加
+  recents.unshift({ ...tab, deletedAt: Date.now() });
+  if (recents.length > 20) recents = recents.slice(0, 20);
+  saveRecents();
+
   tabs.splice(idx, 1);
   document.getElementById('pane-' + id)?.remove();
-  if (activeTabId === id) {
-    activeTabId = tabs[Math.min(idx, tabs.length - 1)].id;
-  }
+  if (activeTabId === id) activeTabId = tabs[Math.min(idx, tabs.length - 1)].id;
   saveTabs();
   syncPlaylistsToGitHub();
   renderTabBar();
   document.querySelectorAll('.pane').forEach(el => el.classList.toggle('active', el.id === 'pane-' + activeTabId));
 }
 
-// ── Rename ───────────────────────────────────────────────────────────────────
+// ── Rename ────────────────────────────────────────────────────────────────────
 function openRename(id) {
   renameTabId = id;
   const tab = tabs.find(t => t.id === id);
   document.getElementById('rename-input').value = tab?.name || '';
   document.getElementById('rename-modal').classList.add('open');
-  document.getElementById('rename-input').focus();
-  document.getElementById('rename-input').select();
+  setTimeout(() => { document.getElementById('rename-input').focus(); document.getElementById('rename-input').select(); }, 50);
 }
-
 function confirmRename() {
   const name = document.getElementById('rename-input').value.trim();
-  if (!name || !renameTabId) return closeRename();
+  if (!name || !renameTabId) return closeModal('rename-modal');
   const tab = tabs.find(t => t.id === renameTabId);
   if (tab) { tab.name = name; saveTabs(); renderTabBar(); }
-  closeRename();
+  closeModal('rename-modal');
 }
-
-function closeRename() {
-  document.getElementById('rename-modal').classList.remove('open');
-  renameTabId = null;
-}
-
 document.getElementById('rename-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') confirmRename();
-  if (e.key === 'Escape') closeRename();
+  if (e.key === 'Escape') closeModal('rename-modal');
 });
 
-// ── Sync playlists to GitHub ──────────────────────────────────────────────────
+// ── Recents panel ─────────────────────────────────────────────────────────────
+function toggleRecent() {
+  recentOpen = !recentOpen;
+  document.getElementById('recent-panel').classList.toggle('open', recentOpen);
+  if (recentOpen) renderRecentList();
+}
+function renderRecentList() {
+  const el = document.getElementById('rp-list');
+  if (!recents.length) { el.innerHTML = '<div class="empty" style="padding:20px">削除したタブはありません</div>'; return; }
+  el.innerHTML = recents.map((r, i) => `
+    <div class="recent-item">
+      <div class="ri-info">
+        <div class="ri-name">${esc(r.name)}</div>
+        <div class="ri-pl">${esc(r.playlistId || '未設定')}</div>
+        <div class="ri-time">${fmtTime(r.deletedAt)}</div>
+      </div>
+      <button class="btn-accent btn-sm" onclick="restoreTab(${i})">復元</button>
+    </div>`).join('');
+}
+function restoreTab(idx) {
+  const r = recents[idx];
+  if (!r) return;
+  const tab = { id: newTab('', '').id, name: r.name, playlistId: r.playlistId, createdAt: Date.now() };
+  tabs.push(tab);
+  recents.splice(idx, 1);
+  saveRecents();
+  saveTabs();
+  syncPlaylistsToGitHub();
+  const pane = document.createElement('div');
+  pane.className = 'pane';
+  pane.id = 'pane-' + tab.id;
+  document.getElementById('app').appendChild(pane);
+  renderTabBar();
+  renderRecentList();
+}
+
+// ── Share ─────────────────────────────────────────────────────────────────────
+function openShare() {
+  const box = document.getElementById('share-checks');
+  box.innerHTML = tabs.map(t => `
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;cursor:pointer">
+      <input type="checkbox" value="${t.id}" checked style="accent-color:var(--accent)">
+      <span>${esc(t.name)}</span>
+      <span style="font-size:10px;color:var(--muted)">${t.playlistId || '未設定'}</span>
+    </label>`).join('');
+  document.getElementById('share-url-box').style.display = 'none';
+  document.getElementById('share-modal').classList.add('open');
+}
+function generateShareUrl() {
+  const checked = [...document.querySelectorAll('#share-checks input:checked')].map(el => el.value);
+  const selected = tabs.filter(t => checked.includes(t.id)).map(t => ({ name: t.name, playlistId: t.playlistId }));
+  if (!selected.length) return;
+  const encoded = btoa(JSON.stringify(selected));
+  const url = `${location.origin}${location.pathname}?import=${encoded}`;
+  document.getElementById('share-url-text').textContent = url;
+  document.getElementById('share-url-box').style.display = 'block';
+}
+function copyShareUrl() {
+  const text = document.getElementById('share-url-text').textContent;
+  navigator.clipboard.writeText(text).then(() => alert('URLをコピーしました'));
+}
+
+// ── Import ───────────────────────────────────────────────────────────────────
+function showImportModal(data) {
+  document.getElementById('import-preview').innerHTML =
+    `<b style="color:var(--accent)">${data.length}件</b>のプレイリストをインポートします:<br><br>` +
+    data.map(t => `• ${esc(t.name)} <span style="color:var(--muted);font-size:10px">${esc(t.playlistId || '')}</span>`).join('<br>');
+  document.getElementById('import-modal').classList.add('open');
+}
+function confirmImport() {
+  if (!pendingImport) return closeModal('import-modal');
+  pendingImport.forEach(d => {
+    const tab = newTab(d.name || '無題', d.playlistId || '');
+    tabs.push(tab);
+    const pane = document.createElement('div');
+    pane.className = 'pane';
+    pane.id = 'pane-' + tab.id;
+    document.getElementById('app').appendChild(pane);
+  });
+  saveTabs();
+  syncPlaylistsToGitHub();
+  renderTabBar();
+  pendingImport = null;
+  closeModal('import-modal');
+}
+
+// ── Sync to GitHub ────────────────────────────────────────────────────────────
 async function syncPlaylistsToGitHub() {
-  const playlists = tabs
-    .filter(t => t.playlistId)
-    .map(t => ({ id: t.playlistId, title: t.name, autoDownload: false }));
+  const playlists = tabs.filter(t => t.playlistId).map(t => ({ id: t.playlistId, title: t.name, autoDownload: false }));
   if (!playlists.length) return;
   try {
     await fetch(`${WORKER}/update-playlists`, {
@@ -415,33 +560,23 @@ async function syncPlaylistsToGitHub() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playlists })
     });
-  } catch(e) { console.warn('sync playlists:', e); }
+  } catch(e) { console.warn('sync:', e); }
 }
 
-// ── Push ─────────────────────────────────────────────────────────────────────
+// ── Push ──────────────────────────────────────────────────────────────────────
 async function togglePush() {
   if (!swReg) { alert('Service Workerが利用できません'); return; }
-  if (pushSub) {
-    await pushSub.unsubscribe(); pushSub = null; updatePushBadge(); return;
-  }
+  if (pushSub) { await pushSub.unsubscribe(); pushSub = null; updatePushBadge(); return; }
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') { alert('通知が許可されていません'); return; }
   try {
     await navigator.serviceWorker.ready;
-    pushSub = await swReg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY)
-    });
-    const res = await fetch(WORKER, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: pushSub.toJSON() })
-    });
+    pushSub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY) });
+    const res = await fetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: pushSub.toJSON() }) });
     if (!res.ok) throw new Error(`Worker: ${res.status}`);
     updatePushBadge();
   } catch(e) { alert('登録エラー: ' + e.message); }
 }
-
 function updatePushBadge() {
   const on = !!pushSub;
   document.getElementById('push-badge').textContent = on ? 'PUSH ON' : 'PUSH OFF';
@@ -454,29 +589,22 @@ function toggleNotifPanel() {
   document.getElementById('notif-panel').classList.toggle('open', notifOpen);
   if (notifOpen) renderNotifList();
 }
-
 function renderNotifList() {
   const el = document.getElementById('np-list');
-  if (!notifs.length) { el.innerHTML = '<div class="empty" style="padding:30px">通知はありません</div>'; return; }
+  if (!notifs.length) { el.innerHTML = '<div class="empty" style="padding:20px">通知はありません</div>'; return; }
   el.innerHTML = notifs.map(n => `
     <div class="notif-item">
-      <div class="ni-title">${escHtml(n.title)}</div>
-      <div class="ni-body">${escHtml(n.body)}</div>
+      <div class="ni-title">${esc(n.title)}</div>
+      <div class="ni-body">${esc(n.body)}</div>
       ${n.url ? `<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>` : ''}
       <div class="ni-time">${fmtTime(n.time)}</div>
     </div>`).join('');
 }
-
-function clearNotifs() {
-  notifs = []; localStorage.setItem('yt_notifs', '[]');
-  updateNotifBadge(); renderNotifList();
-}
-
+function clearNotifs() { notifs = []; localStorage.setItem('yt_notifs', '[]'); updateNotifBadge(); renderNotifList(); }
 function updateNotifBadge() {
   document.getElementById('notif-badge').textContent = notifs.length + '件';
   document.getElementById('notif-badge').className = notifs.length ? 'badge warn' : 'badge off';
 }
-
 navigator.serviceWorker?.addEventListener('message', e => {
   if (e.data?.type === 'push') {
     notifs.unshift({ ...e.data, time: new Date().toISOString() });
@@ -488,9 +616,10 @@ navigator.serviceWorker?.addEventListener('message', e => {
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmtTime = iso => { const d = new Date(iso); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
-const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const escAttr = s => String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+const fmtTime = ts => { const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 function urlB64ToUint8(b) { const pad='='.repeat((4-b.length%4)%4); const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0))); }
 </script>
 </body>
