@@ -26,7 +26,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space 
 .bar-btn:hover{background:var(--bg3);color:var(--text)}
 
 /* ── Tab bar ── */
-#tabbar{position:fixed;top:var(--bar);left:0;right:0;height:var(--tab);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 4px 0 4px;overflow-x:auto;overflow-y:hidden;z-index:190;gap:1px}
+#tabbar{position:fixed;top:var(--bar);left:0;right:0;height:var(--tab);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 4px;overflow-x:auto;overflow-y:hidden;z-index:190;gap:1px}
 #tabbar::-webkit-scrollbar{height:2px}
 .tab-item{flex-shrink:0;height:28px;min-width:120px;max-width:200px;display:flex;align-items:center;gap:5px;padding:0 8px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;position:relative;user-select:none;transition:background .1s}
 .tab-item.active{background:var(--bg);border-bottom-color:var(--bg)}
@@ -35,6 +35,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space 
 .tab-item.active .tab-icon{color:var(--accent)}
 .tab-name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
 .tab-item.active .tab-name{color:var(--text)}
+/* pinned online tab */
+.tab-item.pinned{min-width:90px;max-width:110px;border-color:rgba(127,184,255,.3)}
+.tab-item.pinned.active .tab-icon{color:var(--accent3)}
+.tab-item.pinned.active{border-color:rgba(127,184,255,.4);border-bottom-color:var(--bg)}
 .tab-close{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;padding:0;line-height:1}
 .tab-close:hover{background:rgba(255,68,102,.2);color:var(--danger)}
 .tab-add{flex-shrink:0;width:28px;height:28px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;margin-left:2px}
@@ -45,14 +49,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space 
 .pane{position:absolute;inset:0;overflow-y:auto;display:none;padding:16px}
 .pane.active{display:block}
 
-/* ── Setup ── */
-.setup-box{max-width:480px;margin:40px auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
-.setup-box h2{font-size:13px;color:var(--accent);margin-bottom:16px}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
-input[type=text]{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;width:100%}
-input[type=text]:focus{border-color:var(--accent)}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+/* ── Shared UI ── */
+input[type=text],textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;width:100%}
+input[type=text]:focus,textarea:focus{border-color:var(--accent)}
 button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
 .btn-accent{background:var(--accent);color:#000;font-weight:bold}
 .btn-accent:hover{filter:brightness(1.1)}
@@ -61,9 +60,14 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .btn-sm{padding:4px 10px;font-size:10px}
 .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
 .btn-danger:hover{background:var(--danger);color:#fff}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .errmsg{font-size:11px;color:var(--danger);margin-top:6px;display:none}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 
-/* ── Videos ── */
+/* ── Playlist setup/videos ── */
+.setup-box{max-width:480px;margin:40px auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+.setup-box h2{font-size:13px;color:var(--accent);margin-bottom:16px}
 .vid-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .vid-count{font-size:10px;color:var(--muted)}
 .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
@@ -74,29 +78,69 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .empty{text-align:center;padding:60px 20px;color:var(--muted);line-height:2;font-size:12px}
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:12px}
 
-/* ── Notif panel ── */
-#notif-panel{position:fixed;top:var(--bar);right:0;width:300px;bottom:0;background:var(--bg2);border-left:1px solid var(--border);z-index:180;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column}
+/* ── Schedule (Online tab) ── */
+#sched-pane{padding:12px}
+.sched-top{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:14px}
+.sched-top-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sched-top-row h2{font-size:12px;color:var(--accent3);flex:1}
+#sched-json{height:100px;resize:vertical;font-size:11px;margin-bottom:8px;display:none}
+#sched-json.open{display:block}
+.sched-cards{display:flex;flex-direction:column;gap:10px}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:opacity .2s}
+.s-card.notify-on{border-left:3px solid var(--accent3)}
+.s-card.completed{opacity:.4;filter:grayscale(.5)}
+.s-card-head{display:flex;justify-content:space-between;align-items:flex-start}
+.s-subject{font-size:18px;font-weight:bold;color:var(--text)}
+.s-unit{font-size:13px;color:var(--muted);margin-top:2px}
+.s-date{font-size:11px;color:var(--muted)}
+.s-time{font-size:12px;color:var(--text)}
+.s-time .def{font-size:10px;color:var(--muted);margin-left:4px}
+.s-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.s-rel{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold}
+.s-rel.future{background:rgba(127,184,255,.15);color:var(--accent3);border:1px solid rgba(127,184,255,.3)}
+.s-rel.today{background:rgba(127,255,178,.12);color:var(--accent);border:1px solid rgba(127,255,178,.3)}
+.s-rel.past{background:rgba(255,68,102,.1);color:var(--danger);border:1px solid rgba(255,68,102,.2)}
+.s-status{padding:3px 10px;border-radius:999px;font-size:10px}
+.s-status.normal{background:rgba(127,184,255,.12);color:var(--accent3)}
+.s-status.h_class{background:rgba(255,200,50,.12);color:#ffcc33}
+.s-status.s_class{background:rgba(255,68,102,.12);color:var(--danger)}
+.s-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* toggle switch */
+.tog-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.tog{position:relative;width:42px;height:22px;display:inline-block;flex-shrink:0}
+.tog input{display:none}
+.tog-sl{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:.2s}
+.tog-sl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tog input:checked+.tog-sl{background:var(--accent3)}
+.tog input:checked+.tog-sl:before{transform:translateX(20px)}
+.tog.done input:checked+.tog-sl{background:var(--accent)}
+.s-memo{font-size:11px}
+.s-link-btn{padding:5px 12px;border-radius:var(--r);background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10b981;cursor:pointer;font-size:11px;font-family:inherit}
+.s-link-btn:hover{background:rgba(16,185,129,.25)}
+.s-notify-info{font-size:10px;color:var(--muted)}
+.s-sep{border:none;border-top:1px solid var(--border);margin:4px 0}
+.s-divider{text-align:center;font-size:10px;color:var(--muted);padding:8px 0;letter-spacing:.05em}
+
+/* ── Panels ── */
+#notif-panel,#recent-panel{position:fixed;top:var(--bar);width:280px;bottom:0;background:var(--bg2);z-index:180;display:flex;flex-direction:column;transition:transform .25s}
+#notif-panel{right:0;border-left:1px solid var(--border);transform:translateX(100%)}
 #notif-panel.open{transform:translateX(0)}
-.np-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.np-list{flex:1;overflow-y:auto;padding:8px}
+#recent-panel{left:0;border-right:1px solid var(--border);transform:translateX(-100%)}
+#recent-panel.open{transform:translateX(0)}
+.panel-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.panel-list{flex:1;overflow-y:auto;padding:8px}
 .notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px}
 .ni-title{font-weight:bold;color:var(--accent);font-size:11px;margin-bottom:2px}
 .ni-body{font-size:11px;color:var(--text);line-height:1.5}
 .ni-time{font-size:10px;color:var(--muted);margin-top:3px}
 .ni-link{display:inline-block;font-size:10px;color:var(--accent3);text-decoration:none;margin-top:3px}
-
-/* ── Recents panel ── */
-#recent-panel{position:fixed;top:var(--bar);left:0;width:260px;bottom:0;background:var(--bg2);border-right:1px solid var(--border);z-index:180;transform:translateX(-100%);transition:transform .25s;display:flex;flex-direction:column}
-#recent-panel.open{transform:translateX(0)}
-.rp-header{padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.rp-list{flex:1;overflow-y:auto;padding:8px}
 .recent-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .ri-info{flex:1;min-width:0}
 .ri-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri-pl{font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri-time{font-size:10px;color:var(--muted);margin-top:2px}
 
-/* ── Share modal ── */
+/* ── Modals ── */
 #share-modal,#rename-modal,#import-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
 #share-modal.open,#rename-modal.open,#import-modal.open{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px;width:360px;max-width:90vw}
@@ -108,7 +152,6 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 </head>
 <body>
 
-<!-- Menu bar -->
 <div id="bar">
   <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
   <span class="bar-title">YT Watcher</span>
@@ -121,36 +164,54 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
-<!-- Tab bar -->
 <div id="tabbar">
+  <!-- pinned online tab -->
+  <div class="tab-item pinned" id="online-tab" onclick="switchToOnline()">
+    <span class="tab-icon">📅</span>
+    <span class="tab-name">オンライン通知</span>
+  </div>
   <button class="tab-add" onclick="addTab()" title="新しいタブ">+</button>
 </div>
 
-<!-- Panes -->
-<div id="app"></div>
+<div id="app">
+  <!-- online pane (always present) -->
+  <div class="pane" id="pane-online">
+    <div id="sched-pane">
+      <div class="sched-top">
+        <div class="sched-top-row">
+          <h2>📅 オンライン通知</h2>
+          <button class="btn-outline btn-sm" onclick="toggleJsonArea()">JSON読込</button>
+          <button class="btn-outline btn-sm" onclick="clearSchedule()">全削除</button>
+        </div>
+        <textarea id="sched-json" placeholder='{"schedule":[...]} または schedule配列を貼り付け'></textarea>
+        <div id="sched-err" class="errmsg"></div>
+        <div id="sched-load-row" style="display:none;margin-top:6px">
+          <button class="btn-accent btn-sm" onclick="loadScheduleJson()">読み込む</button>
+          <button class="btn-outline btn-sm" onclick="toggleJsonArea()">キャンセル</button>
+        </div>
+      </div>
+      <div class="sched-cards" id="sched-cards"><div class="empty">JSONを読み込んでください</div></div>
+    </div>
+  </div>
+</div>
 
-<!-- Notification panel -->
 <div id="notif-panel">
-  <div class="np-header">
+  <div class="panel-header">
     <span>通知センター</span>
     <button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button>
   </div>
-  <div class="np-list" id="np-list"></div>
+  <div class="panel-list" id="np-list"></div>
 </div>
 
-<!-- Recents panel -->
 <div id="recent-panel">
-  <div class="rp-header">最近削除したタブ</div>
-  <div class="rp-list" id="rp-list"></div>
+  <div class="panel-header"><span>最近削除したタブ</span></div>
+  <div class="panel-list" id="rp-list"></div>
 </div>
 
-<!-- Rename modal -->
 <div id="rename-modal">
   <div class="modal-box">
     <h3>タブ名を変更</h3>
-    <div class="field">
-      <input type="text" id="rename-input" placeholder="タブ名">
-    </div>
+    <div class="field"><input type="text" id="rename-input" placeholder="タブ名"></div>
     <div class="btn-row">
       <button class="btn-accent" onclick="confirmRename()">保存</button>
       <button class="btn-outline" onclick="closeModal('rename-modal')">キャンセル</button>
@@ -158,7 +219,6 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
-<!-- Share modal -->
 <div id="share-modal">
   <div class="modal-box">
     <h3>プレイリストを共有</h3>
@@ -176,7 +236,6 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
-<!-- Import modal -->
 <div id="import-modal">
   <div class="modal-box">
     <h3>プレイリストをインポート</h3>
@@ -191,47 +250,43 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 <script>
 const WORKER = 'https://yt-push-register.a6068376.workers.dev';
 const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
+const ONLINE_TAB_ID = 'online';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let tabs    = JSON.parse(localStorage.getItem('yt_tabs')   || '[]');
-let recents = JSON.parse(localStorage.getItem('yt_recent') || '[]'); // 削除したタブ履歴
+let recents = JSON.parse(localStorage.getItem('yt_recent') || '[]');
 let notifs  = JSON.parse(localStorage.getItem('yt_notifs') || '[]');
-let activeTabId = localStorage.getItem('yt_active_tab') || null;
+let schedules = JSON.parse(localStorage.getItem('yt_schedule') || '[]');
+let activeTabId = localStorage.getItem('yt_active_tab') || ONLINE_TAB_ID;
 let swReg = null, pushSub = null;
-let notifOpen = false, recentOpen = false;
-let renameTabId = null;
-let videoCache = {};
-let pendingImport = null;
+let notifOpen = false, recentOpen = false, renameTabId = null;
+let videoCache = {}, pendingImport = null;
+let jsonAreaOpen = false;
 
 if (!tabs.length) { tabs = [newTab('プレイリスト 1', '')]; saveTabs(); }
-if (!activeTabId || !tabs.find(t => t.id === activeTabId)) activeTabId = tabs[0].id;
+if (!activeTabId) activeTabId = ONLINE_TAB_ID;
 
 function newTab(name, playlistId) {
   return { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), name, playlistId, createdAt: Date.now() };
 }
-
 function saveTabs() {
   localStorage.setItem('yt_tabs', JSON.stringify(tabs));
   localStorage.setItem('yt_active_tab', activeTabId);
 }
-
-function saveRecents() {
-  localStorage.setItem('yt_recent', JSON.stringify(recents));
-}
+function saveRecents() { localStorage.setItem('yt_recent', JSON.stringify(recents)); }
+function saveSchedule() { localStorage.setItem('yt_schedule', JSON.stringify(schedules)); }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
-  // Check for import URL param
   const params = new URLSearchParams(location.search);
   const importData = params.get('import');
   if (importData) {
     try {
-      const decoded = JSON.parse(atob(importData));
+      const decoded = JSON.parse(decodeURIComponent(atob(importData))); // fix: decodeURIComponent
       if (Array.isArray(decoded)) { pendingImport = decoded; showImportModal(decoded); }
-    } catch {}
+    } catch(e) { console.warn('import decode:', e); }
     history.replaceState({}, '', location.pathname);
   }
-
   if ('serviceWorker' in navigator) {
     try {
       swReg = await navigator.serviceWorker.register('sw.js');
@@ -243,13 +298,19 @@ function saveRecents() {
   renderTabBar();
   renderApp();
   updateNotifBadge();
+  if (schedules.length) renderScheduleCards();
 })();
 
 // ── Tab bar ───────────────────────────────────────────────────────────────────
 function renderTabBar() {
   const bar = document.getElementById('tabbar');
+  const onlineTab = document.getElementById('online-tab');
   const addBtn = bar.querySelector('.tab-add');
-  bar.querySelectorAll('.tab-item').forEach(el => el.remove());
+  bar.querySelectorAll('.tab-item:not(.pinned)').forEach(el => el.remove());
+
+  // Online tab active state
+  onlineTab.classList.toggle('active', activeTabId === ONLINE_TAB_ID);
+
   tabs.forEach(tab => {
     const el = document.createElement('div');
     el.className = 'tab-item' + (tab.id === activeTabId ? ' active' : '');
@@ -263,42 +324,206 @@ function renderTabBar() {
     el.addEventListener('dblclick', () => openRename(tab.id));
     bar.insertBefore(el, addBtn);
   });
-  const active = bar.querySelector('.tab-item.active');
-  if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center' });
 }
 
-// ── App / Panes ───────────────────────────────────────────────────────────────
 function renderApp() {
   const app = document.getElementById('app');
-  app.innerHTML = '';
+  // Remove playlist panes (keep online pane)
+  app.querySelectorAll('.pane:not(#pane-online)').forEach(el => el.remove());
+
   tabs.forEach(tab => {
-    const pane = document.createElement('div');
-    pane.className = 'pane' + (tab.id === activeTabId ? ' active' : '');
-    pane.id = 'pane-' + tab.id;
-    app.appendChild(pane);
-    if (tab.id === activeTabId) renderPane(tab);
+    if (!document.getElementById('pane-' + tab.id)) {
+      const pane = document.createElement('div');
+      pane.className = 'pane';
+      pane.id = 'pane-' + tab.id;
+      app.appendChild(pane);
+    }
+  });
+  updateActivePane();
+}
+
+function updateActivePane() {
+  document.querySelectorAll('.pane').forEach(el => {
+    const isActive = el.id === 'pane-' + activeTabId || (activeTabId === ONLINE_TAB_ID && el.id === 'pane-online');
+    el.classList.toggle('active', isActive);
+    if (isActive && el.id !== 'pane-online' && !el.children.length) {
+      const tab = tabs.find(t => t.id === activeTabId);
+      if (tab) renderPane(tab);
+    }
   });
 }
 
+// ── Online tab ────────────────────────────────────────────────────────────────
+function switchToOnline() {
+  activeTabId = ONLINE_TAB_ID;
+  saveTabs();
+  renderTabBar();
+  updateActivePane();
+}
+
+function toggleJsonArea() {
+  jsonAreaOpen = !jsonAreaOpen;
+  const ta = document.getElementById('sched-json');
+  const row = document.getElementById('sched-load-row');
+  ta.classList.toggle('open', jsonAreaOpen);
+  row.style.display = jsonAreaOpen ? 'flex' : 'none';
+  if (jsonAreaOpen) ta.focus();
+}
+
+function loadScheduleJson() {
+  const raw = document.getElementById('sched-json').value.trim();
+  const errEl = document.getElementById('sched-err');
+  errEl.style.display = 'none';
+  try {
+    let input = JSON.parse(raw);
+    let arr = Array.isArray(input) ? input : (input.schedule || []);
+    if (!arr.length) throw new Error('scheduleが空です');
+
+    let added = 0, skipped = 0;
+    arr.forEach(s => {
+      s = fillDefaultTime(s);
+      // 重複チェック
+      const dup = schedules.find(x =>
+        x.eventId === s.eventId ||
+        (x.subject === s.subject && x.unit === s.unit && x.date === s.date && x.period === s.period && x.status === s.status)
+      );
+      if (dup) { skipped++; return; }
+      schedules.push(s);
+      added++;
+    });
+    saveSchedule();
+    toggleJsonArea();
+    document.getElementById('sched-json').value = '';
+    renderScheduleCards();
+    if (skipped) errEl.textContent = `${added}件追加、${skipped}件重複スキップ`; errEl.style.display = 'block';
+  } catch(e) {
+    errEl.textContent = 'JSONエラー: ' + e.message; errEl.style.display = 'block';
+  }
+}
+
+function clearSchedule() {
+  if (!confirm('全予定を削除しますか？')) return;
+  schedules = []; saveSchedule(); renderScheduleCards();
+}
+
+function fillDefaultTime(s) {
+  if (!s.startTime) {
+    if (s.period === 1) { s.startTime = '19:30'; s.endTime = s.endTime || '21:00'; s.isDefaultTime = true; }
+    else if (s.period === 2) { s.startTime = '20:40'; s.endTime = s.endTime || '23:00'; s.isDefaultTime = true; }
+    else { s.startTime = '00:00'; s.isDefaultTime = true; }
+  } else {
+    s.isDefaultTime = false;
+    if (!s.endTime) s.endTime = calcEnd(s.startTime);
+  }
+  return s;
+}
+
+function calcEnd(start) {
+  let [h, m] = start.split(':').map(Number);
+  m += 90; h += Math.floor(m / 60); m %= 60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+function getRelative(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr); target.setHours(0,0,0,0);
+  const diff = Math.floor((target - today) / 86400000);
+  if (diff === 0) return { text:'今日', cls:'today' };
+  if (diff === 1) return { text:'明日', cls:'future' };
+  if (diff === 2) return { text:'明後日', cls:'future' };
+  if (diff === -1) return { text:'昨日', cls:'past' };
+  if (diff === -2) return { text:'一昨日', cls:'past' };
+  if (diff > 2) return { text:`${diff}日後`, cls:'future' };
+  return { text:`${Math.abs(diff)}日前`, cls:'past' };
+}
+
+function renderScheduleCards() {
+  const container = document.getElementById('sched-cards');
+  if (!schedules.length) { container.innerHTML = '<div class="empty">予定がありません</div>'; return; }
+
+  const now = new Date();
+  const sorted = [...schedules].sort((a, b) => {
+    const ta = new Date(a.date + 'T' + (a.startTime || '00:00'));
+    const tb = new Date(b.date + 'T' + (b.startTime || '00:00'));
+    const aPast = ta < now, bPast = tb < now;
+    if (aPast !== bPast) return aPast ? 1 : -1;
+    if (!aPast && !bPast) return ta - tb;
+    return tb - ta;
+  });
+
+  let html = '';
+  let pastStarted = false;
+  sorted.forEach(s => {
+    const idx = schedules.findIndex(x => x.eventId === s.eventId || (x.subject === s.subject && x.date === s.date && x.period === s.period));
+    const rel = getRelative(s.date);
+    const ta = new Date(s.date + 'T' + (s.startTime || '00:00'));
+    if (!pastStarted && ta < now) {
+      pastStarted = true;
+      html += '<div class="s-divider">─── 過去の予定 ───</div>';
+    }
+    const link = s.link?.url || s.zoomUrl || '';
+    html += `
+    <div class="s-card ${s.notify?'notify-on':''} ${s.completed?'completed':''}" id="sc-${idx}">
+      <div class="s-card-head">
+        <div>
+          <div class="s-subject">${esc(s.subject||'')}</div>
+          <div class="s-unit">${esc(s.unit||'')}</div>
+        </div>
+        <label class="tog-wrap">
+          <span>通知</span>
+          <label class="tog">
+            <input type="checkbox" ${s.notify?'checked':''} onchange="schedToggle(${idx},'notify',this.checked)">
+            <span class="tog-sl"></span>
+          </label>
+        </label>
+      </div>
+      <div class="s-date">${esc(s.date||'')} ・ ${esc(s.weekday||'')} ・ ${esc(s.timeSlot||'')}</div>
+      <div class="s-time">🕒 ${esc(s.startTime||'')} 〜 ${esc(s.endTime||'')}${s.isDefaultTime?'<span class="def">(デフォルト)</span>':''}</div>
+      <div class="s-badges">
+        <span class="s-rel ${rel.cls}">${rel.text}</span>
+        <span class="s-status ${s.status||'normal'}">${esc(s.statusName||'通常授業')}</span>
+        ${link ? `<button class="s-link-btn" onclick="openLink('${link}')">参加/開く</button>` : ''}
+      </div>
+      ${s.notifyBefore?.length ? `<div class="s-notify-info">通知: ${s.notifyBefore.join(', ')}分前</div>` : ''}
+      <div class="s-memo">
+        <input type="text" value="${esc(s.memo||'')}" placeholder="メモ" onchange="schedToggle(${idx},'memo',this.value)">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label class="tog-wrap">
+          <span>完了</span>
+          <label class="tog done">
+            <input type="checkbox" ${s.completed?'checked':''} onchange="schedToggle(${idx},'completed',this.checked)">
+            <span class="tog-sl"></span>
+          </label>
+        </label>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function schedToggle(idx, key, val) {
+  if (idx < 0 || idx >= schedules.length) return;
+  schedules[idx][key] = val;
+  saveSchedule();
+  renderScheduleCards();
+}
+
+function openLink(url) { window.open(url, '_blank'); }
+
+// ── Playlist panes ────────────────────────────────────────────────────────────
 function renderPane(tab) {
   const pane = document.getElementById('pane-' + tab.id);
   if (!pane) return;
   tab.playlistId ? renderVideos(pane, tab) : renderSetup(pane, tab);
 }
 
-// ── Setup ─────────────────────────────────────────────────────────────────────
 function renderSetup(pane, tab) {
   pane.innerHTML = `
     <div class="setup-box">
       <h2>プレイリストを設定</h2>
-      <div class="field">
-        <label>タブ名</label>
-        <input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名">
-      </div>
-      <div class="field">
-        <label>プレイリストURL または ID</label>
-        <input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://www.youtube.com/playlist?list=PL...">
-      </div>
+      <div class="field"><label>タブ名</label><input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名"></div>
+      <div class="field"><label>プレイリストURL または ID</label><input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://www.youtube.com/playlist?list=PL..."></div>
       <div class="errmsg" id="se-${tab.id}"></div>
       <div class="btn-row">
         <button class="btn-accent" onclick="saveTabPlaylist('${tab.id}')">保存</button>
@@ -310,34 +535,22 @@ function renderSetup(pane, tab) {
 function cancelSetup(tabId) {
   const tab = tabs.find(t => t.id === tabId);
   const pane = document.getElementById('pane-' + tabId);
-  if (tab && pane && tab.playlistId) renderVideos(pane, tab);
+  if (tab?.playlistId && pane) renderVideos(pane, tab);
 }
 
 function saveTabPlaylist(tabId) {
-  const nameEl = document.getElementById(`sn-${tabId}`);
-  const plEl   = document.getElementById(`sp-${tabId}`);
-  const errEl  = document.getElementById(`se-${tabId}`);
-  const raw    = plEl?.value.trim() || '';
-  const name   = nameEl?.value.trim() || '';
-  const m      = raw.match(/[?&]list=([A-Za-z0-9_-]+)/);
-  const plId   = m ? m[1] : raw;
-
-  if (!plId) {
-    if (errEl) { errEl.textContent = 'URLまたはIDを入力してください'; errEl.style.display = 'block'; }
-    return;
-  }
+  const raw = document.getElementById(`sp-${tabId}`)?.value.trim() || '';
+  const name = document.getElementById(`sn-${tabId}`)?.value.trim() || '';
+  const errEl = document.getElementById(`se-${tabId}`);
+  const m = raw.match(/[?&]list=([A-Za-z0-9_-]+)/);
+  const plId = m ? m[1] : raw;
+  if (!plId) { if (errEl) { errEl.textContent='URLまたはIDを入力してください'; errEl.style.display='block'; } return; }
   const tab = tabs.find(t => t.id === tabId);
   if (!tab) return;
-  tab.playlistId = plId;
-  if (name) tab.name = name;
-  delete videoCache[tabId]; // キャッシュクリア
-  saveTabs();
-  syncPlaylistsToGitHub();
-  renderTabBar();
-  renderPane(tab);
+  tab.playlistId = plId; if (name) tab.name = name;
+  delete videoCache[tabId]; saveTabs(); syncPlaylistsToGitHub(); renderTabBar(); renderPane(tab);
 }
 
-// ── Videos ───────────────────────────────────────────────────────────────────
 async function renderVideos(pane, tab) {
   pane.innerHTML = `
     <div class="vid-header">
@@ -348,17 +561,12 @@ async function renderVideos(pane, tab) {
       <button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button>
     </div>
     <div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
-
-  if (videoCache[tab.id]) {
-    renderGrid(tab.id, videoCache[tab.id]);
-    return;
-  }
+  if (videoCache[tab.id]) { renderGrid(tab.id, videoCache[tab.id]); return; }
   try {
-    const res  = await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
+    const res = await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    videoCache[tab.id] = data;
-    renderGrid(tab.id, data);
+    videoCache[tab.id] = data; renderGrid(tab.id, data);
   } catch(e) {
     const el = document.getElementById(`vg-${tab.id}`);
     if (el) el.innerHTML = `<div class="empty">エラー: ${esc(e.message)}</div>`;
@@ -366,8 +574,7 @@ async function renderVideos(pane, tab) {
 }
 
 function renderGrid(tabId, videos) {
-  const vc = document.getElementById(`vc-${tabId}`);
-  const vg = document.getElementById(`vg-${tabId}`);
+  const vc = document.getElementById(`vc-${tabId}`), vg = document.getElementById(`vg-${tabId}`);
   if (vc) vc.textContent = videos.length + '本';
   if (!vg) return;
   if (!videos.length) { vg.innerHTML = '<div class="empty">動画がありません</div>'; return; }
@@ -379,92 +586,55 @@ function renderGrid(tabId, videos) {
     </div>`).join('');
 }
 
-function playVideo(id, title) {
-  location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`;
-}
-
-function editTabPlaylist(tabId) {
-  const tab  = tabs.find(t => t.id === tabId);
-  const pane = document.getElementById('pane-' + tabId);
-  if (tab && pane) renderSetup(pane, tab);
-}
-
-async function refreshTab(tabId) {
-  delete videoCache[tabId];
-  const tab  = tabs.find(t => t.id === tabId);
-  const pane = document.getElementById('pane-' + tabId);
-  if (tab && pane) renderVideos(pane, tab);
-}
+function playVideo(id, title) { location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`; }
+function editTabPlaylist(tabId) { const tab=tabs.find(t=>t.id===tabId); const pane=document.getElementById('pane-'+tabId); if(tab&&pane) renderSetup(pane,tab); }
+async function refreshTab(tabId) { delete videoCache[tabId]; const tab=tabs.find(t=>t.id===tabId); const pane=document.getElementById('pane-'+tabId); if(tab&&pane) renderVideos(pane,tab); }
 
 // ── Tab management ────────────────────────────────────────────────────────────
 function switchTab(id) {
-  activeTabId = id;
-  saveTabs();
-  document.querySelectorAll('.tab-item').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+  activeTabId = id; saveTabs();
+  document.getElementById('online-tab').classList.remove('active');
+  document.querySelectorAll('.tab-item:not(.pinned)').forEach(el => el.classList.toggle('active', el.dataset.id === id));
   document.querySelectorAll('.pane').forEach(el => {
     const active = el.id === 'pane-' + id;
     el.classList.toggle('active', active);
-    if (active && !el.children.length) {
-      const tab = tabs.find(t => t.id === id);
-      if (tab) renderPane(tab);
-    }
+    if (active && !el.children.length) { const tab=tabs.find(t=>t.id===id); if(tab) renderPane(tab); }
   });
 }
 
 function addTab() {
-  const tab = newTab('新しいタブ', '');
-  tabs.push(tab);
-  activeTabId = tab.id;
-  saveTabs();
-  const pane = document.createElement('div');
-  pane.className = 'pane active';
-  pane.id = 'pane-' + tab.id;
+  const tab = newTab('新しいタブ', ''); tabs.push(tab); activeTabId = tab.id; saveTabs();
+  const pane = document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
   document.getElementById('app').appendChild(pane);
-  renderSetup(pane, tab);
-  document.querySelectorAll('.pane').forEach(el => el.classList.toggle('active', el.id === 'pane-' + tab.id));
-  renderTabBar();
+  renderSetup(pane, tab); renderTabBar(); updateActivePane();
 }
 
 function closeTab(id) {
   if (tabs.length === 1) return;
-  const idx = tabs.findIndex(t => t.id === id);
-  const tab = tabs[idx];
-
-  // Recents に追加
-  recents.unshift({ ...tab, deletedAt: Date.now() });
-  if (recents.length > 20) recents = recents.slice(0, 20);
-  saveRecents();
-
-  tabs.splice(idx, 1);
-  document.getElementById('pane-' + id)?.remove();
-  if (activeTabId === id) activeTabId = tabs[Math.min(idx, tabs.length - 1)].id;
-  saveTabs();
-  syncPlaylistsToGitHub();
-  renderTabBar();
-  document.querySelectorAll('.pane').forEach(el => el.classList.toggle('active', el.id === 'pane-' + activeTabId));
+  const idx = tabs.findIndex(t => t.id === id); const tab = tabs[idx];
+  recents.unshift({...tab, deletedAt: Date.now()}); if (recents.length > 20) recents=recents.slice(0,20); saveRecents();
+  tabs.splice(idx, 1); document.getElementById('pane-'+id)?.remove();
+  if (activeTabId === id) activeTabId = tabs[Math.min(idx, tabs.length-1)].id;
+  saveTabs(); syncPlaylistsToGitHub(); renderTabBar();
+  updateActivePane();
 }
 
 // ── Rename ────────────────────────────────────────────────────────────────────
 function openRename(id) {
-  renameTabId = id;
-  const tab = tabs.find(t => t.id === id);
+  renameTabId = id; const tab=tabs.find(t=>t.id===id);
   document.getElementById('rename-input').value = tab?.name || '';
   document.getElementById('rename-modal').classList.add('open');
-  setTimeout(() => { document.getElementById('rename-input').focus(); document.getElementById('rename-input').select(); }, 50);
+  setTimeout(()=>{ document.getElementById('rename-input').focus(); document.getElementById('rename-input').select(); },50);
 }
 function confirmRename() {
   const name = document.getElementById('rename-input').value.trim();
   if (!name || !renameTabId) return closeModal('rename-modal');
-  const tab = tabs.find(t => t.id === renameTabId);
-  if (tab) { tab.name = name; saveTabs(); renderTabBar(); }
+  const tab = tabs.find(t=>t.id===renameTabId); if(tab){tab.name=name;saveTabs();renderTabBar();}
   closeModal('rename-modal');
 }
-document.getElementById('rename-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') confirmRename();
-  if (e.key === 'Escape') closeModal('rename-modal');
-});
+document.getElementById('rename-input').addEventListener('keydown', e => { if(e.key==='Enter')confirmRename(); if(e.key==='Escape')closeModal('rename-modal'); });
 
-// ── Recents panel ─────────────────────────────────────────────────────────────
+// ── Recents ───────────────────────────────────────────────────────────────────
 function toggleRecent() {
   recentOpen = !recentOpen;
   document.getElementById('recent-panel').classList.toggle('open', recentOpen);
@@ -472,155 +642,121 @@ function toggleRecent() {
 }
 function renderRecentList() {
   const el = document.getElementById('rp-list');
-  if (!recents.length) { el.innerHTML = '<div class="empty" style="padding:20px">削除したタブはありません</div>'; return; }
-  el.innerHTML = recents.map((r, i) => `
+  if (!recents.length) { el.innerHTML='<div class="empty" style="padding:20px">削除したタブはありません</div>'; return; }
+  el.innerHTML = recents.map((r,i) => `
     <div class="recent-item">
       <div class="ri-info">
         <div class="ri-name">${esc(r.name)}</div>
-        <div class="ri-pl">${esc(r.playlistId || '未設定')}</div>
+        <div class="ri-pl">${esc(r.playlistId||'未設定')}</div>
         <div class="ri-time">${fmtTime(r.deletedAt)}</div>
       </div>
       <button class="btn-accent btn-sm" onclick="restoreTab(${i})">復元</button>
     </div>`).join('');
 }
 function restoreTab(idx) {
-  const r = recents[idx];
-  if (!r) return;
-  const tab = { id: newTab('', '').id, name: r.name, playlistId: r.playlistId, createdAt: Date.now() };
-  tabs.push(tab);
-  recents.splice(idx, 1);
-  saveRecents();
-  saveTabs();
-  syncPlaylistsToGitHub();
-  const pane = document.createElement('div');
-  pane.className = 'pane';
-  pane.id = 'pane-' + tab.id;
+  const r=recents[idx]; if(!r)return;
+  const tab={...newTab(r.name, r.playlistId)};
+  tabs.push(tab); recents.splice(idx,1); saveRecents(); saveTabs(); syncPlaylistsToGitHub();
+  const pane=document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
   document.getElementById('app').appendChild(pane);
-  renderTabBar();
-  renderRecentList();
+  renderTabBar(); renderRecentList();
 }
 
-// ── Share ─────────────────────────────────────────────────────────────────────
+// ── Share (fix: encodeURIComponent for Unicode) ───────────────────────────────
 function openShare() {
   const box = document.getElementById('share-checks');
-  box.innerHTML = tabs.map(t => `
+  box.innerHTML = tabs.map(t=>`
     <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;cursor:pointer">
       <input type="checkbox" value="${t.id}" checked style="accent-color:var(--accent)">
       <span>${esc(t.name)}</span>
-      <span style="font-size:10px;color:var(--muted)">${t.playlistId || '未設定'}</span>
+      <span style="font-size:10px;color:var(--muted)">${t.playlistId||'未設定'}</span>
     </label>`).join('');
-  document.getElementById('share-url-box').style.display = 'none';
+  document.getElementById('share-url-box').style.display='none';
   document.getElementById('share-modal').classList.add('open');
 }
 function generateShareUrl() {
-  const checked = [...document.querySelectorAll('#share-checks input:checked')].map(el => el.value);
-  const selected = tabs.filter(t => checked.includes(t.id)).map(t => ({ name: t.name, playlistId: t.playlistId }));
+  const checked = [...document.querySelectorAll('#share-checks input:checked')].map(el=>el.value);
+  const selected = tabs.filter(t=>checked.includes(t.id)).map(t=>({name:t.name, playlistId:t.playlistId}));
   if (!selected.length) return;
-  const encoded = btoa(JSON.stringify(selected));
+  // ✅ Fix: encodeURIComponent で日本語対応
+  const encoded = btoa(encodeURIComponent(JSON.stringify(selected)));
   const url = `${location.origin}${location.pathname}?import=${encoded}`;
   document.getElementById('share-url-text').textContent = url;
   document.getElementById('share-url-box').style.display = 'block';
 }
 function copyShareUrl() {
-  const text = document.getElementById('share-url-text').textContent;
-  navigator.clipboard.writeText(text).then(() => alert('URLをコピーしました'));
+  navigator.clipboard.writeText(document.getElementById('share-url-text').textContent)
+    .then(()=>alert('URLをコピーしました'));
 }
 
-// ── Import ───────────────────────────────────────────────────────────────────
+// ── Import ────────────────────────────────────────────────────────────────────
 function showImportModal(data) {
   document.getElementById('import-preview').innerHTML =
     `<b style="color:var(--accent)">${data.length}件</b>のプレイリストをインポートします:<br><br>` +
-    data.map(t => `• ${esc(t.name)} <span style="color:var(--muted);font-size:10px">${esc(t.playlistId || '')}</span>`).join('<br>');
+    data.map(t=>`• ${esc(t.name)} <span style="color:var(--muted);font-size:10px">${esc(t.playlistId||'')}</span>`).join('<br>');
   document.getElementById('import-modal').classList.add('open');
 }
 function confirmImport() {
   if (!pendingImport) return closeModal('import-modal');
   pendingImport.forEach(d => {
-    const tab = newTab(d.name || '無題', d.playlistId || '');
+    const tab = newTab(d.name||'無題', d.playlistId||'');
     tabs.push(tab);
-    const pane = document.createElement('div');
-    pane.className = 'pane';
-    pane.id = 'pane-' + tab.id;
+    const pane=document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
     document.getElementById('app').appendChild(pane);
   });
-  saveTabs();
-  syncPlaylistsToGitHub();
-  renderTabBar();
-  pendingImport = null;
-  closeModal('import-modal');
+  saveTabs(); syncPlaylistsToGitHub(); renderTabBar(); pendingImport=null; closeModal('import-modal');
 }
 
-// ── Sync to GitHub ────────────────────────────────────────────────────────────
+// ── Sync ──────────────────────────────────────────────────────────────────────
 async function syncPlaylistsToGitHub() {
-  const playlists = tabs.filter(t => t.playlistId).map(t => ({ id: t.playlistId, title: t.name, autoDownload: false }));
+  const playlists = tabs.filter(t=>t.playlistId).map(t=>({id:t.playlistId, title:t.name, autoDownload:false}));
   if (!playlists.length) return;
   try {
-    await fetch(`${WORKER}/update-playlists`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playlists })
-    });
-  } catch(e) { console.warn('sync:', e); }
+    await fetch(`${WORKER}/update-playlists`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playlists})});
+  } catch(e){console.warn('sync:',e);}
 }
 
 // ── Push ──────────────────────────────────────────────────────────────────────
 async function togglePush() {
-  if (!swReg) { alert('Service Workerが利用できません'); return; }
-  if (pushSub) { await pushSub.unsubscribe(); pushSub = null; updatePushBadge(); return; }
-  const perm = await Notification.requestPermission();
-  if (perm !== 'granted') { alert('通知が許可されていません'); return; }
-  try {
+  if (!swReg){alert('Service Workerが利用できません');return;}
+  if (pushSub){await pushSub.unsubscribe();pushSub=null;updatePushBadge();return;}
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){alert('通知が許可されていません');return;}
+  try{
     await navigator.serviceWorker.ready;
-    pushSub = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(VAPID_PUBLIC_KEY) });
-    const res = await fetch(WORKER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: pushSub.toJSON() }) });
-    if (!res.ok) throw new Error(`Worker: ${res.status}`);
+    pushSub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC_KEY)});
+    const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:pushSub.toJSON()})});
+    if(!res.ok)throw new Error(`${res.status}`);
     updatePushBadge();
-  } catch(e) { alert('登録エラー: ' + e.message); }
+  }catch(e){alert('登録エラー: '+e.message);}
 }
-function updatePushBadge() {
-  const on = !!pushSub;
-  document.getElementById('push-badge').textContent = on ? 'PUSH ON' : 'PUSH OFF';
-  document.getElementById('push-badge').className = on ? 'badge' : 'badge off';
-}
+function updatePushBadge(){const on=!!pushSub;document.getElementById('push-badge').textContent=on?'PUSH ON':'PUSH OFF';document.getElementById('push-badge').className=on?'badge':'badge off';}
 
 // ── Notifications ─────────────────────────────────────────────────────────────
-function toggleNotifPanel() {
-  notifOpen = !notifOpen;
-  document.getElementById('notif-panel').classList.toggle('open', notifOpen);
-  if (notifOpen) renderNotifList();
-}
-function renderNotifList() {
-  const el = document.getElementById('np-list');
-  if (!notifs.length) { el.innerHTML = '<div class="empty" style="padding:20px">通知はありません</div>'; return; }
-  el.innerHTML = notifs.map(n => `
+function toggleNotifPanel(){notifOpen=!notifOpen;document.getElementById('notif-panel').classList.toggle('open',notifOpen);if(notifOpen)renderNotifList();}
+function renderNotifList(){
+  const el=document.getElementById('np-list');
+  if(!notifs.length){el.innerHTML='<div class="empty" style="padding:20px">通知はありません</div>';return;}
+  el.innerHTML=notifs.map(n=>`
     <div class="notif-item">
       <div class="ni-title">${esc(n.title)}</div>
       <div class="ni-body">${esc(n.body)}</div>
-      ${n.url ? `<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>` : ''}
+      ${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}
       <div class="ni-time">${fmtTime(n.time)}</div>
     </div>`).join('');
 }
-function clearNotifs() { notifs = []; localStorage.setItem('yt_notifs', '[]'); updateNotifBadge(); renderNotifList(); }
-function updateNotifBadge() {
-  document.getElementById('notif-badge').textContent = notifs.length + '件';
-  document.getElementById('notif-badge').className = notifs.length ? 'badge warn' : 'badge off';
-}
-navigator.serviceWorker?.addEventListener('message', e => {
-  if (e.data?.type === 'push') {
-    notifs.unshift({ ...e.data, time: new Date().toISOString() });
-    if (notifs.length > 50) notifs = notifs.slice(0, 50);
-    localStorage.setItem('yt_notifs', JSON.stringify(notifs));
-    updateNotifBadge();
-    if (notifOpen) renderNotifList();
-  }
+function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');updateNotifBadge();renderNotifList();}
+function updateNotifBadge(){document.getElementById('notif-badge').textContent=notifs.length+'件';document.getElementById('notif-badge').className=notifs.length?'badge warn':'badge off';}
+navigator.serviceWorker?.addEventListener('message',e=>{
+  if(e.data?.type==='push'){notifs.unshift({...e.data,time:new Date().toISOString()});if(notifs.length>50)notifs=notifs.slice(0,50);localStorage.setItem('yt_notifs',JSON.stringify(notifs));updateNotifBadge();if(notifOpen)renderNotifList();}
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const escAttr = s => String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
-const fmtTime = ts => { const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
-function urlB64ToUint8(b) { const pad='='.repeat((4-b.length%4)%4); const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...raw].map(c=>c.charCodeAt(0))); }
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const escAttr=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+const fmtTime=ts=>{const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
 </script>
 </body>
 </html>
