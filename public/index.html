@@ -31,14 +31,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space 
 .tab-item{flex-shrink:0;height:28px;min-width:120px;max-width:200px;display:flex;align-items:center;gap:5px;padding:0 8px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;position:relative;user-select:none;transition:background .1s}
 .tab-item.active{background:var(--bg);border-bottom-color:var(--bg)}
 .tab-item.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--bg)}
-.tab-icon{font-size:11px;flex-shrink:0;color:var(--muted)}
-.tab-item.active .tab-icon{color:var(--accent)}
+.tab-icon{width:14px;height:14px;flex-shrink:0;opacity:.5}
+.tab-item.active .tab-icon{opacity:1}
 .tab-name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
 .tab-item.active .tab-name{color:var(--text)}
-/* pinned online tab */
-.tab-item.pinned{min-width:90px;max-width:110px;border-color:rgba(127,184,255,.3)}
-.tab-item.pinned.active .tab-icon{color:var(--accent3)}
-.tab-item.pinned.active{border-color:rgba(127,184,255,.4);border-bottom-color:var(--bg)}
+.tab-item.pinned{min-width:90px;max-width:120px}
+.tab-item.pinned .tab-icon{color:var(--accent3)}
 .tab-close{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;padding:0;line-height:1}
 .tab-close:hover{background:rgba(255,68,102,.2);color:var(--danger)}
 .tab-add{flex-shrink:0;width:28px;height:28px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;margin-left:2px}
@@ -64,8 +62,9 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
 .errmsg{font-size:11px;color:var(--danger);margin-top:6px;display:none}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);line-height:2;font-size:12px}
 
-/* ── Playlist setup/videos ── */
+/* ── Playlist ── */
 .setup-box{max-width:480px;margin:40px auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px}
 .setup-box h2{font-size:13px;color:var(--accent);margin-bottom:16px}
 .vid-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -75,51 +74,74 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .video-card:hover{border-color:var(--accent)}
 .video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--bg3)}
 .vc-title{padding:8px;font-size:11px;line-height:1.4;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.empty{text-align:center;padding:60px 20px;color:var(--muted);line-height:2;font-size:12px}
 .loading{text-align:center;padding:40px;color:var(--muted);font-size:12px}
 
-/* ── Schedule (Online tab) ── */
+/* ── Schedule ── */
 #sched-pane{padding:12px}
-.sched-top{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:14px}
-.sched-top-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.sched-top-row h2{font-size:12px;color:var(--accent3);flex:1}
-#sched-json{height:100px;resize:vertical;font-size:11px;margin-bottom:8px;display:none}
+.sched-top{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.sched-top-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sched-top-row h2{font-size:12px;color:var(--accent3);flex:1;display:flex;align-items:center;gap:6px}
+#sched-json{height:100px;resize:vertical;font-size:11px;margin-top:8px;display:none}
 #sched-json.open{display:block}
-.sched-cards{display:flex;flex-direction:column;gap:10px}
-.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;transition:opacity .2s}
+
+/* ── Selection toolbar ── */
+#sel-toolbar{position:sticky;top:0;z-index:10;background:var(--bg3);border:1px solid var(--accent3);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;display:none;align-items:center;gap:8px;flex-wrap:wrap}
+#sel-toolbar.show{display:flex}
+.sel-count{font-size:12px;color:var(--accent3);flex:1}
+.sel-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:var(--r);border:none;cursor:pointer;font-size:11px;font-family:inherit;background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.sel-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sel-btn.danger{border-color:var(--danger);color:var(--danger)}
+.sel-btn.danger:hover{background:var(--danger);color:#fff}
+.sel-btn svg{width:12px;height:12px;fill:currentColor}
+
+/* Mobile selection mode banner */
+#mobile-sel-banner{display:none;background:rgba(127,184,255,.1);border:1px solid rgba(127,184,255,.3);border-radius:var(--r);padding:6px 12px;margin-bottom:8px;font-size:11px;color:var(--accent3);align-items:center;gap:8px}
+#mobile-sel-banner.show{display:flex}
+
+/* ── Schedule cards ── */
+.sched-cards{display:flex;flex-direction:column;gap:8px}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;gap:0;overflow:hidden;transition:border-color .15s,opacity .2s;position:relative}
+.s-card.selected{border-color:var(--accent3);background:rgba(127,184,255,.06)}
 .s-card.notify-on{border-left:3px solid var(--accent3)}
-.s-card.completed{opacity:.4;filter:grayscale(.5)}
-.s-card-head{display:flex;justify-content:space-between;align-items:flex-start}
-.s-subject{font-size:18px;font-weight:bold;color:var(--text)}
-.s-unit{font-size:13px;color:var(--muted);margin-top:2px}
-.s-date{font-size:11px;color:var(--muted)}
-.s-time{font-size:12px;color:var(--text)}
-.s-time .def{font-size:10px;color:var(--muted);margin-left:4px}
+.s-card.completed{opacity:.35;filter:grayscale(.5)}
+/* checkbox column */
+.s-cb-col{display:flex;align-items:flex-start;padding:14px 4px 14px 10px;flex-shrink:0;cursor:pointer}
+.s-checkbox{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.s-card.selected .s-checkbox{background:var(--accent3);border-color:var(--accent3)}
+.s-checkbox svg{width:10px;height:10px;fill:#000;display:none}
+.s-card.selected .s-checkbox svg{display:block}
+/* card body */
+.s-body{flex:1;padding:12px 12px 12px 4px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.s-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.s-subject{font-size:17px;font-weight:bold;color:var(--text)}
+.s-unit{font-size:12px;color:var(--muted);margin-top:2px}
+.s-date{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.s-time{font-size:12px;color:var(--text);display:flex;align-items:center;gap:5px}
+.s-def{font-size:10px;color:var(--muted)}
 .s-badges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.s-rel{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:bold}
-.s-rel.future{background:rgba(127,184,255,.15);color:var(--accent3);border:1px solid rgba(127,184,255,.3)}
-.s-rel.today{background:rgba(127,255,178,.12);color:var(--accent);border:1px solid rgba(127,255,178,.3)}
-.s-rel.past{background:rgba(255,68,102,.1);color:var(--danger);border:1px solid rgba(255,68,102,.2)}
-.s-status{padding:3px 10px;border-radius:999px;font-size:10px}
-.s-status.normal{background:rgba(127,184,255,.12);color:var(--accent3)}
-.s-status.h_class{background:rgba(255,200,50,.12);color:#ffcc33}
-.s-status.s_class{background:rgba(255,68,102,.12);color:var(--danger)}
-.s-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-/* toggle switch */
-.tog-wrap{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
-.tog{position:relative;width:42px;height:22px;display:inline-block;flex-shrink:0}
+.s-rel{padding:2px 9px;border-radius:999px;font-size:11px;font-weight:bold}
+.s-rel.future{background:rgba(127,184,255,.12);color:var(--accent3);border:1px solid rgba(127,184,255,.25)}
+.s-rel.today{background:rgba(127,255,178,.1);color:var(--accent);border:1px solid rgba(127,255,178,.25)}
+.s-rel.past{background:rgba(255,68,102,.08);color:var(--danger);border:1px solid rgba(255,68,102,.2)}
+.s-status{padding:2px 9px;border-radius:999px;font-size:10px}
+.s-status.normal{background:rgba(127,184,255,.1);color:var(--accent3)}
+.s-status.h_class{background:rgba(255,200,50,.1);color:#ffcc33}
+.s-status.s_class{background:rgba(255,68,102,.1);color:var(--danger)}
+.s-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+/* toggle */
+.tog-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer}
+.tog{position:relative;width:38px;height:20px;display:inline-block;flex-shrink:0}
 .tog input{display:none}
 .tog-sl{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:.2s}
-.tog-sl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tog-sl:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
 .tog input:checked+.tog-sl{background:var(--accent3)}
-.tog input:checked+.tog-sl:before{transform:translateX(20px)}
+.tog input:checked+.tog-sl:before{transform:translateX(18px)}
 .tog.done input:checked+.tog-sl{background:var(--accent)}
-.s-memo{font-size:11px}
-.s-link-btn{padding:5px 12px;border-radius:var(--r);background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10b981;cursor:pointer;font-size:11px;font-family:inherit}
-.s-link-btn:hover{background:rgba(16,185,129,.25)}
+.s-link-btn{padding:4px 10px;border-radius:var(--r);background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);color:#10b981;cursor:pointer;font-size:11px;font-family:inherit;display:flex;align-items:center;gap:4px}
+.s-link-btn:hover{background:rgba(16,185,129,.22)}
+.s-link-btn svg{width:11px;height:11px;fill:currentColor}
 .s-notify-info{font-size:10px;color:var(--muted)}
-.s-sep{border:none;border-top:1px solid var(--border);margin:4px 0}
-.s-divider{text-align:center;font-size:10px;color:var(--muted);padding:8px 0;letter-spacing:.05em}
+.s-divider{text-align:center;font-size:10px;color:var(--muted);padding:6px 0;letter-spacing:.05em;border-top:1px solid var(--border);margin:4px 0}
 
 /* ── Panels ── */
 #notif-panel,#recent-panel{position:fixed;top:var(--bar);width:280px;bottom:0;background:var(--bg2);z-index:180;display:flex;flex-direction:column;transition:transform .25s}
@@ -141,8 +163,8 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 .ri-time{font-size:10px;color:var(--muted);margin-top:2px}
 
 /* ── Modals ── */
-#share-modal,#rename-modal,#import-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
-#share-modal.open,#rename-modal.open,#import-modal.open{display:flex}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
 .modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px;width:360px;max-width:90vw}
 .modal-box h3{font-size:12px;color:var(--accent);margin-bottom:14px}
 .share-url{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-size:10px;color:var(--muted);word-break:break-all;margin-bottom:10px;line-height:1.5;max-height:80px;overflow-y:auto}
@@ -165,50 +187,80 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 </div>
 
 <div id="tabbar">
-  <!-- pinned online tab -->
   <div class="tab-item pinned" id="online-tab" onclick="switchToOnline()">
-    <span class="tab-icon">📅</span>
-    <span class="tab-name">オンライン通知</span>
+    <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg>
+    <span class="tab-name">オンライン</span>
   </div>
-  <button class="tab-add" onclick="addTab()" title="新しいタブ">+</button>
+  <button class="tab-add" onclick="addTab()">+</button>
 </div>
 
 <div id="app">
-  <!-- online pane (always present) -->
   <div class="pane" id="pane-online">
     <div id="sched-pane">
       <div class="sched-top">
         <div class="sched-top-row">
-          <h2>📅 オンライン通知</h2>
+          <h2>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--accent3)"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg>
+            オンライン通知
+          </h2>
           <button class="btn-outline btn-sm" onclick="toggleJsonArea()">JSON読込</button>
-          <button class="btn-outline btn-sm" onclick="clearSchedule()">全削除</button>
+          <button class="btn-danger btn-sm" onclick="clearSchedule()">全削除</button>
         </div>
         <textarea id="sched-json" placeholder='{"schedule":[...]} または schedule配列を貼り付け'></textarea>
         <div id="sched-err" class="errmsg"></div>
-        <div id="sched-load-row" style="display:none;margin-top:6px">
+        <div id="sched-load-row" style="display:none;margin-top:6px;gap:6px" class="btn-row">
           <button class="btn-accent btn-sm" onclick="loadScheduleJson()">読み込む</button>
           <button class="btn-outline btn-sm" onclick="toggleJsonArea()">キャンセル</button>
         </div>
+      </div>
+
+      <!-- Mobile selection banner -->
+      <div id="mobile-sel-banner">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        <span id="mobile-sel-text">選択モード</span>
+        <div style="flex:1"></div>
+        <button class="sel-btn danger" onclick="showDeleteConfirm()" id="mb-del-btn" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>削除
+        </button>
+        <button class="sel-btn" onclick="exitSelectionMode()">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          終了
+        </button>
+      </div>
+
+      <!-- Desktop selection toolbar -->
+      <div id="sel-toolbar">
+        <span class="sel-count" id="sel-count-text">0件選択</span>
+        <button class="sel-btn" onclick="selectAll()">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          全選択
+        </button>
+        <button class="sel-btn danger" onclick="showDeleteConfirm()">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          削除
+        </button>
+        <button class="sel-btn" onclick="clearSelection()">
+          <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+          解除
+        </button>
       </div>
       <div class="sched-cards" id="sched-cards"><div class="empty">JSONを読み込んでください</div></div>
     </div>
   </div>
 </div>
 
+<!-- Panels -->
 <div id="notif-panel">
-  <div class="panel-header">
-    <span>通知センター</span>
-    <button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button>
-  </div>
+  <div class="panel-header"><span>通知センター</span><button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button></div>
   <div class="panel-list" id="np-list"></div>
 </div>
-
 <div id="recent-panel">
   <div class="panel-header"><span>最近削除したタブ</span></div>
   <div class="panel-list" id="rp-list"></div>
 </div>
 
-<div id="rename-modal">
+<!-- Modals -->
+<div class="modal-bg" id="rename-modal">
   <div class="modal-box">
     <h3>タブ名を変更</h3>
     <div class="field"><input type="text" id="rename-input" placeholder="タブ名"></div>
@@ -219,7 +271,7 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
-<div id="share-modal">
+<div class="modal-bg" id="share-modal">
   <div class="modal-box">
     <h3>プレイリストを共有</h3>
     <div class="sec">共有するタブを選択</div>
@@ -236,7 +288,7 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
-<div id="import-modal">
+<div class="modal-bg" id="import-modal">
   <div class="modal-box">
     <h3>プレイリストをインポート</h3>
     <div style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:14px" id="import-preview"></div>
@@ -247,120 +299,199 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
   </div>
 </div>
 
+<div class="modal-bg" id="delete-modal">
+  <div class="modal-box">
+    <h3>予定を削除</h3>
+    <p style="font-size:12px;color:var(--text);margin-bottom:16px" id="delete-msg"></p>
+    <div class="btn-row">
+      <button class="btn-danger" onclick="confirmDelete()">削除する</button>
+      <button class="btn-outline" onclick="closeModal('delete-modal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const WORKER = 'https://yt-push-register.a6068376.workers.dev';
 const VAPID_PUBLIC_KEY = 'BFn5vOBnMFz0R3ZlLHsnKb36VU_Lq5q9iQVFmxjH3q1HK3L9VesUlGW8Jw37LoLmWs-yFXAdMHBmeq22wRT2dmc';
 const ONLINE_TAB_ID = 'online';
+const isMobile = () => window.matchMedia('(pointer:coarse)').matches;
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let tabs    = JSON.parse(localStorage.getItem('yt_tabs')   || '[]');
-let recents = JSON.parse(localStorage.getItem('yt_recent') || '[]');
-let notifs  = JSON.parse(localStorage.getItem('yt_notifs') || '[]');
-let schedules = JSON.parse(localStorage.getItem('yt_schedule') || '[]');
+let tabs      = JSON.parse(localStorage.getItem('yt_tabs')    || '[]');
+let recents   = JSON.parse(localStorage.getItem('yt_recent')  || '[]');
+let notifs    = JSON.parse(localStorage.getItem('yt_notifs')  || '[]');
+let schedules = JSON.parse(localStorage.getItem('yt_schedule')|| '[]');
 let activeTabId = localStorage.getItem('yt_active_tab') || ONLINE_TAB_ID;
 let swReg = null, pushSub = null;
 let notifOpen = false, recentOpen = false, renameTabId = null;
-let videoCache = {}, pendingImport = null;
-let jsonAreaOpen = false;
+let videoCache = {}, pendingImport = null, jsonAreaOpen = false;
+
+// Selection state
+let selectedSet = new Set();   // original array indices
+let sortedIndices = [];         // sorted position → original index
+let lastClickedSorted = -1;
+let selectionMode = false;      // mobile selection mode
+let longPressTimer = null;
 
 if (!tabs.length) { tabs = [newTab('プレイリスト 1', '')]; saveTabs(); }
-if (!activeTabId) activeTabId = ONLINE_TAB_ID;
+if (!tabs.find(t => t.id === activeTabId) && activeTabId !== ONLINE_TAB_ID) activeTabId = ONLINE_TAB_ID;
 
 function newTab(name, playlistId) {
   return { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), name, playlistId, createdAt: Date.now() };
 }
-function saveTabs() {
-  localStorage.setItem('yt_tabs', JSON.stringify(tabs));
-  localStorage.setItem('yt_active_tab', activeTabId);
-}
+function saveTabs()    { localStorage.setItem('yt_tabs', JSON.stringify(tabs)); localStorage.setItem('yt_active_tab', activeTabId); }
 function saveRecents() { localStorage.setItem('yt_recent', JSON.stringify(recents)); }
-function saveSchedule() { localStorage.setItem('yt_schedule', JSON.stringify(schedules)); }
+function saveSchedule(){ localStorage.setItem('yt_schedule', JSON.stringify(schedules)); }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
   const params = new URLSearchParams(location.search);
-  const importData = params.get('import');
-  if (importData) {
+  const imp = params.get('import');
+  if (imp) {
     try {
-      const decoded = JSON.parse(decodeURIComponent(atob(importData))); // fix: decodeURIComponent
+      const decoded = JSON.parse(decodeURIComponent(atob(imp)));
       if (Array.isArray(decoded)) { pendingImport = decoded; showImportModal(decoded); }
-    } catch(e) { console.warn('import decode:', e); }
+    } catch {}
     history.replaceState({}, '', location.pathname);
   }
   if ('serviceWorker' in navigator) {
-    try {
-      swReg = await navigator.serviceWorker.register('sw.js');
-      await navigator.serviceWorker.ready;
-      pushSub = await swReg.pushManager.getSubscription();
-      updatePushBadge();
-    } catch(e) { console.error('SW:', e); }
+    try { swReg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready; pushSub = await swReg.pushManager.getSubscription(); updatePushBadge(); } catch {}
   }
   renderTabBar();
   renderApp();
   updateNotifBadge();
   if (schedules.length) renderScheduleCards();
+  setupKeyboard();
 })();
 
-// ── Tab bar ───────────────────────────────────────────────────────────────────
-function renderTabBar() {
-  const bar = document.getElementById('tabbar');
-  const onlineTab = document.getElementById('online-tab');
-  const addBtn = bar.querySelector('.tab-add');
-  bar.querySelectorAll('.tab-item:not(.pinned)').forEach(el => el.remove());
-
-  // Online tab active state
-  onlineTab.classList.toggle('active', activeTabId === ONLINE_TAB_ID);
-
-  tabs.forEach(tab => {
-    const el = document.createElement('div');
-    el.className = 'tab-item' + (tab.id === activeTabId ? ' active' : '');
-    el.dataset.id = tab.id;
-    el.innerHTML = `
-      <span class="tab-icon">${tab.playlistId ? '▶' : '○'}</span>
-      <span class="tab-name">${esc(tab.name)}</span>
-      <button class="tab-close" title="閉じる">×</button>`;
-    el.querySelector('.tab-close').addEventListener('click', e => { e.stopPropagation(); closeTab(tab.id); });
-    el.addEventListener('click', () => switchTab(tab.id));
-    el.addEventListener('dblclick', () => openRename(tab.id));
-    bar.insertBefore(el, addBtn);
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (activeTabId !== ONLINE_TAB_ID) return;
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') { e.preventDefault(); selectAll(); }
+    if ((e.key === 'x' || e.key === 'X') && !e.ctrlKey && !e.metaKey) { if (selectedSet.size > 0) showDeleteConfirm(); }
+    if (e.key === 'Escape') clearSelection();
   });
 }
 
-function renderApp() {
-  const app = document.getElementById('app');
-  // Remove playlist panes (keep online pane)
-  app.querySelectorAll('.pane:not(#pane-online)').forEach(el => el.remove());
+// ── Selection ─────────────────────────────────────────────────────────────────
+function toggleSelect(sortedPos) {
+  const idx = sortedIndices[sortedPos];
+  if (selectedSet.has(idx)) selectedSet.delete(idx);
+  else selectedSet.add(idx);
+  lastClickedSorted = sortedPos;
+  updateSelectionUI();
+}
 
-  tabs.forEach(tab => {
-    if (!document.getElementById('pane-' + tab.id)) {
-      const pane = document.createElement('div');
-      pane.className = 'pane';
-      pane.id = 'pane-' + tab.id;
-      app.appendChild(pane);
-    }
+function shiftSelect(sortedPos) {
+  if (lastClickedSorted === -1) { toggleSelect(sortedPos); return; }
+  const from = Math.min(lastClickedSorted, sortedPos);
+  const to   = Math.max(lastClickedSorted, sortedPos);
+  for (let i = from; i <= to; i++) selectedSet.add(sortedIndices[i]);
+  lastClickedSorted = sortedPos;
+  updateSelectionUI();
+}
+
+function selectAll() {
+  sortedIndices.forEach(idx => selectedSet.add(idx));
+  lastClickedSorted = sortedIndices.length - 1;
+  updateSelectionUI();
+}
+
+function clearSelection() {
+  selectedSet.clear(); lastClickedSorted = -1;
+  if (isMobile()) exitSelectionMode();
+  else updateSelectionUI();
+}
+
+function exitSelectionMode() {
+  selectionMode = false; selectedSet.clear(); lastClickedSorted = -1;
+  updateSelectionUI();
+}
+
+function updateSelectionUI() {
+  const n = selectedSet.size;
+  // Desktop toolbar
+  const tb = document.getElementById('sel-toolbar');
+  if (!isMobile()) {
+    tb.classList.toggle('show', n > 0);
+    document.getElementById('sel-count-text').textContent = n + '件選択中';
+  } else {
+    tb.classList.remove('show');
+  }
+  // Mobile banner
+  const banner = document.getElementById('mobile-sel-banner');
+  if (isMobile()) {
+    banner.classList.toggle('show', selectionMode);
+    document.getElementById('mobile-sel-text').textContent = selectionMode ? n + '件選択中' : '選択モード';
+    const delBtn = document.getElementById('mb-del-btn');
+    delBtn.style.display = (selectionMode && n > 0) ? 'flex' : 'none';
+  } else {
+    banner.classList.remove('show');
+  }
+  // Update card visual states
+  document.querySelectorAll('.s-card[data-sorted]').forEach(card => {
+    const si = parseInt(card.dataset.sorted);
+    const origIdx = sortedIndices[si];
+    card.classList.toggle('selected', selectedSet.has(origIdx));
   });
-  updateActivePane();
 }
 
-function updateActivePane() {
-  document.querySelectorAll('.pane').forEach(el => {
-    const isActive = el.id === 'pane-' + activeTabId || (activeTabId === ONLINE_TAB_ID && el.id === 'pane-online');
-    el.classList.toggle('active', isActive);
-    if (isActive && el.id !== 'pane-online' && !el.children.length) {
-      const tab = tabs.find(t => t.id === activeTabId);
-      if (tab) renderPane(tab);
-    }
-  });
+// Mobile: long press → enter selection mode
+function onCardTouchStart(e, sortedPos) {
+  longPressTimer = setTimeout(() => {
+    longPressTimer = null;
+    selectionMode = true;
+    selectedSet.clear();
+    selectedSet.add(sortedIndices[sortedPos]);
+    lastClickedSorted = sortedPos;
+    navigator.vibrate?.(30);
+    updateSelectionUI();
+  }, 500);
+}
+function onCardTouchEnd(e) {
+  clearTimeout(longPressTimer); longPressTimer = null;
+}
+function onCardTouchMove(e) {
+  clearTimeout(longPressTimer); longPressTimer = null;
 }
 
-// ── Online tab ────────────────────────────────────────────────────────────────
-function switchToOnline() {
-  activeTabId = ONLINE_TAB_ID;
-  saveTabs();
-  renderTabBar();
-  updateActivePane();
+// Card tap/click
+function onCardClick(e, sortedPos) {
+  if (isMobile()) {
+    if (!selectionMode) return; // normal tap
+    e.preventDefault();
+    toggleSelect(sortedPos);
+  }
+  // desktop: click on body does nothing for selection
 }
 
+// Checkbox click
+function onCheckboxClick(e, sortedPos) {
+  e.stopPropagation();
+  if (e.shiftKey) shiftSelect(sortedPos);
+  else toggleSelect(sortedPos);
+}
+
+// Delete
+function showDeleteConfirm() {
+  const n = selectedSet.size;
+  if (!n) return;
+  document.getElementById('delete-msg').textContent = `${n}件の予定を削除しますか？この操作は元に戻せません。`;
+  document.getElementById('delete-modal').classList.add('open');
+}
+function confirmDelete() {
+  const toDelete = [...selectedSet].sort((a,b)=>b-a);
+  toDelete.forEach(idx => schedules.splice(idx, 1));
+  saveSchedule();
+  clearSelection();
+  closeModal('delete-modal');
+  renderScheduleCards();
+}
+
+// ── Schedule JSON ─────────────────────────────────────────────────────────────
 function toggleJsonArea() {
   jsonAreaOpen = !jsonAreaOpen;
   const ta = document.getElementById('sched-json');
@@ -378,356 +509,323 @@ function loadScheduleJson() {
     let input = JSON.parse(raw);
     let arr = Array.isArray(input) ? input : (input.schedule || []);
     if (!arr.length) throw new Error('scheduleが空です');
-
     let added = 0, skipped = 0;
     arr.forEach(s => {
       s = fillDefaultTime(s);
-      // 重複チェック
-      const dup = schedules.find(x =>
-        x.eventId === s.eventId ||
-        (x.subject === s.subject && x.unit === s.unit && x.date === s.date && x.period === s.period && x.status === s.status)
-      );
+      const dup = schedules.find(x => x.eventId === s.eventId ||
+        (x.subject===s.subject && x.unit===s.unit && x.date===s.date && x.period===s.period && x.status===s.status));
       if (dup) { skipped++; return; }
-      schedules.push(s);
-      added++;
+      schedules.push(s); added++;
     });
     saveSchedule();
     toggleJsonArea();
     document.getElementById('sched-json').value = '';
     renderScheduleCards();
-    if (skipped) errEl.textContent = `${added}件追加、${skipped}件重複スキップ`; errEl.style.display = 'block';
-  } catch(e) {
-    errEl.textContent = 'JSONエラー: ' + e.message; errEl.style.display = 'block';
-  }
+    if (skipped) { errEl.textContent = `${added}件追加、${skipped}件重複スキップ`; errEl.style.display = 'block'; }
+  } catch(e) { errEl.textContent = 'JSONエラー: ' + e.message; errEl.style.display = 'block'; }
 }
 
 function clearSchedule() {
   if (!confirm('全予定を削除しますか？')) return;
-  schedules = []; saveSchedule(); renderScheduleCards();
+  schedules = []; saveSchedule(); selectedSet.clear(); renderScheduleCards();
 }
 
 function fillDefaultTime(s) {
   if (!s.startTime) {
-    if (s.period === 1) { s.startTime = '19:30'; s.endTime = s.endTime || '21:00'; s.isDefaultTime = true; }
-    else if (s.period === 2) { s.startTime = '20:40'; s.endTime = s.endTime || '23:00'; s.isDefaultTime = true; }
-    else { s.startTime = '00:00'; s.isDefaultTime = true; }
+    if (s.period===1)      { s.startTime='19:30'; s.endTime=s.endTime||'21:00'; s.isDefaultTime=true; }
+    else if (s.period===2) { s.startTime='20:40'; s.endTime=s.endTime||'23:00'; s.isDefaultTime=true; }
+    else                   { s.startTime='00:00'; s.isDefaultTime=true; }
   } else {
     s.isDefaultTime = false;
     if (!s.endTime) s.endTime = calcEnd(s.startTime);
   }
   return s;
 }
-
 function calcEnd(start) {
-  let [h, m] = start.split(':').map(Number);
-  m += 90; h += Math.floor(m / 60); m %= 60;
-  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+  let [h,m] = start.split(':').map(Number); m+=90; h+=Math.floor(m/60); m%=60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
 }
-
 function getRelative(dateStr) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const target = new Date(dateStr); target.setHours(0,0,0,0);
-  const diff = Math.floor((target - today) / 86400000);
-  if (diff === 0) return { text:'今日', cls:'today' };
-  if (diff === 1) return { text:'明日', cls:'future' };
-  if (diff === 2) return { text:'明後日', cls:'future' };
-  if (diff === -1) return { text:'昨日', cls:'past' };
-  if (diff === -2) return { text:'一昨日', cls:'past' };
-  if (diff > 2) return { text:`${diff}日後`, cls:'future' };
-  return { text:`${Math.abs(diff)}日前`, cls:'past' };
+  const today=new Date(); today.setHours(0,0,0,0);
+  const target=new Date(dateStr); target.setHours(0,0,0,0);
+  const diff=Math.floor((target-today)/86400000);
+  if(diff===0) return{text:'今日',cls:'today'};
+  if(diff===1) return{text:'明日',cls:'future'};
+  if(diff===2) return{text:'明後日',cls:'future'};
+  if(diff===-1) return{text:'昨日',cls:'past'};
+  if(diff===-2) return{text:'一昨日',cls:'past'};
+  if(diff>2) return{text:`${diff}日後`,cls:'future'};
+  return{text:`${Math.abs(diff)}日前`,cls:'past'};
 }
 
 function renderScheduleCards() {
   const container = document.getElementById('sched-cards');
-  if (!schedules.length) { container.innerHTML = '<div class="empty">予定がありません</div>'; return; }
-
+  if (!schedules.length) { container.innerHTML='<div class="empty">予定がありません</div>'; sortedIndices=[]; updateSelectionUI(); return; }
   const now = new Date();
-  const sorted = [...schedules].sort((a, b) => {
-    const ta = new Date(a.date + 'T' + (a.startTime || '00:00'));
-    const tb = new Date(b.date + 'T' + (b.startTime || '00:00'));
-    const aPast = ta < now, bPast = tb < now;
-    if (aPast !== bPast) return aPast ? 1 : -1;
-    if (!aPast && !bPast) return ta - tb;
-    return tb - ta;
+  // Build sorted list with original indices
+  const withIdx = schedules.map((s,i) => ({s,i}));
+  withIdx.sort((a,b) => {
+    const ta=new Date(a.s.date+'T'+(a.s.startTime||'00:00'));
+    const tb=new Date(b.s.date+'T'+(b.s.startTime||'00:00'));
+    const ap=ta<now, bp=tb<now;
+    if(ap!==bp) return ap?1:-1;
+    if(!ap&&!bp) return ta-tb;
+    return tb-ta;
   });
+  sortedIndices = withIdx.map(x=>x.i);
 
-  let html = '';
-  let pastStarted = false;
-  sorted.forEach(s => {
-    const idx = schedules.findIndex(x => x.eventId === s.eventId || (x.subject === s.subject && x.date === s.date && x.period === s.period));
-    const rel = getRelative(s.date);
-    const ta = new Date(s.date + 'T' + (s.startTime || '00:00'));
-    if (!pastStarted && ta < now) {
-      pastStarted = true;
-      html += '<div class="s-divider">─── 過去の予定 ───</div>';
-    }
-    const link = s.link?.url || s.zoomUrl || '';
-    html += `
-    <div class="s-card ${s.notify?'notify-on':''} ${s.completed?'completed':''}" id="sc-${idx}">
-      <div class="s-card-head">
-        <div>
-          <div class="s-subject">${esc(s.subject||'')}</div>
-          <div class="s-unit">${esc(s.unit||'')}</div>
+  let html='', pastStarted=false;
+  withIdx.forEach(({s,i}, sortedPos) => {
+    const rel=getRelative(s.date);
+    const ta=new Date(s.date+'T'+(s.startTime||'00:00'));
+    if(!pastStarted && ta<now) { pastStarted=true; html+='<div class="s-divider">─── 過去の予定 ───</div>'; }
+    const link=s.link?.url||s.zoomUrl||'';
+    const selected=selectedSet.has(i)?'selected':'';
+    html+=`
+    <div class="s-card ${s.notify?'notify-on':''} ${s.completed?'completed':''} ${selected}" data-sorted="${sortedPos}"
+      onclick="onCardClick(event,${sortedPos})"
+      ontouchstart="onCardTouchStart(event,${sortedPos})"
+      ontouchend="onCardTouchEnd(event)"
+      ontouchmove="onCardTouchMove(event)">
+      <div class="s-cb-col" onclick="onCheckboxClick(event,${sortedPos})">
+        <div class="s-checkbox">
+          <svg viewBox="0 0 12 12"><path d="M1 6l3.5 3.5L11 2"/></svg>
         </div>
-        <label class="tog-wrap">
-          <span>通知</span>
-          <label class="tog">
-            <input type="checkbox" ${s.notify?'checked':''} onchange="schedToggle(${idx},'notify',this.checked)">
-            <span class="tog-sl"></span>
+      </div>
+      <div class="s-body">
+        <div class="s-head">
+          <div>
+            <div class="s-subject">${esc(s.subject||'')}</div>
+            <div class="s-unit">${esc(s.unit||'')}</div>
+          </div>
+          <label class="tog-wrap" onclick="event.stopPropagation()">
+            <span>通知</span>
+            <label class="tog"><input type="checkbox" ${s.notify?'checked':''} onchange="schedSet(${i},'notify',this.checked)"><span class="tog-sl"></span></label>
           </label>
-        </label>
-      </div>
-      <div class="s-date">${esc(s.date||'')} ・ ${esc(s.weekday||'')} ・ ${esc(s.timeSlot||'')}</div>
-      <div class="s-time">🕒 ${esc(s.startTime||'')} 〜 ${esc(s.endTime||'')}${s.isDefaultTime?'<span class="def">(デフォルト)</span>':''}</div>
-      <div class="s-badges">
-        <span class="s-rel ${rel.cls}">${rel.text}</span>
-        <span class="s-status ${s.status||'normal'}">${esc(s.statusName||'通常授業')}</span>
-        ${link ? `<button class="s-link-btn" onclick="openLink('${link}')">参加/開く</button>` : ''}
-      </div>
-      ${s.notifyBefore?.length ? `<div class="s-notify-info">通知: ${s.notifyBefore.join(', ')}分前</div>` : ''}
-      <div class="s-memo">
-        <input type="text" value="${esc(s.memo||'')}" placeholder="メモ" onchange="schedToggle(${idx},'memo',this.value)">
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <label class="tog-wrap">
-          <span>完了</span>
-          <label class="tog done">
-            <input type="checkbox" ${s.completed?'checked':''} onchange="schedToggle(${idx},'completed',this.checked)">
-            <span class="tog-sl"></span>
+        </div>
+        <div class="s-date">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--muted)"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+          ${esc(s.date||'')} ${esc(s.weekday||'')} ${esc(s.timeSlot||'')}
+        </div>
+        <div class="s-time">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--muted)"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7h1.5z"/></svg>
+          ${esc(s.startTime||'')} ~ ${esc(s.endTime||'')}
+          ${s.isDefaultTime?'<span class="s-def">(デフォルト)</span>':''}
+        </div>
+        <div class="s-badges">
+          <span class="s-rel ${rel.cls}">${rel.text}</span>
+          <span class="s-status ${s.status||'normal'}">${esc(s.statusName||'通常授業')}</span>
+          ${link?`<button class="s-link-btn" onclick="event.stopPropagation();window.open('${link}','_blank')">
+            <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            参加/開く
+          </button>`:''}
+        </div>
+        ${s.notifyBefore?.length?`<div class="s-notify-info">通知: ${s.notifyBefore.join(', ')}分前</div>`:''}
+        <div onclick="event.stopPropagation()">
+          <input type="text" value="${esc(s.memo||'')}" placeholder="メモ" onchange="schedSet(${i},'memo',this.value)">
+        </div>
+        <div class="s-row" onclick="event.stopPropagation()">
+          <label class="tog-wrap">
+            <span>完了</span>
+            <label class="tog done"><input type="checkbox" ${s.completed?'checked':''} onchange="schedSet(${i},'completed',this.checked)"><span class="tog-sl"></span></label>
           </label>
-        </label>
+        </div>
       </div>
     </div>`;
   });
   container.innerHTML = html;
+  updateSelectionUI();
 }
 
-function schedToggle(idx, key, val) {
-  if (idx < 0 || idx >= schedules.length) return;
-  schedules[idx][key] = val;
+function schedSet(origIdx, key, val) {
+  if (origIdx<0||origIdx>=schedules.length) return;
+  schedules[origIdx][key] = val;
   saveSchedule();
-  renderScheduleCards();
+  if (key==='notify'||key==='completed') renderScheduleCards();
 }
 
-function openLink(url) { window.open(url, '_blank'); }
-
-// ── Playlist panes ────────────────────────────────────────────────────────────
-function renderPane(tab) {
-  const pane = document.getElementById('pane-' + tab.id);
-  if (!pane) return;
-  tab.playlistId ? renderVideos(pane, tab) : renderSetup(pane, tab);
-}
-
-function renderSetup(pane, tab) {
-  pane.innerHTML = `
-    <div class="setup-box">
-      <h2>プレイリストを設定</h2>
-      <div class="field"><label>タブ名</label><input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名"></div>
-      <div class="field"><label>プレイリストURL または ID</label><input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://www.youtube.com/playlist?list=PL..."></div>
-      <div class="errmsg" id="se-${tab.id}"></div>
-      <div class="btn-row">
-        <button class="btn-accent" onclick="saveTabPlaylist('${tab.id}')">保存</button>
-        ${tab.playlistId ? `<button class="btn-outline" onclick="cancelSetup('${tab.id}')">キャンセル</button>` : ''}
-      </div>
-    </div>`;
-}
-
-function cancelSetup(tabId) {
-  const tab = tabs.find(t => t.id === tabId);
-  const pane = document.getElementById('pane-' + tabId);
-  if (tab?.playlistId && pane) renderVideos(pane, tab);
-}
-
-function saveTabPlaylist(tabId) {
-  const raw = document.getElementById(`sp-${tabId}`)?.value.trim() || '';
-  const name = document.getElementById(`sn-${tabId}`)?.value.trim() || '';
-  const errEl = document.getElementById(`se-${tabId}`);
-  const m = raw.match(/[?&]list=([A-Za-z0-9_-]+)/);
-  const plId = m ? m[1] : raw;
-  if (!plId) { if (errEl) { errEl.textContent='URLまたはIDを入力してください'; errEl.style.display='block'; } return; }
-  const tab = tabs.find(t => t.id === tabId);
-  if (!tab) return;
-  tab.playlistId = plId; if (name) tab.name = name;
-  delete videoCache[tabId]; saveTabs(); syncPlaylistsToGitHub(); renderTabBar(); renderPane(tab);
-}
-
-async function renderVideos(pane, tab) {
-  pane.innerHTML = `
-    <div class="vid-header">
-      <span style="font-size:12px;color:var(--accent)">${esc(tab.name)}</span>
-      <span class="vid-count" id="vc-${tab.id}"></span>
-      <div style="flex:1"></div>
-      <button class="btn-outline btn-sm" onclick="editTabPlaylist('${tab.id}')">設定</button>
-      <button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button>
-    </div>
-    <div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
-  if (videoCache[tab.id]) { renderGrid(tab.id, videoCache[tab.id]); return; }
-  try {
-    const res = await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    videoCache[tab.id] = data; renderGrid(tab.id, data);
-  } catch(e) {
-    const el = document.getElementById(`vg-${tab.id}`);
-    if (el) el.innerHTML = `<div class="empty">エラー: ${esc(e.message)}</div>`;
-  }
-}
-
-function renderGrid(tabId, videos) {
-  const vc = document.getElementById(`vc-${tabId}`), vg = document.getElementById(`vg-${tabId}`);
-  if (vc) vc.textContent = videos.length + '本';
-  if (!vg) return;
-  if (!videos.length) { vg.innerHTML = '<div class="empty">動画がありません</div>'; return; }
-  vg.className = 'video-grid';
-  vg.innerHTML = videos.map(v => `
-    <div class="video-card" onclick="playVideo('${v.id}','${escAttr(v.title)}')">
-      <img src="${v.thumb}" loading="lazy" onerror="this.style.background='var(--bg3)'">
-      <div class="vc-title">${esc(v.title)}</div>
-    </div>`).join('');
-}
-
-function playVideo(id, title) { location.href = `player.html?v=${id}&t=${encodeURIComponent(title)}`; }
-function editTabPlaylist(tabId) { const tab=tabs.find(t=>t.id===tabId); const pane=document.getElementById('pane-'+tabId); if(tab&&pane) renderSetup(pane,tab); }
-async function refreshTab(tabId) { delete videoCache[tabId]; const tab=tabs.find(t=>t.id===tabId); const pane=document.getElementById('pane-'+tabId); if(tab&&pane) renderVideos(pane,tab); }
-
-// ── Tab management ────────────────────────────────────────────────────────────
-function switchTab(id) {
-  activeTabId = id; saveTabs();
-  document.getElementById('online-tab').classList.remove('active');
-  document.querySelectorAll('.tab-item:not(.pinned)').forEach(el => el.classList.toggle('active', el.dataset.id === id));
-  document.querySelectorAll('.pane').forEach(el => {
-    const active = el.id === 'pane-' + id;
-    el.classList.toggle('active', active);
-    if (active && !el.children.length) { const tab=tabs.find(t=>t.id===id); if(tab) renderPane(tab); }
+// ── Tab system ────────────────────────────────────────────────────────────────
+function renderTabBar() {
+  const bar=document.getElementById('tabbar'), addBtn=bar.querySelector('.tab-add');
+  bar.querySelectorAll('.tab-item:not(.pinned)').forEach(el=>el.remove());
+  document.getElementById('online-tab').classList.toggle('active', activeTabId===ONLINE_TAB_ID);
+  tabs.forEach(tab=>{
+    const el=document.createElement('div');
+    el.className='tab-item'+(tab.id===activeTabId?' active':'');
+    el.dataset.id=tab.id;
+    el.innerHTML=`
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="currentColor"><path d="${tab.playlistId?'M8 5v14l11-7z':'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'}"/></svg>
+      <span class="tab-name">${esc(tab.name)}</span>
+      <button class="tab-close">×</button>`;
+    el.querySelector('.tab-close').addEventListener('click',e=>{e.stopPropagation();closeTab(tab.id);});
+    el.addEventListener('click',()=>switchTab(tab.id));
+    el.addEventListener('dblclick',()=>openRename(tab.id));
+    bar.insertBefore(el,addBtn);
   });
 }
 
-function addTab() {
-  const tab = newTab('新しいタブ', ''); tabs.push(tab); activeTabId = tab.id; saveTabs();
-  const pane = document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
-  document.getElementById('app').appendChild(pane);
-  renderSetup(pane, tab); renderTabBar(); updateActivePane();
-}
-
-function closeTab(id) {
-  if (tabs.length === 1) return;
-  const idx = tabs.findIndex(t => t.id === id); const tab = tabs[idx];
-  recents.unshift({...tab, deletedAt: Date.now()}); if (recents.length > 20) recents=recents.slice(0,20); saveRecents();
-  tabs.splice(idx, 1); document.getElementById('pane-'+id)?.remove();
-  if (activeTabId === id) activeTabId = tabs[Math.min(idx, tabs.length-1)].id;
-  saveTabs(); syncPlaylistsToGitHub(); renderTabBar();
+function renderApp() {
+  const app=document.getElementById('app');
+  app.querySelectorAll('.pane:not(#pane-online)').forEach(el=>el.remove());
+  tabs.forEach(tab=>{ if(!document.getElementById('pane-'+tab.id)){ const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;app.appendChild(p); }});
   updateActivePane();
 }
 
+function updateActivePane() {
+  document.querySelectorAll('.pane').forEach(el=>{
+    const isOnline=activeTabId===ONLINE_TAB_ID&&el.id==='pane-online';
+    const isTab=el.id==='pane-'+activeTabId;
+    const active=isOnline||isTab;
+    el.classList.toggle('active',active);
+    if(active&&el.id!=='pane-online'&&!el.children.length){const tab=tabs.find(t=>t.id===activeTabId);if(tab)renderPane(tab);}
+  });
+}
+
+function switchToOnline(){activeTabId=ONLINE_TAB_ID;saveTabs();renderTabBar();updateActivePane();}
+
+function switchTab(id){
+  activeTabId=id;saveTabs();
+  document.getElementById('online-tab').classList.remove('active');
+  document.querySelectorAll('.tab-item:not(.pinned)').forEach(el=>el.classList.toggle('active',el.dataset.id===id));
+  document.querySelectorAll('.pane').forEach(el=>{
+    const active=el.id==='pane-'+id;el.classList.toggle('active',active);
+    if(active&&!el.children.length){const tab=tabs.find(t=>t.id===id);if(tab)renderPane(tab);}
+  });
+}
+
+function addTab(){
+  const tab=newTab('新しいタブ','');tabs.push(tab);activeTabId=tab.id;saveTabs();
+  const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;document.getElementById('app').appendChild(p);
+  renderSetup(p,tab);renderTabBar();updateActivePane();
+}
+
+function closeTab(id){
+  if(tabs.length===1)return;
+  const idx=tabs.findIndex(t=>t.id===id),tab=tabs[idx];
+  recents.unshift({...tab,deletedAt:Date.now()});if(recents.length>20)recents=recents.slice(0,20);saveRecents();
+  tabs.splice(idx,1);document.getElementById('pane-'+id)?.remove();
+  if(activeTabId===id)activeTabId=tabs[Math.min(idx,tabs.length-1)].id;
+  saveTabs();syncPlaylistsToGitHub();renderTabBar();updateActivePane();
+}
+
+// ── Playlist panes ────────────────────────────────────────────────────────────
+function renderPane(tab){const p=document.getElementById('pane-'+tab.id);if(!p)return;tab.playlistId?renderVideos(p,tab):renderSetup(p,tab);}
+
+function renderSetup(pane,tab){
+  pane.innerHTML=`<div class="setup-box"><h2>プレイリストを設定</h2>
+    <div class="field"><label>タブ名</label><input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名"></div>
+    <div class="field"><label>プレイリストURL または ID</label><input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://www.youtube.com/playlist?list=PL..."></div>
+    <div class="errmsg" id="se-${tab.id}"></div>
+    <div class="btn-row">
+      <button class="btn-accent" onclick="saveTabPlaylist('${tab.id}')">保存</button>
+      ${tab.playlistId?`<button class="btn-outline" onclick="cancelSetup('${tab.id}')">キャンセル</button>`:''}
+    </div></div>`;
+}
+
+function cancelSetup(tabId){const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab?.playlistId&&p)renderVideos(p,tab);}
+
+function saveTabPlaylist(tabId){
+  const raw=document.getElementById(`sp-${tabId}`)?.value.trim()||'';
+  const name=document.getElementById(`sn-${tabId}`)?.value.trim()||'';
+  const errEl=document.getElementById(`se-${tabId}`);
+  const m=raw.match(/[?&]list=([A-Za-z0-9_-]+)/);const plId=m?m[1]:raw;
+  if(!plId){if(errEl){errEl.textContent='URLまたはIDを入力してください';errEl.style.display='block';}return;}
+  const tab=tabs.find(t=>t.id===tabId);if(!tab)return;
+  tab.playlistId=plId;if(name)tab.name=name;delete videoCache[tabId];saveTabs();syncPlaylistsToGitHub();renderTabBar();renderPane(tab);
+}
+
+async function renderVideos(pane,tab){
+  pane.innerHTML=`<div class="vid-header">
+    <span style="font-size:12px;color:var(--accent)">${esc(tab.name)}</span>
+    <span class="vid-count" id="vc-${tab.id}"></span><div style="flex:1"></div>
+    <button class="btn-outline btn-sm" onclick="editTabPlaylist('${tab.id}')">設定</button>
+    <button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button>
+  </div><div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
+  if(videoCache[tab.id]){renderGrid(tab.id,videoCache[tab.id]);return;}
+  try{
+    const res=await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
+    const data=await res.json();if(data.error)throw new Error(data.error);
+    videoCache[tab.id]=data;renderGrid(tab.id,data);
+  }catch(e){const el=document.getElementById(`vg-${tab.id}`);if(el)el.innerHTML=`<div class="empty">エラー: ${esc(e.message)}</div>`;}
+}
+
+function renderGrid(tabId,videos){
+  const vc=document.getElementById(`vc-${tabId}`),vg=document.getElementById(`vg-${tabId}`);
+  if(vc)vc.textContent=videos.length+'本';if(!vg)return;
+  if(!videos.length){vg.innerHTML='<div class="empty">動画がありません</div>';return;}
+  vg.className='video-grid';
+  vg.innerHTML=videos.map(v=>`<div class="video-card" onclick="location.href='player.html?v=${v.id}&t=${encodeURIComponent(v.title)}'">
+    <img src="${v.thumb}" loading="lazy" onerror="this.style.background='var(--bg3)'">
+    <div class="vc-title">${esc(v.title)}</div></div>`).join('');
+}
+
+function editTabPlaylist(tabId){const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab&&p)renderSetup(p,tab);}
+async function refreshTab(tabId){delete videoCache[tabId];const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab&&p)renderVideos(p,tab);}
+
 // ── Rename ────────────────────────────────────────────────────────────────────
-function openRename(id) {
-  renameTabId = id; const tab=tabs.find(t=>t.id===id);
-  document.getElementById('rename-input').value = tab?.name || '';
-  document.getElementById('rename-modal').classList.add('open');
-  setTimeout(()=>{ document.getElementById('rename-input').focus(); document.getElementById('rename-input').select(); },50);
-}
-function confirmRename() {
-  const name = document.getElementById('rename-input').value.trim();
-  if (!name || !renameTabId) return closeModal('rename-modal');
-  const tab = tabs.find(t=>t.id===renameTabId); if(tab){tab.name=name;saveTabs();renderTabBar();}
-  closeModal('rename-modal');
-}
-document.getElementById('rename-input').addEventListener('keydown', e => { if(e.key==='Enter')confirmRename(); if(e.key==='Escape')closeModal('rename-modal'); });
+function openRename(id){renameTabId=id;const tab=tabs.find(t=>t.id===id);document.getElementById('rename-input').value=tab?.name||'';document.getElementById('rename-modal').classList.add('open');setTimeout(()=>{document.getElementById('rename-input').focus();document.getElementById('rename-input').select();},50);}
+function confirmRename(){const name=document.getElementById('rename-input').value.trim();if(!name||!renameTabId)return closeModal('rename-modal');const tab=tabs.find(t=>t.id===renameTabId);if(tab){tab.name=name;saveTabs();renderTabBar();}closeModal('rename-modal');}
+document.getElementById('rename-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmRename();if(e.key==='Escape')closeModal('rename-modal');});
 
 // ── Recents ───────────────────────────────────────────────────────────────────
-function toggleRecent() {
-  recentOpen = !recentOpen;
-  document.getElementById('recent-panel').classList.toggle('open', recentOpen);
-  if (recentOpen) renderRecentList();
+function toggleRecent(){recentOpen=!recentOpen;document.getElementById('recent-panel').classList.toggle('open',recentOpen);if(recentOpen)renderRecentList();}
+function renderRecentList(){
+  const el=document.getElementById('rp-list');
+  if(!recents.length){el.innerHTML='<div class="empty" style="padding:20px">削除したタブはありません</div>';return;}
+  el.innerHTML=recents.map((r,i)=>`<div class="recent-item"><div class="ri-info"><div class="ri-name">${esc(r.name)}</div><div class="ri-pl">${esc(r.playlistId||'未設定')}</div><div class="ri-time">${fmtTime(r.deletedAt)}</div></div><button class="btn-accent btn-sm" onclick="restoreTab(${i})">復元</button></div>`).join('');
 }
-function renderRecentList() {
-  const el = document.getElementById('rp-list');
-  if (!recents.length) { el.innerHTML='<div class="empty" style="padding:20px">削除したタブはありません</div>'; return; }
-  el.innerHTML = recents.map((r,i) => `
-    <div class="recent-item">
-      <div class="ri-info">
-        <div class="ri-name">${esc(r.name)}</div>
-        <div class="ri-pl">${esc(r.playlistId||'未設定')}</div>
-        <div class="ri-time">${fmtTime(r.deletedAt)}</div>
-      </div>
-      <button class="btn-accent btn-sm" onclick="restoreTab(${i})">復元</button>
-    </div>`).join('');
-}
-function restoreTab(idx) {
-  const r=recents[idx]; if(!r)return;
-  const tab={...newTab(r.name, r.playlistId)};
-  tabs.push(tab); recents.splice(idx,1); saveRecents(); saveTabs(); syncPlaylistsToGitHub();
-  const pane=document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
-  document.getElementById('app').appendChild(pane);
-  renderTabBar(); renderRecentList();
+function restoreTab(idx){
+  const r=recents[idx];if(!r)return;
+  const tab={...newTab(r.name,r.playlistId)};tabs.push(tab);recents.splice(idx,1);saveRecents();saveTabs();syncPlaylistsToGitHub();
+  const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;document.getElementById('app').appendChild(p);
+  renderTabBar();renderRecentList();
 }
 
-// ── Share (fix: encodeURIComponent for Unicode) ───────────────────────────────
-function openShare() {
-  const box = document.getElementById('share-checks');
-  box.innerHTML = tabs.map(t=>`
-    <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;cursor:pointer">
-      <input type="checkbox" value="${t.id}" checked style="accent-color:var(--accent)">
-      <span>${esc(t.name)}</span>
-      <span style="font-size:10px;color:var(--muted)">${t.playlistId||'未設定'}</span>
-    </label>`).join('');
+// ── Share (Unicode fix) ───────────────────────────────────────────────────────
+function openShare(){
+  document.getElementById('share-checks').innerHTML=tabs.map(t=>`<label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;cursor:pointer"><input type="checkbox" value="${t.id}" checked style="accent-color:var(--accent)"><span>${esc(t.name)}</span><span style="font-size:10px;color:var(--muted)">${t.playlistId||'未設定'}</span></label>`).join('');
   document.getElementById('share-url-box').style.display='none';
   document.getElementById('share-modal').classList.add('open');
 }
-function generateShareUrl() {
-  const checked = [...document.querySelectorAll('#share-checks input:checked')].map(el=>el.value);
-  const selected = tabs.filter(t=>checked.includes(t.id)).map(t=>({name:t.name, playlistId:t.playlistId}));
-  if (!selected.length) return;
-  // ✅ Fix: encodeURIComponent で日本語対応
-  const encoded = btoa(encodeURIComponent(JSON.stringify(selected)));
-  const url = `${location.origin}${location.pathname}?import=${encoded}`;
-  document.getElementById('share-url-text').textContent = url;
-  document.getElementById('share-url-box').style.display = 'block';
+function generateShareUrl(){
+  const checked=[...document.querySelectorAll('#share-checks input:checked')].map(el=>el.value);
+  const selected=tabs.filter(t=>checked.includes(t.id)).map(t=>({name:t.name,playlistId:t.playlistId}));
+  if(!selected.length)return;
+  const encoded=btoa(encodeURIComponent(JSON.stringify(selected)));
+  const url=`${location.origin}${location.pathname}?import=${encoded}`;
+  document.getElementById('share-url-text').textContent=url;
+  document.getElementById('share-url-box').style.display='block';
 }
-function copyShareUrl() {
-  navigator.clipboard.writeText(document.getElementById('share-url-text').textContent)
-    .then(()=>alert('URLをコピーしました'));
-}
+function copyShareUrl(){navigator.clipboard.writeText(document.getElementById('share-url-text').textContent).then(()=>alert('URLをコピーしました'));}
 
 // ── Import ────────────────────────────────────────────────────────────────────
-function showImportModal(data) {
-  document.getElementById('import-preview').innerHTML =
-    `<b style="color:var(--accent)">${data.length}件</b>のプレイリストをインポートします:<br><br>` +
-    data.map(t=>`• ${esc(t.name)} <span style="color:var(--muted);font-size:10px">${esc(t.playlistId||'')}</span>`).join('<br>');
+function showImportModal(data){
+  document.getElementById('import-preview').innerHTML=`<b style="color:var(--accent)">${data.length}件</b>のプレイリストをインポートします:<br><br>`+data.map(t=>`• ${esc(t.name)} <span style="color:var(--muted);font-size:10px">${esc(t.playlistId||'')}</span>`).join('<br>');
   document.getElementById('import-modal').classList.add('open');
 }
-function confirmImport() {
-  if (!pendingImport) return closeModal('import-modal');
-  pendingImport.forEach(d => {
-    const tab = newTab(d.name||'無題', d.playlistId||'');
-    tabs.push(tab);
-    const pane=document.createElement('div'); pane.className='pane'; pane.id='pane-'+tab.id;
-    document.getElementById('app').appendChild(pane);
-  });
-  saveTabs(); syncPlaylistsToGitHub(); renderTabBar(); pendingImport=null; closeModal('import-modal');
+function confirmImport(){
+  if(!pendingImport)return closeModal('import-modal');
+  pendingImport.forEach(d=>{const tab=newTab(d.name||'無題',d.playlistId||'');tabs.push(tab);const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;document.getElementById('app').appendChild(p);});
+  saveTabs();syncPlaylistsToGitHub();renderTabBar();pendingImport=null;closeModal('import-modal');
 }
 
 // ── Sync ──────────────────────────────────────────────────────────────────────
-async function syncPlaylistsToGitHub() {
-  const playlists = tabs.filter(t=>t.playlistId).map(t=>({id:t.playlistId, title:t.name, autoDownload:false}));
-  if (!playlists.length) return;
-  try {
-    await fetch(`${WORKER}/update-playlists`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playlists})});
-  } catch(e){console.warn('sync:',e);}
+async function syncPlaylistsToGitHub(){
+  const pl=tabs.filter(t=>t.playlistId).map(t=>({id:t.playlistId,title:t.name,autoDownload:false}));
+  if(!pl.length)return;
+  try{await fetch(`${WORKER}/update-playlists`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playlists:pl})});}catch{}
 }
 
 // ── Push ──────────────────────────────────────────────────────────────────────
-async function togglePush() {
-  if (!swReg){alert('Service Workerが利用できません');return;}
-  if (pushSub){await pushSub.unsubscribe();pushSub=null;updatePushBadge();return;}
-  const perm=await Notification.requestPermission();
-  if(perm!=='granted'){alert('通知が許可されていません');return;}
+async function togglePush(){
+  if(!swReg){alert('Service Workerが利用できません');return;}
+  if(pushSub){await pushSub.unsubscribe();pushSub=null;updatePushBadge();return;}
+  const perm=await Notification.requestPermission();if(perm!=='granted'){alert('通知が許可されていません');return;}
   try{
     await navigator.serviceWorker.ready;
     pushSub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID_PUBLIC_KEY)});
     const res=await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:pushSub.toJSON()})});
-    if(!res.ok)throw new Error(`${res.status}`);
-    updatePushBadge();
+    if(!res.ok)throw new Error(`${res.status}`);updatePushBadge();
   }catch(e){alert('登録エラー: '+e.message);}
 }
 function updatePushBadge(){const on=!!pushSub;document.getElementById('push-badge').textContent=on?'PUSH ON':'PUSH OFF';document.getElementById('push-badge').className=on?'badge':'badge off';}
@@ -737,13 +835,7 @@ function toggleNotifPanel(){notifOpen=!notifOpen;document.getElementById('notif-
 function renderNotifList(){
   const el=document.getElementById('np-list');
   if(!notifs.length){el.innerHTML='<div class="empty" style="padding:20px">通知はありません</div>';return;}
-  el.innerHTML=notifs.map(n=>`
-    <div class="notif-item">
-      <div class="ni-title">${esc(n.title)}</div>
-      <div class="ni-body">${esc(n.body)}</div>
-      ${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}
-      <div class="ni-time">${fmtTime(n.time)}</div>
-    </div>`).join('');
+  el.innerHTML=notifs.map(n=>`<div class="notif-item"><div class="ni-title">${esc(n.title)}</div><div class="ni-body">${esc(n.body)}</div>${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}<div class="ni-time">${fmtTime(n.time)}</div></div>`).join('');
 }
 function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');updateNotifBadge();renderNotifList();}
 function updateNotifBadge(){document.getElementById('notif-badge').textContent=notifs.length+'件';document.getElementById('notif-badge').className=notifs.length?'badge warn':'badge off';}
@@ -754,7 +846,6 @@ navigator.serviceWorker?.addEventListener('message',e=>{
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const escAttr=s=>String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
 const fmtTime=ts=>{const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
 function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
 </script>
