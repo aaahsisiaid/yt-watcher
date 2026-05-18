@@ -1,9 +1,11 @@
 {
-  "name": "YT Playlist Watcher",
+  "name": "YT Watcher",
   "short_name": "YT Watch",
+  "description": "YouTubeプレイリスト監視・オンライン通知PWA",
   "start_url": "/yt-watcher/",
   "scope": "/yt-watcher/",
   "display": "standalone",
   "background_color": "#0a0a0f",
-  "theme_color": "#7fffb2"
+  "theme_color": "#7fffb2",
+  "orientation": "portrait-primary"
 }
