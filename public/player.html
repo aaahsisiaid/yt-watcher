@@ -2,278 +2,366 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<meta name="theme-color" content="#000">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Player</title>
+<script src="https://www.youtube.com/iframe_api"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
-#yt-player{position:absolute;inset:0;pointer-events:none}
-#yt-player iframe{width:100%;height:100%;border:none}
-/* Controls */
-#ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .25s}
-#ctrl.hidden{opacity:0;pointer-events:none}
-#top{display:flex;align-items:center;gap:10px;padding:12px 14px 20px;background:linear-gradient(rgba(0,0,0,.75),transparent)}
-#back-btn{background:none;border:none;color:#fff;cursor:pointer;padding:4px 8px;font-size:20px;line-height:1}
-#ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
-#bot{padding:6px 14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
-/* Seek bar */
-#seek-wrap{position:relative;height:22px;display:flex;align-items:center;margin-bottom:4px;cursor:pointer;touch-action:none}
-#seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.2);border-radius:2px}
-#seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.35);border-radius:2px;width:0}
-#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0}
-#seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px;transition:transform .1s}
-#seek-wrap:active #seek-thumb{transform:translateX(-50%) scale(1.4)}
-/* Row */
-#bot-row{display:flex;align-items:center;gap:8px}
-.ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:18px;line-height:1;border-radius:50%}
-.ibtn:active{background:rgba(255,255,255,.15)}
-.ibtn svg{width:20px;height:20px;fill:#fff;display:block}
-#time-disp{font-size:11px;color:#bbb;white-space:nowrap}
-.sp{flex:1}
-/* Quality menu */
-#q-menu{position:absolute;bottom:68px;right:14px;background:#111;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;display:none;z-index:20;min-width:80px}
-#q-menu.open{display:block}
-#q-menu button{display:block;width:100%;padding:9px 16px;background:none;border:none;color:#ccc;font-size:12px;font-family:inherit;cursor:pointer;text-align:left}
-#q-menu button:active,#q-menu button.sel{background:#1e1e1e;color:#7fffb2}
-/* Center overlays */
-#center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:10px}
-#play-flash{width:56px;height:56px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
-#play-flash.show{opacity:1}
-#speed-badge{background:rgba(0,0,0,.75);color:#7fffb2;padding:5px 16px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .2s}
-#speed-badge.show{opacity:1}
-#spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Inter,system-ui,sans-serif}
+body{background:radial-gradient(circle at top left,#3d003d,transparent 30%),radial-gradient(circle at bottom right,#001a3d,transparent 30%),#050505}
+.player-shell{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;padding:20px}
+.player-wrap{position:relative;width:min(1600px,96vw);aspect-ratio:16/9;overflow:hidden;border-radius:34px;background:#000;box-shadow:0 30px 100px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.05);touch-action:manipulation}
+#player{position:absolute;inset:-14%;width:128%;height:128%;pointer-events:none;filter:contrast(1.04) saturate(1.08)}
+.ui{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,.25) 30%,transparent 60%);opacity:0;transition:.25s}
+.player-wrap:hover .ui,.player-wrap.show-ui .ui{opacity:1}
+.topbar{padding:20px 28px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.back-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s}
+.back-btn:hover{background:rgba(255,255,255,.2)}
+.back-btn svg{width:20px;height:20px;fill:#fff}
+.title{font-size:18px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+.sub{opacity:.5;margin-top:4px;color:#fff;font-size:13px}
+.status{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(20px);font-size:13px;letter-spacing:.08em;opacity:.85;transition:.2s;color:#fff;white-space:nowrap;flex-shrink:0}
+.status.fast{background:rgba(255,0,80,.16);border:1px solid rgba(255,0,80,.35);box-shadow:0 0 30px rgba(255,0,80,.2);color:#ff7ba5}
+.center{flex:1;display:flex;justify-content:center;align-items:center;min-height:0}
+.bigplay{width:100px;height:100px;border-radius:999px;backdrop-filter:blur(20px);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);display:flex;justify-content:center;align-items:center;cursor:pointer;transition:.25s;font-size:36px;color:#fff}
+.bigplay:hover{transform:scale(1.08)}
+.bottom{padding:20px 28px}
+.progress-area{width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:visible;cursor:pointer;position:relative}
+.progress-area::before{content:'';position:absolute;top:-14px;left:0;right:0;bottom:-14px}
+.progress{width:0%;height:100%;border-radius:999px;background:linear-gradient(90deg,#7fffb2,#00d4aa)}
+.preview{position:absolute;bottom:22px;left:0;transform:translateX(-50%);width:200px;border-radius:16px;overflow:hidden;background:rgba(10,10,10,.95);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(20px);opacity:0;transition:.12s;pointer-events:none;z-index:500}
+.preview.show{opacity:1}
+.preview img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#000}
+.previewTime{padding:8px;font-size:12px;text-align:center;background:rgba(255,255,255,.04);color:#fff}
+.controls{margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+.left,.right{display:flex;align-items:center;gap:8px}
+.btn{width:auto;min-width:44px;height:44px;padding:0 14px;border-radius:14px;border:none;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:.2s;font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px;backdrop-filter:blur(10px)}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.14)}
+.icon-btn{padding:0;width:44px}
+.icon-btn svg{width:20px;height:20px;fill:#fff;display:block}
+.time{opacity:.7;font-size:13px;color:#fff}
+.volume{width:90px;accent-color:#7fffb2}
+.speed{background:rgba(255,255,255,.08);color:#fff;border:none;height:40px;border-radius:12px;padding:0 12px;outline:none;font-size:13px}
+.speed option{background:#111}
+.settings{position:absolute;right:20px;bottom:90px;width:220px;background:rgba(15,15,15,.95);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px;z-index:100;backdrop-filter:blur(20px);display:none}
+.settings.active{display:block}
+.settings h3{margin-bottom:14px;font-size:15px;color:#fff}
+.settings-row{margin-bottom:14px}
+.settings-row label{display:block;margin-bottom:8px;opacity:.7;font-size:12px;color:#fff}
+.edge-mask-top{position:absolute;top:0;left:0;width:100%;height:80px;background:linear-gradient(to bottom,rgba(0,0,0,.9),transparent);z-index:11}
+.edge-mask-right{position:absolute;top:0;right:0;width:120px;height:100%;background:linear-gradient(to left,rgba(0,0,0,.9),transparent);z-index:11}
+.edge-mask-bottom{position:absolute;bottom:0;left:0;width:100%;height:80px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);z-index:11}
+.loader{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;z-index:50;backdrop-filter:blur(10px);background:rgba(0,0,0,.6);transition:.4s}
+.spinner{width:60px;height:60px;border-radius:50%;border:4px solid rgba(255,255,255,.15);border-top:4px solid #7fffb2;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#err-msg{background:rgba(180,40,40,.85);padding:8px 16px;border-radius:8px;font-size:12px;display:none;text-align:center}
-/* Tap zone */
-#tap{position:absolute;top:56px;left:0;right:0;bottom:72px}
+.hide{opacity:0;pointer-events:none}
+.skip-popup{position:absolute;top:50%;transform:translateY(-50%);padding:14px 22px;border-radius:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(20px);font-size:20px;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:200;display:flex;align-items:center;gap:8px;color:#fff}
+.skip-popup.show{opacity:1}
+.skip-left{left:50px}
+.skip-right{right:50px}
+.skip-popup svg{width:24px;height:24px;fill:#fff;flex:none}
+@media(max-width:640px){
+.player-shell{padding:0}
+.player-wrap{width:100vw;border-radius:0}
+.topbar{padding:8px 12px;gap:6px}
+.title{font-size:12px;max-width:45vw}
+.sub{font-size:9px}
+.status{font-size:9px;padding:4px 8px}
+.back-btn{width:32px;height:32px}
+.back-btn svg{width:16px;height:16px}
+.bigplay{width:52px;height:52px;font-size:18px}
+.bottom{padding:8px 12px}
+.controls{margin-top:8px}
+.btn{min-width:32px;height:32px;padding:0 8px;border-radius:9px;font-size:11px}
+.icon-btn{width:32px;padding:0}
+.icon-btn svg{width:15px;height:15px}
+.volume{display:none}
+.time{font-size:10px}
+.left,.right{gap:5px}
+.settings{right:6px;bottom:72px;width:calc(100% - 12px);max-width:220px}
+.skip-left{left:16px}.skip-right{right:16px}
+.skip-popup{padding:8px 14px;font-size:14px;border-radius:12px}
+.skip-popup svg{width:18px;height:18px}
+}
 </style>
 </head>
 <body>
-<div id="yt-player"><div id="player"></div></div>
-
-<div id="center">
-  <div id="spinner"></div>
-  <div id="play-flash">
-    <svg id="flash-svg" viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-  </div>
-  <div id="speed-badge"></div>
-  <div id="err-msg"></div>
-</div>
-
-<div id="tap"></div>
-
-<div id="ctrl">
-  <div id="top">
-    <button id="back-btn" onclick="history.back()">&#8592;</button>
-    <div id="ttl"></div>
-  </div>
-  <div id="bot">
-    <div id="seek-wrap">
-      <div id="seek-bg"></div>
-      <div id="seek-buf"></div>
-      <div id="seek-fill"></div>
-      <div id="seek-thumb"></div>
-    </div>
-    <div id="bot-row">
-      <button class="ibtn" id="play-btn">
-        <svg id="play-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <span id="time-disp">0:00 / 0:00</span>
-      <div class="sp"></div>
-      <button class="ibtn" id="q-btn">
-        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-      </button>
-      <button class="ibtn" id="fs-btn">
-        <svg id="fs-svg" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-      </button>
+<div class="player-shell">
+<div class="player-wrap" id="wrap">
+  <div class="edge-mask-top"></div>
+  <div class="edge-mask-right"></div>
+  <div class="edge-mask-bottom"></div>
+  <div id="player"></div>
+  <div class="skip-popup skip-left" id="skipLeft"><svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12zm9 0V6l-8.5 6z"/></svg><span>15s</span></div>
+  <div class="skip-popup skip-right" id="skipRight"><span>15s</span><svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6zm9 0l8.5-6L13 6z"/></svg></div>
+  <div class="loader" id="loader"><div class="spinner"></div></div>
+  <div class="settings" id="settings">
+    <h3>Settings</h3>
+    <div class="settings-row">
+      <label>Playback Speed</label>
+      <select class="speed" id="speed">
+        <option value="0.25">0.25x</option><option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option><option value="1" selected>1x</option>
+        <option value="1.25">1.25x</option><option value="1.5">1.5x</option>
+        <option value="1.75">1.75x</option><option value="2">2x</option>
+      </select>
     </div>
   </div>
+  <div class="ui">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="back-btn" onclick="history.back()">
+          <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </button>
+        <div>
+          <div class="title" id="titleEl"></div>
+          <div class="sub" id="subEl">YouTube</div>
+        </div>
+      </div>
+      <div class="status" id="status">NORMAL</div>
+    </div>
+    <div class="center"><div class="bigplay" id="bigplay">▶</div></div>
+    <div class="bottom">
+      <div class="progress-area" id="progressArea">
+        <div class="progress" id="progress"></div>
+        <div class="preview" id="preview">
+          <img id="previewImg">
+          <div class="previewTime" id="previewTime">0:00</div>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="left">
+          <button class="btn icon-btn" id="play">
+            <svg id="playSvg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="btn icon-btn" id="mute">
+            <svg id="muteSvg" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10z"/></svg>
+          </button>
+          <input class="volume" type="range" min="0" max="100" value="100" id="volume">
+          <div class="time" id="time">0:00 / 0:00</div>
+        </div>
+        <div class="right">
+          <button class="btn" id="settingsBtn">Settings</button>
+          <button class="btn icon-btn" id="fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7zm0-4h2V7h3V5H5v5zm10 7h-3v2h5v-5h-2zm0-12V5h-5v2h3v3h2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-<div id="q-menu"></div>
+</div>
 
 <script>
-const params = new URLSearchParams(location.search);
-const videoId = params.get('v') || '';
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// ── URL params ────────────────────────────────────────────────────────────────
+const params  = new URLSearchParams(location.search);
+const videoId = params.get('v') || 'dQw4w9WgXcQ';
 const title   = decodeURIComponent(params.get('t') || '');
-document.getElementById('ttl').textContent = title;
+document.getElementById('titleEl').textContent = title || 'YouTube Player';
+document.title = title || 'Player';
 
-let player, dur = 0, isSeeking = false, longTimer = null, isLong = false;
-let ctrlTimer = null;
+// ── State ─────────────────────────────────────────────────────────────────────
+let player, playing = false;
+let holdTimeout, holdSpeeding = false, prevSpeed = 1;
+let lastTap = 0, lastSide = '';
+let dragging = false, isDraggingProgress = false;
+let ignoreWrapClick = false, justClosedSettings = false;
+let uiTimeout, isHolding = false;
+let touchStartX = 0, touchStartY = 0;
 
-// Load YouTube IFrame API
-const tag = document.createElement('script');
-tag.src = 'https://www.youtube.com/iframe_api';
-document.head.appendChild(tag);
+// ── Elements ──────────────────────────────────────────────────────────────────
+const loader       = document.getElementById('loader');
+const wrap         = document.getElementById('wrap');
+const progress     = document.getElementById('progress');
+const progressArea = document.getElementById('progressArea');
+const time         = document.getElementById('time');
+const play         = document.getElementById('play');
+const mute         = document.getElementById('mute');
+const volume       = document.getElementById('volume');
+const fullscreen   = document.getElementById('fullscreen');
+const bigplay      = document.getElementById('bigplay');
+const settingsBtn  = document.getElementById('settingsBtn');
+const settings     = document.getElementById('settings');
+const speed        = document.getElementById('speed');
+const statusBox    = document.getElementById('status');
+const skipLeft     = document.getElementById('skipLeft');
+const skipRight    = document.getElementById('skipRight');
+const preview      = document.getElementById('preview');
+const previewImg   = document.getElementById('previewImg');
+const previewTime  = document.getElementById('previewTime');
+const playSvg      = document.getElementById('playSvg');
+const muteSvg      = document.getElementById('muteSvg');
 
-window.onYouTubeIframeAPIReady = () => {
+// ── YouTube API ───────────────────────────────────────────────────────────────
+function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
     videoId,
-    playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1, modestbranding: 1, iv_load_policy: 3 },
+    playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, rel: 0, modestbranding: 1, playsinline: 1, iv_load_policy: 3, cc_load_policy: 0, enablejsapi: 1 },
     events: {
-      onReady: e => { e.target.playVideo(); showCtrl(); },
+      onReady: e => { loader.classList.add('hide'); e.target.playVideo(); updateLoop(); showUI(); },
       onStateChange: e => {
-        const s = document.getElementById('spinner');
-        s.style.display = e.data === YT.PlayerState.BUFFERING ? 'block' : 'none';
-        if (e.data === YT.PlayerState.PLAYING) {
-          updatePlayBtn(true); startTick();
-        } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
-          updatePlayBtn(false);
-        }
-      },
-      onError: e => {
-        const err = document.getElementById('err-msg');
-        err.textContent = '再生エラー (code:' + e.data + ')';
-        err.style.display = 'block';
-        document.getElementById('spinner').style.display = 'none';
+        if (e.data === YT.PlayerState.PLAYING) { playing = true; playSvg.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'; bigplay.innerHTML = 'Ⅱ'; }
+        else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) { playing = false; playSvg.innerHTML = '<path d="M8 5v14l11-7z"/>'; bigplay.innerHTML = '▶'; }
+        else if (e.data === YT.PlayerState.BUFFERING) {}
       }
     }
   });
+}
+
+// ── UI auto-hide ──────────────────────────────────────────────────────────────
+function showUI() {
+  wrap.classList.add('show-ui');
+  clearTimeout(uiTimeout);
+  uiTimeout = setTimeout(() => { if (!settings.classList.contains('active')) wrap.classList.remove('show-ui'); }, 2500);
+}
+['mousemove','touchstart','click','keydown'].forEach(ev => document.addEventListener(ev, showUI));
+
+// ── Update loop ───────────────────────────────────────────────────────────────
+function updateLoop() {
+  setInterval(() => {
+    if (!player?.getDuration) return;
+    if (isDraggingProgress) return;
+    const cur = player.getCurrentTime(), dur = player.getDuration();
+    progress.style.width = (cur / dur * 100) + '%';
+    time.innerText = fmt(cur) + ' / ' + fmt(dur);
+  }, 150);
+}
+
+// ── Play/Pause ────────────────────────────────────────────────────────────────
+function togglePlay() {
+  playing ? player.pauseVideo() : player.playVideo();
+}
+
+play.addEventListener('click', e => { e.stopPropagation(); ignoreWrapClick = true; togglePlay(); setTimeout(() => ignoreWrapClick = false, 50); });
+bigplay.addEventListener('click', e => { e.stopPropagation(); ignoreWrapClick = true; togglePlay(); setTimeout(() => ignoreWrapClick = false, 50); });
+
+// ── Wrap click (tap to play/pause + double tap skip) ─────────────────────────
+wrap.addEventListener('click', e => {
+  if (isHolding || ignoreWrapClick || isDraggingProgress || holdSpeeding) return;
+  if (justClosedSettings) { justClosedSettings = false; return; }
+  if (settings.classList.contains('active') && !settings.contains(e.target) && !settingsBtn.contains(e.target)) {
+    settings.classList.remove('active'); justClosedSettings = true; return;
+  }
+  if (settings.contains(e.target) || settingsBtn.contains(e.target) || progressArea.contains(e.target) || e.target.closest('.btn') || e.target.closest('.speed') || e.target.closest('.volume') || e.target.closest('.back-btn')) return;
+
+  const now = Date.now();
+  const rect = wrap.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const side = x < rect.width / 2 ? 'left' : 'right';
+
+  if (now - lastTap < 300 && side === lastSide) {
+    clearTimeout(previewTimer);
+    if (side === 'left') { player.seekTo(player.getCurrentTime() - 15, true); showSkip(skipLeft); }
+    else { player.seekTo(player.getCurrentTime() + 15, true); showSkip(skipRight); }
+    lastTap = 0; return;
+  }
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => { if (!holdSpeeding && !isDraggingProgress) togglePlay(); }, 310);
+  lastTap = now; lastSide = side;
+});
+let previewTimer;
+
+function showSkip(el) { el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 450); }
+
+// ── Long press = 2x ───────────────────────────────────────────────────────────
+function startHold(e) {
+  if (e.target.closest('.controls') || e.target.closest('.settings') || e.target.closest('.progress-area') || e.target.closest('.back-btn')) return;
+  if (e.touches) { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; }
+  isHolding = true;
+  holdTimeout = setTimeout(() => {
+    holdSpeeding = true; prevSpeed = player.getPlaybackRate();
+    player.setPlaybackRate(2); updateStatus(2);
+  }, 500);
+}
+function stopHold() {
+  clearTimeout(holdTimeout);
+  if (holdSpeeding) { holdSpeeding = false; player.setPlaybackRate(prevSpeed); updateStatus(prevSpeed); ignoreWrapClick = true; setTimeout(() => ignoreWrapClick = false, 200); }
+  isHolding = false;
+}
+wrap.addEventListener('mousedown', startHold);
+wrap.addEventListener('mouseup', stopHold);
+wrap.addEventListener('mouseleave', stopHold);
+wrap.addEventListener('touchstart', startHold, { passive: true });
+wrap.addEventListener('touchend', stopHold);
+wrap.addEventListener('touchcancel', stopHold);
+wrap.addEventListener('touchmove', e => {
+  if (!isHolding || holdSpeeding) return;
+  const dx = e.touches[0].clientX - touchStartX, dy = e.touches[0].clientY - touchStartY;
+  if (Math.sqrt(dx * dx + dy * dy) > 10) { clearTimeout(holdTimeout); isHolding = false; }
+}, { passive: true });
+
+// ── Mute ──────────────────────────────────────────────────────────────────────
+mute.onclick = () => {
+  if (player.isMuted()) { player.unMute(); muteSvg.innerHTML = '<path d="M3 10v4h4l5 5V5L7 10z"/>'; }
+  else { player.mute(); muteSvg.innerHTML = '<path d="M16 9l5 5m0-5l-5 5M3 10v4h4l5 5V5L7 10z" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>'; }
+};
+volume.oninput = e => player.setVolume(e.target.value);
+
+// ── Seek ──────────────────────────────────────────────────────────────────────
+function seekFromEvent(e) {
+  const rect = progressArea.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const per = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  const seekTime = player.getDuration() * per;
+  progress.style.width = (per * 100) + '%';
+  time.innerText = fmt(seekTime) + ' / ' + fmt(player.getDuration());
+  player.seekTo(seekTime, true);
+}
+progressArea.addEventListener('mousedown', e => { e.stopPropagation(); isDraggingProgress = true; seekFromEvent(e); });
+document.addEventListener('mousemove', e => { if (isDraggingProgress) seekFromEvent(e); });
+document.addEventListener('mouseup', () => { if (isDraggingProgress) setTimeout(() => isDraggingProgress = false, 20); });
+progressArea.addEventListener('touchstart', e => { showUI(); e.stopPropagation(); isDraggingProgress = true; seekFromEvent(e); }, { passive: false });
+document.addEventListener('touchmove', e => { if (isDraggingProgress) seekFromEvent(e); }, { passive: true });
+document.addEventListener('touchend', () => { if (isDraggingProgress) setTimeout(() => isDraggingProgress = false, 20); });
+
+// ── Progress preview ──────────────────────────────────────────────────────────
+progressArea.addEventListener('mousemove', e => {
+  const rect = progressArea.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const per = Math.max(0, Math.min(1, x / rect.width));
+  const sec = player.getDuration() * per;
+  preview.classList.add('show');
+  preview.style.left = x + 'px';
+  previewTime.innerHTML = fmt(sec);
+  previewImg.src = `https://i.ytimg.com/sb/${videoId}/storyboard3_L2/M${Math.floor(sec / 5)}.jpg`;
+});
+progressArea.addEventListener('mouseleave', () => preview.classList.remove('show'));
+
+// ── Fullscreen ────────────────────────────────────────────────────────────────
+fullscreen.onclick = async () => {
+  if (!document.fullscreenElement) {
+    await wrap.requestFullscreen().catch(() => document.documentElement.requestFullscreen().catch(() => {}));
+    screen.orientation?.lock('landscape').catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
 };
 
-// Tick
-let tickId;
-function startTick() {
-  clearInterval(tickId);
-  tickId = setInterval(() => {
-    if (!player || !player.getCurrentTime) return;
-    const cur = player.getCurrentTime();
-    dur = player.getDuration() || 0;
-    if (!isSeeking) updateSeekUI(cur, dur);
-    document.getElementById('time-disp').textContent = fmt(cur) + ' / ' + fmt(dur);
-    try {
-      const buf = (player.getVideoLoadedFraction() || 0) * 100;
-      document.getElementById('seek-buf').style.width = buf + '%';
-    } catch {}
-  }, 400);
+// ── Settings ──────────────────────────────────────────────────────────────────
+settingsBtn.onclick = e => { e.stopPropagation(); settings.classList.toggle('active'); };
+speed.onchange = e => { player.setPlaybackRate(Number(e.target.value)); updateStatus(Number(e.target.value)); };
+
+function updateStatus(s) {
+  statusBox.innerHTML = s === 1 ? 'NORMAL' : `${s}x SPEED`;
+  statusBox.classList.toggle('fast', s !== 1);
 }
 
-function updateSeekUI(cur, d) {
-  if (!d) return;
-  const pct = (cur / d) * 100;
-  document.getElementById('seek-fill').style.width = pct + '%';
-  document.getElementById('seek-thumb').style.left = pct + '%';
-}
-
-function fmt(s) {
-  s = Math.floor(s || 0);
-  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-}
-
-function updatePlayBtn(playing) {
-  document.getElementById('play-svg').innerHTML = playing
-    ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
-    : '<path d="M8 5v14l11-7z"/>';
-}
-
-// Play/pause button
-document.getElementById('play-btn').addEventListener('click', () => {
-  if (!player) return;
-  showCtrl();
-  player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.code === 'ArrowRight') player.seekTo(player.getCurrentTime() + 5, true);
+  if (e.code === 'ArrowLeft')  player.seekTo(player.getCurrentTime() - 5, true);
+  if (e.code === 'KeyM') mute.click();
+  if (e.code === 'KeyF') fullscreen.click();
 });
 
-// Tap zone
-const tap = document.getElementById('tap');
-tap.addEventListener('click', e => {
-  if (isLong) return;
-  if (!player) return;
-  showCtrl();
-  const state = player.getPlayerState();
-  state === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
-  const svg = document.getElementById('flash-svg');
-  svg.innerHTML = state === YT.PlayerState.PLAYING
-    ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
-    : '<path d="M8 5v14l11-7z"/>';
-  const fi = document.getElementById('play-flash');
-  fi.classList.add('show'); setTimeout(() => fi.classList.remove('show'), 500);
-});
-
-// Long press = 2x speed
-tap.addEventListener('touchstart', e => {
-  isLong = false;
-  longTimer = setTimeout(() => {
-    isLong = true;
-    if (player) player.setPlaybackRate(2);
-    const b = document.getElementById('speed-badge');
-    b.textContent = '2x'; b.classList.add('show');
-  }, 500);
-}, { passive: true });
-tap.addEventListener('touchend', () => {
-  clearTimeout(longTimer);
-  if (isLong) {
-    if (player) player.setPlaybackRate(1);
-    const b = document.getElementById('speed-badge');
-    b.textContent = '1x';
-    setTimeout(() => b.classList.remove('show'), 700);
-  }
-  isLong = false;
-});
-tap.addEventListener('touchmove', () => clearTimeout(longTimer), { passive: true });
-
-// Seek bar
-const sw = document.getElementById('seek-wrap');
-function seekAt(clientX) {
-  const r = sw.getBoundingClientRect();
-  const pct = Math.max(0, Math.min((clientX - r.left) / r.width, 1));
-  document.getElementById('seek-fill').style.width = (pct * 100) + '%';
-  document.getElementById('seek-thumb').style.left = (pct * 100) + '%';
-  if (player && player.seekTo) player.seekTo(pct * (dur || 0), true);
+function fmt(sec) {
+  sec = Math.floor(sec || 0);
+  return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
 }
-sw.addEventListener('touchstart', e => { isSeeking = true; seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
-sw.addEventListener('touchmove', e => { if (isSeeking) seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
-sw.addEventListener('touchend', e => { isSeeking = false; e.stopPropagation(); }, { passive: true });
-sw.addEventListener('mousedown', e => { isSeeking = true; seekAt(e.clientX); });
-window.addEventListener('mousemove', e => { if (isSeeking) seekAt(e.clientX); });
-window.addEventListener('mouseup', () => { isSeeking = false; });
-
-// Quality menu
-const QUALITIES = [
-  { label: '1080p', val: 'hd1080' }, { label: '720p', val: 'hd720' },
-  { label: '480p', val: 'large' },   { label: '360p', val: 'medium' },
-  { label: '240p', val: 'small' },   { label: '自動', val: 'default' }
-];
-const qMenu = document.getElementById('q-menu');
-qMenu.innerHTML = QUALITIES.map(q =>
-  `<button onclick="setQ('${q.val}')">${q.label}</button>`
-).join('');
-function setQ(val) {
-  if (player) player.setPlaybackQuality(val);
-  qMenu.querySelectorAll('button').forEach((b, i) => b.classList.toggle('sel', QUALITIES[i].val === val));
-  qMenu.classList.remove('open');
-  showCtrl();
-}
-document.getElementById('q-btn').addEventListener('click', e => {
-  e.stopPropagation(); qMenu.classList.toggle('open'); showCtrl();
-});
-
-// Fullscreen + auto landscape
-document.getElementById('fs-btn').addEventListener('click', async () => {
-  if (!document.fullscreenElement) {
-    await document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
-    await screen.orientation?.lock('landscape').catch(() => {});
-  } else {
-    await document.exitFullscreen().catch(() => {});
-    await screen.orientation?.unlock();
-  }
-});
-document.addEventListener('fullscreenchange', () => {
-  document.getElementById('fs-svg').innerHTML = document.fullscreenElement
-    ? '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>'
-    : '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
-});
-
-// Controls visibility
-function showCtrl() {
-  const c = document.getElementById('ctrl');
-  c.classList.remove('hidden');
-  clearTimeout(ctrlTimer);
-  ctrlTimer = setTimeout(() => c.classList.add('hidden'), 3000);
-}
-document.getElementById('ctrl').addEventListener('click', showCtrl);
-document.addEventListener('contextmenu', e => e.preventDefault());
-showCtrl();
 </script>
 </body>
 </html>
