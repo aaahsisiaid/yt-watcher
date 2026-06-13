@@ -148,11 +148,17 @@ button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-f
 #recent-panel.open{transform:translateX(0)}
 .panel-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .panel-list{flex:1;overflow-y:auto;padding:8px}
-.notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px}
+.notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;position:relative;transition:opacity .2s,transform .2s}
+.notif-item.removing{opacity:0;transform:translateX(20px)}
+.ni-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
 .ni-title{font-weight:bold;color:var(--accent);font-size:11px;margin-bottom:2px}
 .ni-body{font-size:11px;color:var(--text);line-height:1.5}
 .ni-time{font-size:10px;color:var(--muted);margin-top:3px}
 .ni-link{display:inline-block;font-size:10px;color:var(--accent3);text-decoration:none;margin-top:3px}
+.ni-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;flex-shrink:0;border-radius:4px}
+.ni-close:hover{color:var(--danger);background:rgba(255,68,102,.1)}
+.notif-controls{display:flex;gap:5px;flex-wrap:wrap;padding:6px 8px;border-bottom:1px solid var(--border)}
+.notif-date-divider{font-size:10px;color:var(--muted);padding:6px 2px 4px;text-align:left}
 .recent-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .ri-info{flex:1;min-width:0}.ri-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ri-pl{font-size:10px;color:var(--muted)}.ri-time{font-size:10px;color:var(--muted);margin-top:2px}
@@ -472,6 +478,8 @@ function isDuplicate(ev) {
 let tabs      = JSON.parse(localStorage.getItem('yt_tabs')    || '[]');
 let recents   = JSON.parse(localStorage.getItem('yt_recent')  || '[]');
 let notifs    = JSON.parse(localStorage.getItem('yt_notifs')  || '[]');
+let notifSort   = localStorage.getItem('yt_notif_sort')   || 'new'; // 'new' | 'old'
+let notifFilter = localStorage.getItem('yt_notif_filter') || 'all'; // 'all' | 'today' | 'week'
 let schedules = JSON.parse(localStorage.getItem('yt_schedule')|| '[]');
 let activeTabId = localStorage.getItem('yt_active_tab') || ONLINE;
 let swReg = null, pushSub = null, notifOpen = false, recentOpen = false, renameTabId = null;
@@ -512,6 +520,10 @@ async function syncScheduleToKV() {
   if ('serviceWorker' in navigator) {
     try { swReg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready; pushSub = await swReg.pushManager.getSubscription(); updatePushBadge(); } catch {}
   }
+  // Migrate notifs without id
+  let migrated = false;
+  notifs.forEach(n => { if (!n.id) { n.id = 'n_'+Math.random().toString(36).slice(2,10); migrated = true; } });
+  if (migrated) localStorage.setItem('yt_notifs', JSON.stringify(notifs));
   buildPaletteRow();
   renderTabBar(); renderApp(); updateNotifBadge();
   if (schedules.length) renderScheduleCards();
@@ -1226,17 +1238,91 @@ async function runServerCheck(){
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 function toggleNotifPanel(){notifOpen=!notifOpen;document.getElementById('notif-panel').classList.toggle('open',notifOpen);if(notifOpen)renderNotifList();}
+
+function notifDateLabel(ts){
+  const d=new Date(ts), now=new Date();
+  const dKey=d.toDateString(), todayKey=now.toDateString();
+  const yestKey=new Date(now.getTime()-86400000).toDateString();
+  if(dKey===todayKey)return '今日';
+  if(dKey===yestKey)return '昨日';
+  const days=['日','月','火','水','木','金','土'];
+  return `${d.getMonth()+1}/${d.getDate()} (${days[d.getDay()]})`;
+}
+
+function filterNotifsByDate(list){
+  if(notifFilter==='all')return list;
+  const now=new Date();
+  if(notifFilter==='today'){
+    const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+    return list.filter(n=>new Date(n.time).getTime()>=start);
+  }
+  const cutoff=now.getTime()-7*86400000;
+  return list.filter(n=>new Date(n.time).getTime()>=cutoff);
+}
+
+function setNotifSort(s){notifSort=s;localStorage.setItem('yt_notif_sort',s);renderNotifList();}
+function setNotifFilter(f){notifFilter=f;localStorage.setItem('yt_notif_filter',f);renderNotifList();}
+
+function removeNotif(id){
+  const el=document.getElementById('ni-'+id);
+  const doRemove=()=>{
+    notifs=notifs.filter(n=>n.id!==id);
+    localStorage.setItem('yt_notifs',JSON.stringify(notifs));
+    updateNotifBadge();
+    renderNotifList();
+  };
+  if(el){el.classList.add('removing');setTimeout(doRemove,180);}
+  else doRemove();
+}
+
 function renderNotifList(){
   const el=document.getElementById('np-list');
   const hdr=`<div style="padding:8px;border-bottom:1px solid var(--border)"><button class="btn-outline btn-sm" onclick="testLocalNotif()" style="width:100%;margin-bottom:6px">通知テスト(ローカル)</button><button class="btn-accent btn-sm" onclick="runServerCheck()" style="width:100%;margin-bottom:6px">サーバーチェック実行</button><div id="server-check-result" style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:6px"></div><div id="push-debug" style="font-size:10px;color:var(--muted);line-height:1.6;word-break:break-all"></div></div>`;
-  if(!notifs.length){el.innerHTML=hdr+'<div class="empty" style="padding:16px">通知はありません</div>';updatePushDebug();return;}
-  el.innerHTML=hdr+notifs.map(n=>`<div class="notif-item"><div class="ni-title">${esc(n.title)}</div><div class="ni-body">${esc(n.body)}</div>${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}<div class="ni-time">${fmtTime(n.time)}</div></div>`).join('');
+
+  const ctrl=`<div class="notif-controls">
+    <button class="cal-filter-btn ${notifSort==='new'?'active':''}" onclick="setNotifSort('new')">新しい順</button>
+    <button class="cal-filter-btn ${notifSort==='old'?'active':''}" onclick="setNotifSort('old')">古い順</button>
+    <div style="flex:1"></div>
+    <button class="cal-filter-btn ${notifFilter==='all'?'active':''}" onclick="setNotifFilter('all')">全て</button>
+    <button class="cal-filter-btn ${notifFilter==='today'?'active':''}" onclick="setNotifFilter('today')">今日</button>
+    <button class="cal-filter-btn ${notifFilter==='week'?'active':''}" onclick="setNotifFilter('week')">7日間</button>
+  </div>`;
+
+  if(!notifs.length){el.innerHTML=hdr+ctrl+'<div class="empty" style="padding:16px">通知はありません</div>';updatePushDebug();return;}
+
+  let list=filterNotifsByDate(notifs); // stored newest-first
+  if(notifSort==='old')list=[...list].reverse();
+
+  if(!list.length){el.innerHTML=hdr+ctrl+'<div class="empty" style="padding:16px">この期間の通知はありません</div>';updatePushDebug();return;}
+
+  let html='',lastLabel=null;
+  list.forEach(n=>{
+    const label=notifDateLabel(n.time);
+    if(label!==lastLabel){html+=`<div class="notif-date-divider">${label}</div>`;lastLabel=label;}
+    html+=`<div class="notif-item" id="ni-${n.id}">
+      <div class="ni-head">
+        <div class="ni-title">${esc(n.title)}</div>
+        <button class="ni-close" onclick="removeNotif('${n.id}')" title="削除">×</button>
+      </div>
+      <div class="ni-body">${esc(n.body)}</div>
+      ${n.url?`<a class="ni-link" href="${n.url}" target="_blank" onclick="removeNotif('${n.id}')">▶ 開く</a>`:''}
+      <div class="ni-time">${fmtTime(n.time)}</div>
+    </div>`;
+  });
+
+  el.innerHTML=hdr+ctrl+html;
   updatePushDebug();
 }
 function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');updateNotifBadge();renderNotifList();}
 function updateNotifBadge(){document.getElementById('notif-badge').textContent=notifs.length+'件';document.getElementById('notif-badge').className=notifs.length?'badge warn':'badge off';}
 navigator.serviceWorker?.addEventListener('message',e=>{
-  if(e.data?.type==='push'){notifs.unshift({...e.data,time:new Date().toISOString()});if(notifs.length>50)notifs=notifs.slice(0,50);localStorage.setItem('yt_notifs',JSON.stringify(notifs));updateNotifBadge();if(notifOpen)renderNotifList();}
+  if(e.data?.type==='push'){
+    notifs.unshift({...e.data, id:'n_'+Math.random().toString(36).slice(2,10), time:new Date().toISOString()});
+    if(notifs.length>50)notifs=notifs.slice(0,50);
+    localStorage.setItem('yt_notifs',JSON.stringify(notifs));
+    updateNotifBadge();
+    if(notifOpen)renderNotifList();
+  }
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
