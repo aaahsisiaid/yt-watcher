@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7fffb2">
+<link rel="manifest" href="/manifest.json">
+<title>YT Watcher</title>
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a38;--accent:#7fffb2;--accent2:#ff7f50;--accent3:#7fb8ff;--text:#e0e0e8;--muted:#666678;--danger:#ff4466;--r:6px;--bar:28px;--tab:34px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;font-size:13px;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+#bar{position:fixed;top:0;left:0;right:0;height:var(--bar);background:rgba(10,10,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;z-index:200}
+.dots{display:flex;gap:6px;padding:0 12px}.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c840}
+.bar-title{padding:0 8px;font-weight:bold;color:var(--accent);font-size:12px}.spacer{flex:1}
+.bar-right{display:flex;align-items:center;gap:5px;padding:0 8px}
+.badge{font-size:10px;padding:1px 6px;border-radius:8px;background:var(--accent);color:#000;font-weight:bold;cursor:pointer;white-space:nowrap}
+.badge.off{background:var(--muted)}.badge.warn{background:var(--accent2)}
+.bar-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:3px 6px;font-size:11px;border-radius:4px;font-family:inherit}
+.bar-btn:hover{background:var(--bg3);color:var(--text)}
+#tabbar{position:fixed;top:var(--bar);left:0;right:0;height:var(--tab);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:0 4px;overflow-x:auto;overflow-y:hidden;z-index:190;gap:1px}
+#tabbar::-webkit-scrollbar{height:2px}
+.tab-item{flex-shrink:0;height:28px;min-width:120px;max-width:200px;display:flex;align-items:center;gap:5px;padding:0 8px;background:var(--bg3);border:1px solid var(--border);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;position:relative;user-select:none}
+.tab-item.active{background:var(--bg);border-bottom-color:var(--bg)}
+.tab-item.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--bg)}
+.tab-icon{width:13px;height:13px;flex-shrink:0;opacity:.5;fill:currentColor}.tab-item.active .tab-icon{opacity:1}
+.tab-name{flex:1;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}.tab-item.active .tab-name{color:var(--text)}
+.tab-item.pinned{min-width:90px;max-width:120px}
+.tab-close{width:16px;height:16px;border-radius:50%;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:11px;flex-shrink:0;padding:0;display:flex;align-items:center;justify-content:center}
+.tab-close:hover{background:rgba(255,68,102,.2);color:var(--danger)}
+.tab-add{flex-shrink:0;width:28px;height:28px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;border-radius:6px 6px 0 0;display:flex;align-items:center;justify-content:center;margin-left:2px}
+.tab-add:hover{background:var(--bg3);color:var(--accent)}
+#app{position:fixed;top:62px;left:0;right:0;bottom:0;overflow:hidden}
+.pane{position:absolute;inset:0;overflow-y:auto;display:none;padding:12px}.pane.active{display:block}
+input[type=text],input[type=date],input[type=time],input[type=url],textarea,select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:7px 10px;font-family:inherit;font-size:12px;outline:none;width:100%}
+input[type=color]{width:36px;height:30px;padding:2px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg3);cursor:pointer}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--bg2)}
+button{padding:7px 14px;border-radius:var(--r);border:none;cursor:pointer;font-family:inherit;font-size:12px;transition:all .15s}
+.btn-accent{background:var(--accent);color:#000;font-weight:bold}.btn-accent:hover{filter:brightness(1.1)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:4px 10px;font-size:10px}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}.btn-danger:hover{background:var(--danger);color:#fff}
+.field{margin-bottom:10px}.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.06em}
+.errmsg{font-size:11px;color:var(--danger);margin-top:5px;display:none}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);line-height:2;font-size:12px}
+.loading{text-align:center;padding:30px;color:var(--muted);font-size:12px}
+/* Playlist */
+.setup-box{max-width:480px;margin:30px auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.setup-box h2{font-size:13px;color:var(--accent);margin-bottom:14px}
+.vid-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.video-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.video-card:hover{border-color:var(--accent)}
+.video-card img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--bg3)}
+.vc-title{padding:8px;font-size:11px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Schedule top */
+.sched-top{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:10px}
+.sched-top-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sched-top-row h2{font-size:12px;color:var(--accent3);flex:1;display:flex;align-items:center;gap:5px}
+#sched-json{height:80px;resize:vertical;font-size:11px;margin-top:8px;display:none}
+#sched-json.open{display:block}
+/* Selection */
+#sel-toolbar{background:var(--bg3);border:1px solid var(--accent3);border-radius:var(--r);padding:7px 10px;margin-bottom:8px;display:none;align-items:center;gap:6px;flex-wrap:wrap}
+#sel-toolbar.show{display:flex}
+.sel-count{font-size:12px;color:var(--accent3);flex:1}
+.sel-btn{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:var(--r);border:1px solid var(--border);cursor:pointer;font-size:11px;font-family:inherit;background:var(--bg2);color:var(--text)}
+.sel-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sel-btn.danger{border-color:var(--danger);color:var(--danger)}.sel-btn.danger:hover{background:var(--danger);color:#fff}
+.sel-btn svg{width:11px;height:11px;fill:currentColor;flex-shrink:0}
+#mobile-sel-banner{display:none;background:rgba(127,184,255,.08);border:1px solid rgba(127,184,255,.25);border-radius:var(--r);padding:6px 10px;margin-bottom:8px;font-size:11px;color:var(--accent3);align-items:center;gap:6px}
+#mobile-sel-banner.show{display:flex}
+/* Calendar */
+#cal-wrap{display:none}#cal-wrap.show{display:block}
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cal-nav h3{flex:1;text-align:center;font-size:13px}
+.cal-filter-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.cal-filter-btn{padding:3px 10px;border-radius:999px;border:1px solid var(--border);font-size:10px;cursor:pointer;background:transparent;color:var(--muted);font-family:inherit}
+.cal-filter-btn.active{background:var(--accent3);border-color:var(--accent3);color:#000;font-weight:bold}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-head{text-align:center;font-size:10px;color:var(--muted);padding:3px 0}
+.cal-day{min-height:48px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:4px;cursor:pointer}
+.cal-day:hover{border-color:var(--accent)}.cal-day.today{border-color:var(--accent)}
+.cal-day.other-month .cal-dn{opacity:.35}.cal-day.selected{border-color:var(--accent3);background:rgba(127,184,255,.06)}
+.cal-dn{font-size:11px;font-weight:bold;margin-bottom:3px}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px}
+.cal-dot{width:6px;height:6px;border-radius:50%}
+.cal-events-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-top:8px}
+.cal-events-box h4{font-size:11px;color:var(--accent3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.cal-ev{border-radius:0 var(--r) var(--r) 0;padding:8px 10px;margin-bottom:6px;border-left:3px solid var(--accent3)}
+.cal-ev-sub{font-weight:bold;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.cal-ev-meta{color:var(--muted);font-size:10px;margin-top:2px}
+.cal-ev-actions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center}
+/* Cards */
+.sched-group{margin-bottom:10px}
+.sched-group-header{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:var(--r);margin-bottom:5px;cursor:pointer;background:var(--bg3)}
+.sched-group-header:hover{filter:brightness(1.05)}
+.sgh-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sgh-name{font-size:12px;font-weight:bold;flex:1}
+.sgh-count{font-size:10px;color:var(--muted)}
+.sgh-toggle{font-size:10px;color:var(--muted);margin-left:auto}
+.group-events{display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.group-events.collapsed .s-card:nth-child(n+2){display:none}
+.sched-cards{display:flex;flex-direction:column;gap:7px}
+.s-card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;display:flex;overflow:hidden;transition:border-color .15s,opacity .2s,filter .2s}
+.s-card.selected{border-color:var(--accent3);background:rgba(127,184,255,.05)}
+.s-card.notify-on{border-left:3px solid var(--accent3)}
+.s-card.notify-bright{filter:brightness(1.15)}
+.s-card.completed{opacity:.3;filter:grayscale(.6)}
+.s-card.dim-duplicate{opacity:.45;filter:grayscale(.3)}
+.s-cb-col{display:flex;align-items:flex-start;padding:12px 3px 12px 9px;flex-shrink:0;cursor:pointer}
+.s-checkbox{width:15px;height:15px;border:1.5px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.s-card.selected .s-checkbox{background:var(--accent3);border-color:var(--accent3)}
+.s-checkbox svg{width:9px;height:9px;fill:#000;display:none}.s-card.selected .s-checkbox svg{display:block}
+.s-body{flex:1;padding:10px 10px 10px 4px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.s-head{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.s-subject{font-size:15px;font-weight:bold}.s-unit{font-size:11px;color:var(--muted);margin-top:2px}
+.s-date{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.s-time{font-size:11px;display:flex;align-items:center;gap:4px}
+.s-def{font-size:10px;color:var(--muted)}
+.s-badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.s-rel{padding:2px 8px;border-radius:999px;font-size:10px;font-weight:bold}
+.s-rel.future{background:rgba(127,184,255,.12);color:var(--accent3);border:1px solid rgba(127,184,255,.2)}
+.s-rel.today{background:rgba(127,255,178,.1);color:var(--accent);border:1px solid rgba(127,255,178,.2)}
+.s-rel.past{background:rgba(255,68,102,.08);color:var(--danger);border:1px solid rgba(255,68,102,.15)}
+.s-status{padding:2px 8px;border-radius:999px;font-size:10px}
+.s-status.normal{background:rgba(127,184,255,.1);color:var(--accent3)}
+.s-status.h_class{background:rgba(255,200,50,.1);color:#ffcc33}
+.s-status.s_class{background:rgba(255,68,102,.1);color:var(--danger)}
+.tog-wrap{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);cursor:pointer}
+.tog{position:relative;width:36px;height:19px;display:inline-block;flex-shrink:0}
+.tog input{display:none}.tog-sl{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:.2s}
+.tog-sl:before{content:'';position:absolute;width:13px;height:13px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.tog input:checked+.tog-sl{background:var(--accent3)}.tog input:checked+.tog-sl:before{transform:translateX(17px)}
+.tog.done input:checked+.tog-sl{background:var(--accent)}
+.s-link-btn{padding:3px 9px;border-radius:var(--r);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);color:#10b981;cursor:pointer;font-size:10px;font-family:inherit;display:flex;align-items:center;gap:3px}
+.s-link-btn:hover{background:rgba(16,185,129,.2)}
+.s-link-btn svg{width:10px;height:10px;fill:currentColor}
+.s-divider{text-align:center;font-size:10px;color:var(--muted);padding:5px 0;border-top:1px solid var(--border);margin:3px 0}
+/* Panels */
+#notif-panel,#recent-panel{position:fixed;top:var(--bar);width:280px;bottom:0;background:var(--bg2);z-index:180;display:flex;flex-direction:column;transition:transform .25s}
+#notif-panel{right:0;border-left:1px solid var(--border);transform:translateX(100%)}
+#notif-panel.open{transform:translateX(0)}
+#recent-panel{left:0;border-right:1px solid var(--border);transform:translateX(-100%)}
+#recent-panel.open{transform:translateX(0)}
+.panel-header{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.panel-list{flex:1;overflow-y:auto;padding:8px}
+.notif-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px}
+.ni-title{font-weight:bold;color:var(--accent);font-size:11px;margin-bottom:2px}
+.ni-body{font-size:11px;color:var(--text);line-height:1.5}
+.ni-time{font-size:10px;color:var(--muted);margin-top:3px}
+.ni-link{display:inline-block;font-size:10px;color:var(--accent3);text-decoration:none;margin-top:3px}
+.recent-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.ri-info{flex:1;min-width:0}.ri-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ri-pl{font-size:10px;color:var(--muted)}.ri-time{font-size:10px;color:var(--muted);margin-top:2px}
+/* Modals */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;align-items:center;justify-content:center;padding:16px}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;width:420px;max-width:100%;max-height:90vh;overflow-y:auto}
+.modal-box h3{font-size:12px;color:var(--accent);margin-bottom:12px}
+.share-url{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;font-size:11px;color:var(--accent);word-break:break-all;margin-bottom:8px;line-height:1.6;font-family:monospace;cursor:pointer}
+.share-url:hover{border-color:var(--accent)}
+.sec{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* Color swatch row */
+.color-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .1s}
+.color-swatch:hover{transform:scale(1.15)}.color-swatch.active{border-color:#fff}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="bar">
+  <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <span class="bar-title">YT Watcher</span>
+  <div class="spacer"></div>
+  <div class="bar-right">
+    <button class="bar-btn" onclick="toggleRecent()">最近</button>
+    <button class="bar-btn" onclick="openShare()">共有</button>
+    <span class="badge off" id="push-badge" onclick="togglePush()">PUSH OFF</span>
+    <span class="badge off" id="notif-badge" onclick="toggleNotifPanel()">0件</span>
+  </div>
+</div>
+
+<div id="tabbar">
+  <div class="tab-item pinned" id="online-tab" onclick="switchToOnline()">
+    <svg class="tab-icon" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg>
+    <span class="tab-name">オンライン</span>
+  </div>
+  <button class="tab-add" onclick="addTab()">+</button>
+</div>
+
+<div id="app">
+  <div class="pane" id="pane-online">
+    <div class="sched-top">
+      <div class="sched-top-row">
+        <h2><svg width="13" height="13" viewBox="0 0 24 24" fill="var(--accent3)"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg>オンライン通知</h2>
+        <button class="btn-outline btn-sm" onclick="openAddEvent()">＋ 追加</button>
+        <button class="btn-outline btn-sm" onclick="toggleJsonArea()">JSON読込</button>
+        <button class="btn-outline btn-sm" id="view-btn" onclick="toggleView()">カレンダー</button>
+        <button class="btn-outline btn-sm" onclick="openSchedShare()">共有</button>
+        <button class="btn-danger btn-sm" onclick="clearSchedule()">全削除</button>
+      </div>
+      <textarea id="sched-json" placeholder='{"schedule":[...]} または schedule配列'></textarea>
+      <div id="sched-err" class="errmsg"></div>
+      <div id="sched-load-row" style="display:none;margin-top:6px" class="btn-row">
+        <button class="btn-accent btn-sm" onclick="loadScheduleJson()">読み込む</button>
+        <button class="btn-outline btn-sm" onclick="toggleJsonArea()">キャンセル</button>
+      </div>
+    </div>
+    <div id="mobile-sel-banner">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      <span id="mb-sel-txt">選択モード</span><div style="flex:1"></div>
+      <button class="sel-btn danger" id="mb-del-btn" style="display:none" onclick="showDeleteConfirm()"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>削除</button>
+      <button class="sel-btn" onclick="exitSelectionMode()"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>終了</button>
+    </div>
+    <div id="sel-toolbar">
+      <span class="sel-count" id="sel-count-text">0件選択</span>
+      <button class="sel-btn" onclick="selectAll()"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>全選択</button>
+      <button class="sel-btn danger" onclick="showDeleteConfirm()"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>削除</button>
+      <button class="sel-btn" onclick="clearSelection()"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>解除</button>
+    </div>
+    <div id="cal-wrap">
+      <div class="cal-nav">
+        <button class="btn-outline btn-sm" onclick="calMove(-1)">&#8249;</button>
+        <h3 id="cal-title"></h3>
+        <button class="btn-outline btn-sm" onclick="calMove(1)">&#8250;</button>
+      </div>
+      <div class="cal-filter-row">
+        <button class="cal-filter-btn active" id="filt-all" onclick="setCalFilter('all')">全て</button>
+        <button class="cal-filter-btn" id="filt-notify" onclick="setCalFilter('notify')">通知ONのみ</button>
+        <button class="cal-filter-btn" id="filt-future" onclick="setCalFilter('future')">未来のみ</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div id="cal-events" style="display:none"></div>
+    </div>
+    <div id="list-wrap">
+      <div id="sched-cards"><div class="empty">「＋ 追加」またはJSONを読み込んでください</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Panels -->
+<div id="notif-panel">
+  <div class="panel-header"><span>通知センター</span><button class="btn-outline btn-sm" onclick="clearNotifs()">全消去</button></div>
+  <div class="panel-list" id="np-list">
+    <div style="padding:8px">
+      <button class="btn-outline btn-sm" onclick="testLocalNotif()" style="width:100%;margin-bottom:6px">通知テスト(ローカル)</button>
+      <button class="btn-accent btn-sm" onclick="runServerCheck()" style="width:100%;margin-bottom:6px">サーバーチェック実行</button>
+      <div id="server-check-result" style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:6px"></div>
+      <div id="push-debug" style="font-size:10px;color:var(--muted);line-height:1.6;word-break:break-all"></div>
+    </div>
+  </div>
+</div>
+<div id="recent-panel">
+  <div class="panel-header"><span>最近削除したタブ</span></div>
+  <div class="panel-list" id="rp-list"></div>
+</div>
+
+<!-- Modals -->
+<div class="modal-bg" id="rename-modal">
+  <div class="modal-box"><h3>タブ名を変更</h3>
+    <div class="field"><input type="text" id="rename-input" placeholder="タブ名"></div>
+    <div class="btn-row"><button class="btn-accent" onclick="confirmRename()">保存</button><button class="btn-outline" onclick="closeModal('rename-modal')">キャンセル</button></div>
+  </div>
+</div>
+
+<!-- Playlist share -->
+<div class="modal-bg" id="share-modal">
+  <div class="modal-box"><h3>プレイリストを共有</h3>
+    <div class="sec">共有するタブを選択</div>
+    <div id="share-checks" style="margin-bottom:12px"></div>
+    <div id="share-result" style="display:none">
+      <div class="sec">共有リンク（タップでコピー）</div>
+      <div class="share-url" id="share-url-text" onclick="copyShareUrl()"></div>
+      <div class="btn-row" style="margin-bottom:8px">
+        <button class="btn-accent btn-sm" onclick="copyShareUrl()">URLをコピー</button>
+        <button class="btn-outline btn-sm" onclick="copyShareJson()">JSONをコピー</button>
+      </div>
+    </div>
+    <div id="share-loading" style="display:none;font-size:11px;color:var(--muted);margin-bottom:8px">生成中...</div>
+    <div class="btn-row"><button class="btn-accent" onclick="generateShareUrl()">リンクを生成</button><button class="btn-outline" onclick="closeModal('share-modal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- Schedule share -->
+<div class="modal-bg" id="sched-share-modal">
+  <div class="modal-box"><h3>予定を共有</h3>
+    <div class="sec">共有する予定を選択</div>
+    <div style="margin-bottom:8px;display:flex;gap:6px">
+      <button class="btn-outline btn-sm" onclick="schedShareSelectAll()">全選択</button>
+      <button class="btn-outline btn-sm" onclick="schedShareSelectNone()">全解除</button>
+    </div>
+    <div id="sched-share-checks" style="margin-bottom:12px;max-height:200px;overflow-y:auto"></div>
+    <div id="sched-share-result" style="display:none">
+      <div class="sec">共有リンク（タップでコピー）</div>
+      <div class="share-url" id="sched-share-url" onclick="copySchedShareUrl()"></div>
+      <div class="btn-row" style="margin-bottom:8px">
+        <button class="btn-accent btn-sm" onclick="copySchedShareUrl()">URLをコピー</button>
+        <button class="btn-outline btn-sm" onclick="copySchedShareJson()">JSONをコピー</button>
+      </div>
+    </div>
+    <div id="sched-share-loading" style="display:none;font-size:11px;color:var(--muted);margin-bottom:8px">生成中...</div>
+    <div class="btn-row"><button class="btn-accent" onclick="generateSchedShareUrl()">リンクを生成</button><button class="btn-outline" onclick="closeModal('sched-share-modal')">閉じる</button></div>
+  </div>
+</div>
+
+<!-- Import modal -->
+<div class="modal-bg" id="import-modal">
+  <div class="modal-box">
+    <h3 id="import-title">インポート</h3>
+    <div class="sec">インポートするものを選択</div>
+    <div id="import-checks" style="margin-bottom:12px;max-height:260px;overflow-y:auto"></div>
+    <div class="btn-row">
+      <button class="btn-accent" onclick="confirmImport()">インポート</button>
+      <button class="btn-outline" onclick="closeModal('import-modal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="delete-modal">
+  <div class="modal-box"><h3>予定を削除</h3>
+    <p style="font-size:12px;margin-bottom:14px" id="delete-msg"></p>
+    <div class="btn-row"><button class="btn-danger" onclick="confirmDelete()">削除する</button><button class="btn-outline" onclick="closeModal('delete-modal')">キャンセル</button></div>
+  </div>
+</div>
+
+<!-- Add/Edit event -->
+<div class="modal-bg" id="event-modal">
+  <div class="modal-box">
+    <h3 id="event-modal-title">予定を追加</h3>
+    <div class="form-grid">
+      <div class="field"><label>教科</label><input type="text" id="ev-subject" placeholder="理科" oninput="onSubjectInput()"></div>
+      <div class="field"><label>単元</label><input type="text" id="ev-unit" placeholder="遺伝"></div>
+      <div class="field"><label>日付</label><input type="date" id="ev-date"></div>
+      <div class="field"><label>限</label>
+        <select id="ev-period" onchange="onPeriodChange()">
+          <option value="1">1限 (19:30〜)</option>
+          <option value="2">2限 (20:40〜)</option>
+          <option value="0">カスタム</option>
+        </select>
+      </div>
+      <div class="field"><label>開始時刻</label><input type="time" id="ev-start" value="19:30"></div>
+      <div class="field"><label>終了時刻</label><input type="time" id="ev-end" value="21:00"></div>
+      <div class="field"><label>ステータス</label>
+        <select id="ev-status">
+          <option value="normal">〇 通常授業</option>
+          <option value="h_class">H Hクラス</option>
+          <option value="s_class">S Sクラス</option>
+        </select>
+      </div>
+      <div class="field"><label>通知 (分前)</label><input type="text" id="ev-notify" value="60,30,10"></div>
+    </div>
+    <div class="field"><label>Zoom/参加URL</label><input type="url" id="ev-link" placeholder="https://zoom.us/j/..."></div>
+    <div class="field"><label>メモ</label><input type="text" id="ev-memo" placeholder="提出物など"></div>
+    <div class="field">
+      <label>色（教科色 / イベント個別色）</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <input type="color" id="ev-color" value="#7fb8ff">
+        <div class="color-row" id="palette-row"></div>
+        <button class="btn-outline btn-sm" onclick="saveSubjectColor()">教科に適用</button>
+        <button class="btn-outline btn-sm" onclick="clearEventColor()">リセット</button>
+      </div>
+    </div>
+    <div id="ev-err" class="errmsg"></div>
+    <div class="btn-row">
+      <button class="btn-accent" onclick="submitEvent()">保存</button>
+      <button class="btn-outline" onclick="closeModal('event-modal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER = window.__CFG?.worker || location.origin;
+const VAPID  = window.__CFG?.vapid  || '';
+const ONLINE = 'online';
+const isMobile = () => window.matchMedia('(pointer:coarse)').matches;
+
+// ── Color system ──────────────────────────────────────────────────────────────
+const PALETTE = [
+  '#7fffb2','#7fb8ff','#ff7f50','#ffcc33',
+  '#c77fff','#ff7fb0','#7fffd4','#ffa07a',
+  '#87ceeb','#98fb98','#dda0dd','#f08080',
+];
+let subjectColors = JSON.parse(localStorage.getItem('yt_subject_colors') || '{}');
+
+function saveSubjectColors() { localStorage.setItem('yt_subject_colors', JSON.stringify(subjectColors)); }
+
+function autoColor(subject) {
+  if (!subject) return PALETTE[0];
+  let h = 0;
+  for (let i = 0; i < subject.length; i++) { h = (h << 5) - h + subject.charCodeAt(i); h |= 0; }
+  return PALETTE[Math.abs(h) % PALETTE.length];
+}
+
+function getEventColor(ev) {
+  if (ev?.color) return ev.color;                         // per-event color
+  if (ev?.subject && subjectColors[ev.subject]) return subjectColors[ev.subject]; // per-subject
+  return autoColor(ev?.subject);                          // auto
+}
+
+function brighten(hex, amount = 40) {
+  const r = Math.min(255, parseInt(hex.slice(1,3),16) + amount);
+  const g = Math.min(255, parseInt(hex.slice(3,5),16) + amount);
+  const b = Math.min(255, parseInt(hex.slice(5,7),16) + amount);
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+// Palette swatches
+function buildPaletteRow() {
+  const row = document.getElementById('palette-row');
+  if (!row) return;
+  row.innerHTML = PALETTE.map(c =>
+    `<span class="color-swatch" style="background:${c}" onclick="pickPaletteColor('${c}')" title="${c}"></span>`
+  ).join('');
+}
+
+function pickPaletteColor(c) {
+  document.getElementById('ev-color').value = c;
+  document.querySelectorAll('.color-swatch').forEach(el =>
+    el.classList.toggle('active', el.style.background === c || el.style.background === hexToRgb(c))
+  );
+}
+
+function hexToRgb(hex) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function onSubjectInput() {
+  const subj = document.getElementById('ev-subject').value.trim();
+  const c = subjectColors[subj] || autoColor(subj);
+  document.getElementById('ev-color').value = c;
+}
+
+function saveSubjectColor() {
+  const subj = document.getElementById('ev-subject').value.trim();
+  if (!subj) return;
+  subjectColors[subj] = document.getElementById('ev-color').value;
+  saveSubjectColors();
+  renderScheduleCards();
+  if (viewMode==='cal') renderCalendar();
+}
+
+function clearEventColor() {
+  const subj = document.getElementById('ev-subject').value.trim();
+  const c = subjectColors[subj] || autoColor(subj);
+  document.getElementById('ev-color').value = c;
+}
+
+// ── Duplicate suppression ─────────────────────────────────────────────────────
+// Returns true if this event should be suppressed in list view
+function isDuplicate(ev) {
+  if (ev.notify) return false; // never suppress notify=ON events
+  const key = (ev.subject||'') + '::' + (ev.unit||'');
+  const evDate = new Date(ev.date);
+  for (const other of schedules) {
+    if (other.eventId === ev.eventId) continue;
+    if ((other.subject||'')+'::'+(other.unit||'') !== key) continue;
+    if (!other.notify) continue;
+    const otherDate = new Date(other.date);
+    const daysDiff = Math.abs((evDate - otherDate) / 86400000);
+    if (daysDiff <= 20) return true; // suppress
+  }
+  return false;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let tabs      = JSON.parse(localStorage.getItem('yt_tabs')    || '[]');
+let recents   = JSON.parse(localStorage.getItem('yt_recent')  || '[]');
+let notifs    = JSON.parse(localStorage.getItem('yt_notifs')  || '[]');
+let schedules = JSON.parse(localStorage.getItem('yt_schedule')|| '[]');
+let activeTabId = localStorage.getItem('yt_active_tab') || ONLINE;
+let swReg = null, pushSub = null, notifOpen = false, recentOpen = false, renameTabId = null;
+let videoCache = {}, jsonAreaOpen = false, viewMode = 'list';
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth(), calSelected = null, calFilter = 'all';
+let selectedSet = new Set(), sortedIndices = [], lastClickedSorted = -1, selectionMode = false, longPressTimer = null;
+let editingEventIdx = -1;
+let pendingImport = null;
+
+if (!tabs.length) { tabs = [newTab('プレイリスト 1', '')]; saveTabs(); }
+if (!tabs.find(t => t.id === activeTabId) && activeTabId !== ONLINE) activeTabId = ONLINE;
+
+function newTab(n, p) { return { id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), name:n, playlistId:p, createdAt:Date.now() }; }
+function saveTabs() { localStorage.setItem('yt_tabs', JSON.stringify(tabs)); localStorage.setItem('yt_active_tab', activeTabId); }
+function saveRecents() { localStorage.setItem('yt_recent', JSON.stringify(recents)); }
+function saveSchedule() { localStorage.setItem('yt_schedule', JSON.stringify(schedules)); syncScheduleToKV(); }
+async function syncScheduleToKV() {
+  try { await fetch(`${WORKER}/schedules`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedules})}); } catch {}
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  const p = new URLSearchParams(location.search);
+
+  // Short code import
+  const code = p.get('code');
+  if (code) {
+    try {
+      const res = await fetch(`${WORKER}/share?code=${encodeURIComponent(code)}`);
+      if (res.ok) {
+        const result = await res.json();
+        if (result.data) showImportModal(result.data);
+      }
+    } catch(e) { console.warn('code import:', e); }
+    history.replaceState({}, '', location.pathname);
+  }
+
+  if ('serviceWorker' in navigator) {
+    try { swReg = await navigator.serviceWorker.register('/sw.js'); await navigator.serviceWorker.ready; pushSub = await swReg.pushManager.getSubscription(); updatePushBadge(); } catch {}
+  }
+  buildPaletteRow();
+  renderTabBar(); renderApp(); updateNotifBadge();
+  if (schedules.length) renderScheduleCards();
+  setupKeyboard(); updatePushDebug();
+  document.getElementById('ev-period').addEventListener('change', onPeriodChange);
+})();
+
+// ── Period ────────────────────────────────────────────────────────────────────
+function onPeriodChange() {
+  const v = document.getElementById('ev-period').value;
+  if (v==='1') { document.getElementById('ev-start').value='19:30'; document.getElementById('ev-end').value='21:00'; }
+  else if (v==='2') { document.getElementById('ev-start').value='20:40'; document.getElementById('ev-end').value='23:00'; }
+}
+
+// ── Keyboard ──────────────────────────────────────────────────────────────────
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (activeTabId !== ONLINE) return;
+    const tag = document.activeElement.tagName;
+    if (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+    if ((e.ctrlKey||e.metaKey) && e.key==='a') { e.preventDefault(); selectAll(); }
+    if ((e.key==='x'||e.key==='X') && !e.ctrlKey && selectedSet.size>0) showDeleteConfirm();
+    if (e.key==='Escape') clearSelection();
+  });
+}
+
+// ── View ──────────────────────────────────────────────────────────────────────
+function toggleView() {
+  viewMode = viewMode==='list' ? 'cal' : 'list';
+  document.getElementById('view-btn').textContent = viewMode==='list' ? 'カレンダー' : 'リスト';
+  document.getElementById('cal-wrap').classList.toggle('show', viewMode==='cal');
+  document.getElementById('list-wrap').style.display = viewMode==='list' ? '' : 'none';
+  if (viewMode==='cal') renderCalendar();
+}
+
+// ── Calendar filter ───────────────────────────────────────────────────────────
+function setCalFilter(f) {
+  calFilter = f;
+  ['all','notify','future'].forEach(id => document.getElementById('filt-'+id).classList.toggle('active', id===f));
+  calSelected = null;
+  document.getElementById('cal-events').style.display = 'none';
+  renderCalendar();
+}
+
+function filteredSchedules() {
+  const now = new Date();
+  return schedules.filter(s => {
+    if (calFilter==='notify' && !s.notify) return false;
+    if (calFilter==='future' && new Date(s.date+'T'+(s.startTime||'00:00')) < now) return false;
+    return true;
+  });
+}
+
+// ── Calendar ──────────────────────────────────────────────────────────────────
+function calMove(d) { calMonth+=d; if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;} calSelected=null; document.getElementById('cal-events').style.display='none'; renderCalendar(); }
+function toDateStr(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function renderCalendar() {
+  document.getElementById('cal-title').textContent = calYear+'年'+(calMonth+1)+'月';
+  const grid = document.getElementById('cal-grid');
+  const days = ['日','月','火','水','木','金','土'];
+  let html = days.map(d=>`<div class="cal-head">${d}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+  const todayStr = toDateStr(new Date());
+  const evMap = {};
+  filteredSchedules().forEach(s => { if(s.date) evMap[s.date]=(evMap[s.date]||[]).concat(s); });
+  for (let i=startDow-1; i>=0; i--) {
+    const d=prevDays-i, ds=toDateStr(new Date(calYear,calMonth-1,d));
+    html += dayCell(d, ds, evMap[ds]||[], 'other-month');
+  }
+  for (let d=1; d<=daysInMonth; d++) {
+    const ds = toDateStr(new Date(calYear,calMonth,d));
+    const cls = (ds===todayStr?'today':'')+(ds===calSelected?' selected':'');
+    html += dayCell(d, ds, evMap[ds]||[], cls);
+  }
+  const remain = (7-(startDow+daysInMonth)%7)%7;
+  for (let d=1; d<=remain; d++) {
+    const ds = toDateStr(new Date(calYear,calMonth+1,d));
+    html += dayCell(d, ds, evMap[ds]||[], 'other-month');
+  }
+  grid.innerHTML = html;
+  if (calSelected) renderCalEvents(calSelected, evMap[calSelected]||[]);
+}
+
+function dayCell(d, ds, events, extra) {
+  const seen = new Set();
+  const dots = events.map(e => {
+    const c = e.notify ? brighten(getEventColor(e), 30) : getEventColor(e);
+    const k = c + (e.notify?'1':'0');
+    if (seen.has(k)) return '';
+    seen.add(k);
+    return `<span class="cal-dot" style="background:${c}${e.notify?';box-shadow:0 0 4px '+c:''}"></span>`;
+  }).join('');
+  return `<div class="cal-day ${extra}" onclick="calSelect('${ds}')"><div class="cal-dn">${d}</div><div class="cal-dots">${dots}</div></div>`;
+}
+
+function calSelect(ds) {
+  calSelected = ds;
+  const evMap = {};
+  filteredSchedules().forEach(s => { if(s.date) evMap[s.date]=(evMap[s.date]||[]).concat(s); });
+  renderCalendar();
+  const el = document.getElementById('cal-events');
+  renderCalEvents(ds, evMap[ds]||[]);
+  el.style.display = '';
+}
+
+function renderCalEvents(ds, events) {
+  const el = document.getElementById('cal-events');
+  if (!events.length) { el.innerHTML='<div class="empty" style="padding:12px">この日の予定はありません</div>'; return; }
+  const rel = getRelative(ds);
+  el.innerHTML = `<div class="cal-events-box"><h4>${ds} <span class="s-rel ${rel.cls}" style="font-size:10px">${rel.text}</span></h4>
+  ${events.map(e => {
+    const origIdx = schedules.findIndex(x => x.eventId===e.eventId);
+    const color = getEventColor(e);
+    const displayColor = e.notify ? brighten(color, 30) : color;
+    const link = e.link?.url || e.zoomUrl || '';
+    return `<div class="cal-ev" style="border-left-color:${displayColor};background:${displayColor}18">
+      <div class="cal-ev-sub">
+        <span style="color:${displayColor};font-weight:bold">${esc(e.subject||'')} <span style="font-weight:normal;color:var(--muted);font-size:10px">${esc(e.unit||'')}</span></span>
+        <span class="s-status ${e.status||'normal'}" style="font-size:10px">${esc(e.statusName||'通常')}</span>
+      </div>
+      <div class="cal-ev-meta">${esc(e.timeSlot||'')} ${esc(e.startTime||'')}〜${esc(e.endTime||'')}${e.isDefaultTime?' (デフォルト)':''}</div>
+      ${e.memo?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${esc(e.memo)}</div>`:''}
+      <div class="cal-ev-actions">
+        <label class="tog-wrap" onclick="event.stopPropagation()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+          <label class="tog"><input type="checkbox" ${e.notify?'checked':''} onchange="schedSet(${origIdx},'notify',this.checked);calSelect('${ds}')"><span class="tog-sl" style="${e.notify?'background:'+displayColor:''}"></span></label>
+        </label>
+        <label class="tog-wrap">完了<label class="tog done"><input type="checkbox" ${e.completed?'checked':''} onchange="schedSet(${origIdx},'completed',this.checked);calSelect('${ds}')"><span class="tog-sl"></span></label></label>
+        ${link?`<button class="s-link-btn" onclick="window.open('${link}','_blank')"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>参加/開く</button>`:''}
+        <button class="sel-btn" style="font-size:10px;padding:2px 6px" onclick="openAddEvent(${origIdx})">編集</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+function toggleSelect(sp){const i=sortedIndices[sp];if(selectedSet.has(i))selectedSet.delete(i);else selectedSet.add(i);lastClickedSorted=sp;updateSelUI();}
+function shiftSelect(sp){if(lastClickedSorted===-1){toggleSelect(sp);return;}const f=Math.min(lastClickedSorted,sp),t=Math.max(lastClickedSorted,sp);for(let i=f;i<=t;i++)selectedSet.add(sortedIndices[i]);lastClickedSorted=sp;updateSelUI();}
+function selectAll(){sortedIndices.forEach(i=>selectedSet.add(i));lastClickedSorted=sortedIndices.length-1;updateSelUI();}
+function clearSelection(){selectedSet.clear();lastClickedSorted=-1;if(isMobile())exitSelectionMode();else updateSelUI();}
+function exitSelectionMode(){selectionMode=false;selectedSet.clear();lastClickedSorted=-1;updateSelUI();}
+function updateSelUI(){
+  const n=selectedSet.size;
+  if(!isMobile()){
+    document.getElementById('sel-toolbar').classList.toggle('show',n>0);
+    document.getElementById('sel-count-text').textContent=n+'件選択中';
+    document.getElementById('mobile-sel-banner').classList.remove('show');
+  }else{
+    document.getElementById('sel-toolbar').classList.remove('show');
+    document.getElementById('mobile-sel-banner').classList.toggle('show',selectionMode);
+    document.getElementById('mb-sel-txt').textContent=selectionMode?n+'件選択中':'選択モード';
+    document.getElementById('mb-del-btn').style.display=(selectionMode&&n>0)?'flex':'none';
+  }
+  document.querySelectorAll('.s-card[data-sp]').forEach(card=>{
+    card.classList.toggle('selected',selectedSet.has(sortedIndices[parseInt(card.dataset.sp)]));
+  });
+}
+function onCardTouchStart(e,sp){longPressTimer=setTimeout(()=>{longPressTimer=null;selectionMode=true;selectedSet.clear();selectedSet.add(sortedIndices[sp]);lastClickedSorted=sp;navigator.vibrate?.(30);updateSelUI();},500);}
+function onCardTouchEnd(){clearTimeout(longPressTimer);longPressTimer=null;}
+function onCardTouchMove(){clearTimeout(longPressTimer);longPressTimer=null;}
+function onCardClick(e,sp){if(!isMobile())return;if(!selectionMode)return;e.preventDefault();toggleSelect(sp);}
+function onCheckboxClick(e,sp){e.stopPropagation();if(e.shiftKey)shiftSelect(sp);else toggleSelect(sp);}
+function showDeleteConfirm(){if(!selectedSet.size)return;document.getElementById('delete-msg').textContent=selectedSet.size+'件の予定を削除しますか？';document.getElementById('delete-modal').classList.add('open');}
+function confirmDelete(){[...selectedSet].sort((a,b)=>b-a).forEach(i=>schedules.splice(i,1));saveSchedule();clearSelection();closeModal('delete-modal');renderScheduleCards();if(viewMode==='cal')renderCalendar();}
+
+// ── Add/Edit event ────────────────────────────────────────────────────────────
+function openAddEvent(idx=-1) {
+  editingEventIdx = idx;
+  const isEdit = idx >= 0;
+  document.getElementById('event-modal-title').textContent = isEdit ? '予定を編集' : '予定を追加';
+  document.getElementById('ev-err').style.display = 'none';
+  buildPaletteRow();
+  if (isEdit) {
+    const s = schedules[idx];
+    document.getElementById('ev-subject').value = s.subject||'';
+    document.getElementById('ev-unit').value = s.unit||'';
+    document.getElementById('ev-date').value = s.date||'';
+    document.getElementById('ev-period').value = s.period||1;
+    document.getElementById('ev-start').value = s.startTime||'19:30';
+    document.getElementById('ev-end').value = s.endTime||'21:00';
+    document.getElementById('ev-status').value = s.status||'normal';
+    document.getElementById('ev-notify').value = (s.notifyBefore||[60,30,10]).join(',');
+    document.getElementById('ev-link').value = s.link?.url||s.zoomUrl||'';
+    document.getElementById('ev-memo').value = s.memo||'';
+    document.getElementById('ev-color').value = s.color || subjectColors[s.subject] || autoColor(s.subject);
+  } else {
+    document.getElementById('ev-subject').value = '';
+    document.getElementById('ev-unit').value = '';
+    document.getElementById('ev-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('ev-period').value = '1';
+    document.getElementById('ev-start').value = '19:30';
+    document.getElementById('ev-end').value = '21:00';
+    document.getElementById('ev-status').value = 'normal';
+    document.getElementById('ev-notify').value = '60,30,10';
+    document.getElementById('ev-link').value = '';
+    document.getElementById('ev-memo').value = '';
+    document.getElementById('ev-color').value = autoColor('');
+  }
+  document.getElementById('event-modal').classList.add('open');
+}
+
+function submitEvent() {
+  const subject   = document.getElementById('ev-subject').value.trim();
+  const date      = document.getElementById('ev-date').value;
+  const errEl     = document.getElementById('ev-err');
+  if (!subject) { errEl.textContent='教科を入力してください'; errEl.style.display='block'; return; }
+  if (!date)    { errEl.textContent='日付を入力してください';   errEl.style.display='block'; return; }
+  const period    = parseInt(document.getElementById('ev-period').value)||0;
+  const startTime = document.getElementById('ev-start').value;
+  const endTime   = document.getElementById('ev-end').value;
+  const statusVal = document.getElementById('ev-status').value;
+  const statusNames = {normal:'通常授業',h_class:'Hクラス',s_class:'Sクラス'};
+  const notifyBefore = document.getElementById('ev-notify').value.split(',').map(v=>parseInt(v.trim())).filter(n=>!isNaN(n));
+  const linkUrl   = document.getElementById('ev-link').value.trim();
+  const colorVal  = document.getElementById('ev-color').value;
+  const weekday   = ['日','月','火','水','木','金','土'][new Date(date).getDay()];
+  // Auto-save to subject color if it's a new event
+  const autoC = autoColor(subject);
+  const existingColor = subjectColors[subject];
+  const entry = {
+    eventId: editingEventIdx>=0 ? schedules[editingEventIdx].eventId : 'evt_'+Math.random().toString(36).slice(2,10),
+    subject, unit: document.getElementById('ev-unit').value.trim(), date,
+    displayDate: date.slice(5).replace('-','/'), weekday, period,
+    timeSlot: period>0?period+'限':'',
+    startTime, endTime, isDefaultTime: false,
+    status: statusVal, statusName: statusNames[statusVal]||'通常授業',
+    zoomUrl: linkUrl,
+    link: linkUrl ? {url:linkUrl,type:linkUrl.includes('zoom')?'zoom':'external',target:'_blank'} : {url:''},
+    color: colorVal !== autoC && colorVal !== existingColor ? colorVal : undefined,
+    notify: editingEventIdx>=0 ? schedules[editingEventIdx].notify : false,
+    notifyBefore, memo: document.getElementById('ev-memo').value.trim(),
+    completed: editingEventIdx>=0 ? schedules[editingEventIdx].completed : false,
+    confidence: 1.0,
+  };
+  if (editingEventIdx>=0) schedules[editingEventIdx]=entry;
+  else schedules.push(entry);
+  saveSchedule();
+  closeModal('event-modal');
+  renderScheduleCards();
+  if (viewMode==='cal') renderCalendar();
+}
+
+// ── Schedule JSON ─────────────────────────────────────────────────────────────
+function toggleJsonArea(){jsonAreaOpen=!jsonAreaOpen;document.getElementById('sched-json').classList.toggle('open',jsonAreaOpen);document.getElementById('sched-load-row').style.display=jsonAreaOpen?'flex':'none';if(jsonAreaOpen)document.getElementById('sched-json').focus();}
+
+function loadScheduleJson(){
+  const raw=document.getElementById('sched-json').value.trim();
+  const errEl=document.getElementById('sched-err');errEl.style.display='none';
+  try{
+    let input=JSON.parse(raw);let arr=Array.isArray(input)?input:(input.schedule||[]);
+    if(!arr.length)throw new Error('scheduleが空です');
+    let added=0,skipped=0;
+    arr.forEach(s=>{
+      s=fillDefaultTime(s);
+      const dup=schedules.find(x=>x.eventId===s.eventId||(x.subject===s.subject&&x.unit===s.unit&&x.date===s.date&&x.period===s.period&&x.status===s.status));
+      if(dup){skipped++;return;}schedules.push(s);added++;
+    });
+    saveSchedule();toggleJsonArea();document.getElementById('sched-json').value='';
+    renderScheduleCards();if(viewMode==='cal')renderCalendar();
+    if(skipped){errEl.textContent=`${added}件追加、${skipped}件重複スキップ`;errEl.style.display='block';}
+  }catch(e){errEl.textContent='JSONエラー: '+e.message;errEl.style.display='block';}
+}
+
+function clearSchedule(){if(!confirm('全予定を削除しますか？'))return;schedules=[];saveSchedule();selectedSet.clear();renderScheduleCards();if(viewMode==='cal')renderCalendar();}
+
+function fillDefaultTime(s){
+  if(!s.startTime){
+    if(s.period===1){s.startTime='19:30';s.endTime=s.endTime||'21:00';s.isDefaultTime=true;}
+    else if(s.period===2){s.startTime='20:40';s.endTime=s.endTime||'23:00';s.isDefaultTime=true;}
+    else{s.startTime='00:00';s.isDefaultTime=true;}
+  }else{s.isDefaultTime=false;if(!s.endTime)s.endTime=calcEnd(s.startTime);}
+  return s;
+}
+function calcEnd(start){let[h,m]=start.split(':').map(Number);m+=90;h+=Math.floor(m/60);m%=60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+function getRelative(ds){
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(ds);target.setHours(0,0,0,0);
+  const diff=Math.floor((target-today)/86400000);
+  if(diff===0)return{text:'今日',cls:'today'};if(diff===1)return{text:'明日',cls:'future'};
+  if(diff===2)return{text:'明後日',cls:'future'};if(diff===-1)return{text:'昨日',cls:'past'};
+  if(diff===-2)return{text:'一昨日',cls:'past'};if(diff>2)return{text:`${diff}日後`,cls:'future'};
+  return{text:`${Math.abs(diff)}日前`,cls:'past'};
+}
+
+// ── Render cards (grouped by subject+unit) ────────────────────────────────────
+let groupExpanded = {}; // key → bool
+
+function renderScheduleCards() {
+  const container = document.getElementById('sched-cards');
+  if (!schedules.length) {
+    container.innerHTML = '<div class="empty">「＋ 追加」またはJSONを読み込んでください</div>';
+    sortedIndices = []; updateSelUI(); return;
+  }
+
+  const now = new Date();
+  // Sort all schedules
+  const withIdx = schedules.map((s,i) => ({s,i}));
+  withIdx.sort((a,b) => {
+    const ta=new Date(a.s.date+'T'+(a.s.startTime||'00:00'));
+    const tb=new Date(b.s.date+'T'+(b.s.startTime||'00:00'));
+    const ap=ta<now, bp=tb<now;
+    if(ap!==bp)return ap?1:-1;if(!ap&&!bp)return ta-tb;return tb-ta;
+  });
+  sortedIndices = withIdx.map(x => x.i);
+
+  // Group by subject + unit
+  const groups = {};
+  const groupOrder = [];
+  withIdx.forEach(({s,i}, sp) => {
+    const key = (s.subject||'') + '::' + (s.unit||'');
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push({s,i,sp});
+  });
+
+  let html = '';
+  let pastDividerAdded = false;
+
+  groupOrder.forEach(key => {
+    const items = groups[key];
+    const firstEv = items[0].s;
+    const color = getEventColor(firstEv);
+    const displayColor = items.some(x=>x.s.notify) ? brighten(color,20) : color;
+    const expanded = groupExpanded[key] !== false; // default expanded
+    const hasMultiple = items.length > 1;
+
+    // Past divider — check if first item of group is past
+    const firstDate = new Date(items[0].s.date+'T'+(items[0].s.startTime||'00:00'));
+    if (!pastDividerAdded && firstDate < now) {
+      pastDividerAdded = true;
+      html += '<div class="s-divider">─── 過去の予定 ───</div>';
+    }
+
+    html += `<div class="sched-group">`;
+
+    if (hasMultiple) {
+      html += `<div class="sched-group-header" onclick="toggleGroup('${key.replace(/'/g,"\\'")}')">
+        <span class="sgh-dot" style="background:${displayColor}"></span>
+        <span class="sgh-name" style="color:${displayColor}">${esc(firstEv.subject||'')} <span style="font-weight:normal;font-size:10px;color:var(--muted)">${esc(firstEv.unit||'')}</span></span>
+        <span class="sgh-count">${items.length}件</span>
+        <span class="sgh-toggle">${expanded ? '▲' : '▼'}</span>
+      </div>`;
+    }
+
+    html += `<div class="group-events ${hasMultiple && !expanded ? 'collapsed' : ''}" id="grp-${btoa(encodeURIComponent(key)).replace(/=/g,'')}">`;
+
+    items.forEach(({s,i,sp}) => {
+      const rel = getRelative(s.date);
+      const eColor = getEventColor(s);
+      const eDisplay = s.notify ? brighten(eColor, 30) : eColor;
+      const link = s.link?.url || s.zoomUrl || '';
+      const dup = isDuplicate(s);
+      const sel = selectedSet.has(i) ? 'selected' : '';
+
+      html += `<div class="s-card ${s.notify?'notify-on':''} ${s.notify?'notify-bright':''} ${s.completed?'completed':''} ${dup?'dim-duplicate':''} ${sel}" data-sp="${sp}"
+        style="border-top:1px solid ${eDisplay}22;${s.notify?'border-left-color:'+eDisplay:''}"
+        onclick="onCardClick(event,${sp})"
+        ontouchstart="onCardTouchStart(event,${sp})"
+        ontouchend="onCardTouchEnd()"
+        ontouchmove="onCardTouchMove()">
+        <div class="s-cb-col" onclick="onCheckboxClick(event,${sp})">
+          <div class="s-checkbox"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,6 4,10 11,2"/></svg></div>
+        </div>
+        <div class="s-body">
+          <div class="s-head">
+            <div>
+              ${!hasMultiple?`<div class="s-subject" style="color:${eDisplay}">${esc(s.subject||'')} <span style="font-size:11px;color:var(--muted);font-weight:normal">${esc(s.unit||'')}</span></div>`:''}
+              ${dup?`<div style="font-size:10px;color:var(--muted)">通知ON日の同一予定</div>`:''}
+            </div>
+            <div style="display:flex;gap:5px;align-items:center">
+              <label class="tog-wrap" onclick="event.stopPropagation()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <label class="tog"><input type="checkbox" ${s.notify?'checked':''} onchange="schedSet(${i},'notify',this.checked)"><span class="tog-sl" style="${s.notify?'background:'+eDisplay:''}"></span></label>
+              </label>
+              <button class="sel-btn" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();openAddEvent(${i})">編集</button>
+            </div>
+          </div>
+          <div class="s-date">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--muted)"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+            ${esc(s.date||'')} ${esc(s.weekday||'')} ${esc(s.timeSlot||'')}
+          </div>
+          <div class="s-time">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="var(--muted)"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7h1.5z"/></svg>
+            ${esc(s.startTime||'')} ~ ${esc(s.endTime||'')}${s.isDefaultTime?'<span class="s-def">(デフォルト)</span>':''}
+          </div>
+          <div class="s-badges">
+            <span class="s-rel ${rel.cls}">${rel.text}</span>
+            <span class="s-status ${s.status||'normal'}">${esc(s.statusName||'通常授業')}</span>
+            ${link?`<button class="s-link-btn" onclick="event.stopPropagation();window.open('${link}','_blank')"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>参加/開く</button>`:''}
+          </div>
+          ${s.notifyBefore?.length?`<div style="font-size:10px;color:var(--muted)">通知: ${s.notifyBefore.join(', ')}分前</div>`:''}
+          <div onclick="event.stopPropagation()">
+            <input type="text" value="${esc(s.memo||'')}" placeholder="メモ" onchange="schedSet(${i},'memo',this.value)">
+          </div>
+          <div onclick="event.stopPropagation()">
+            <label class="tog-wrap">完了<label class="tog done"><input type="checkbox" ${s.completed?'checked':''} onchange="schedSet(${i},'completed',this.checked)"><span class="tog-sl"></span></label></label>
+          </div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+  updateSelUI();
+}
+
+function toggleGroup(key) {
+  groupExpanded[key] = groupExpanded[key] === false ? true : false;
+  renderScheduleCards();
+}
+
+function schedSet(idx,key,val){if(idx<0||idx>=schedules.length)return;schedules[idx][key]=val;saveSchedule();if(key==='notify'||key==='completed'){renderScheduleCards();if(viewMode==='cal')renderCalendar();}}
+
+// ── Share (Worker KV short code) ──────────────────────────────────────────────
+async function createShareCode(data) {
+  const res = await fetch(`${WORKER}/share`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({data})
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const result = await res.json();
+  return result;
+}
+
+// Playlist share
+function openShare() {
+  document.getElementById('share-checks').innerHTML = tabs.map(t=>`
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;cursor:pointer">
+      <input type="checkbox" value="${t.id}" checked style="accent-color:var(--accent)">
+      <span>${esc(t.name)}</span>
+      <span style="font-size:10px;color:var(--muted)">${t.playlistId||'未設定'}</span>
+    </label>`).join('');
+  document.getElementById('share-result').style.display = 'none';
+  document.getElementById('share-loading').style.display = 'none';
+  document.getElementById('share-modal').classList.add('open');
+}
+
+function getSelectedTabs() {
+  const checked = [...document.querySelectorAll('#share-checks input:checked')].map(el=>el.value);
+  return tabs.filter(t=>checked.includes(t.id)).map(t=>({name:t.name,playlistId:t.playlistId}));
+}
+
+async function generateShareUrl() {
+  const selected = getSelectedTabs();
+  if (!selected.length) return;
+  const loading = document.getElementById('share-loading');
+  loading.style.display = 'block';
+  try {
+    const payload = {type:'playlist', data:selected};
+    const result = await createShareCode(payload);
+    const url = `${location.origin}/?code=${result.code}`;
+    document.getElementById('share-url-text').textContent = url;
+    document.getElementById('share-result').style.display = 'block';
+    document.getElementById('share-result').dataset.json = JSON.stringify(selected);
+  } catch(e) { alert('生成エラー: '+e.message); }
+  finally { loading.style.display = 'none'; }
+}
+
+function copyShareUrl() { navigator.clipboard.writeText(document.getElementById('share-url-text').textContent).then(()=>alert('URLをコピーしました')); }
+function copyShareJson() { navigator.clipboard.writeText(document.getElementById('share-result').dataset.json||'[]').then(()=>alert('JSONをコピーしました')); }
+
+// Schedule share
+function openSchedShare() {
+  const checks = document.getElementById('sched-share-checks');
+  checks.innerHTML = schedules.map((s,i) => {
+    const color = getEventColor(s);
+    return `<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;cursor:pointer">
+      <input type="checkbox" value="${i}" checked style="accent-color:${color}">
+      <span style="color:${color}">${esc(s.subject||'')}</span>
+      <span style="font-size:10px;color:var(--muted)">${esc(s.unit||'')} ${esc(s.date||'')}</span>
+    </label>`;
+  }).join('');
+  document.getElementById('sched-share-result').style.display = 'none';
+  document.getElementById('sched-share-loading').style.display = 'none';
+  document.getElementById('sched-share-modal').classList.add('open');
+}
+function schedShareSelectAll(){document.querySelectorAll('#sched-share-checks input').forEach(el=>el.checked=true);}
+function schedShareSelectNone(){document.querySelectorAll('#sched-share-checks input').forEach(el=>el.checked=false);}
+
+function getSelectedSchedules() {
+  const checked = [...document.querySelectorAll('#sched-share-checks input:checked')].map(el=>parseInt(el.value));
+  return checked.map(i=>schedules[i]).filter(Boolean);
+}
+
+async function generateSchedShareUrl() {
+  const sel = getSelectedSchedules();
+  if (!sel.length) return;
+  const loading = document.getElementById('sched-share-loading');
+  loading.style.display = 'block';
+  try {
+    const payload = {type:'schedule', data:sel};
+    const result = await createShareCode(payload);
+    const url = `${location.origin}/?code=${result.code}`;
+    document.getElementById('sched-share-url').textContent = url;
+    document.getElementById('sched-share-result').style.display = 'block';
+    document.getElementById('sched-share-result').dataset.json = JSON.stringify(sel);
+  } catch(e) { alert('生成エラー: '+e.message); }
+  finally { loading.style.display = 'none'; }
+}
+function copySchedShareUrl(){navigator.clipboard.writeText(document.getElementById('sched-share-url').textContent).then(()=>alert('URLをコピーしました'));}
+function copySchedShareJson(){navigator.clipboard.writeText(document.getElementById('sched-share-result').dataset.json||'[]').then(()=>alert('JSONをコピーしました'));}
+
+// ── Import ────────────────────────────────────────────────────────────────────
+function showImportModal(payload) {
+  pendingImport = payload;
+  const isSchedule = payload?.type === 'schedule';
+  const items = isSchedule ? payload.data : (payload.data || (Array.isArray(payload)?payload:[]));
+  document.getElementById('import-title').textContent = isSchedule ? '予定をインポート' : 'プレイリストをインポート';
+  document.getElementById('import-checks').innerHTML = items.map((item,i) => {
+    if (isSchedule) {
+      const color = getEventColor(item);
+      return `<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;cursor:pointer">
+        <input type="checkbox" value="${i}" checked style="accent-color:${color}">
+        <span style="color:${color}">${esc(item.subject||'')}</span>
+        <span style="font-size:10px;color:var(--muted)">${esc(item.unit||'')} ${esc(item.date||'')}</span>
+      </label>`;
+    } else {
+      return `<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;cursor:pointer">
+        <input type="checkbox" value="${i}" checked style="accent-color:var(--accent)">
+        <span>${esc(item.name||'無題')}</span>
+        <span style="font-size:10px;color:var(--muted)">${esc(item.playlistId||'')}</span>
+      </label>`;
+    }
+  }).join('');
+  document.getElementById('import-modal').classList.add('open');
+}
+
+function confirmImport() {
+  if (!pendingImport) return closeModal('import-modal');
+  const payload = pendingImport;
+  const isSchedule = payload?.type === 'schedule';
+  const items = isSchedule ? payload.data : (payload.data||(Array.isArray(payload)?payload:[]));
+  const checked = [...document.querySelectorAll('#import-checks input:checked')].map(el=>parseInt(el.value));
+  if (isSchedule) {
+    let added=0, skipped=0;
+    checked.forEach(i => {
+      const s = fillDefaultTime({...items[i]});
+      const dup = schedules.find(x=>x.eventId===s.eventId||(x.subject===s.subject&&x.unit===s.unit&&x.date===s.date));
+      if (dup) { skipped++; return; }
+      schedules.push(s); added++;
+    });
+    saveSchedule(); renderScheduleCards(); if(viewMode==='cal')renderCalendar();
+    if (skipped) alert(`${added}件追加、${skipped}件は重複のためスキップ`);
+  } else {
+    checked.forEach(i => {
+      const d = items[i]; if(!d) return;
+      const tab = newTab(d.name||'無題', d.playlistId||'');
+      tabs.push(tab);
+      const p = document.createElement('div'); p.className='pane'; p.id='pane-'+tab.id;
+      document.getElementById('app').appendChild(p);
+    });
+    saveTabs(); syncPlaylistsToGitHub(); renderTabBar();
+  }
+  pendingImport = null;
+  closeModal('import-modal');
+}
+
+// ── Tab system ────────────────────────────────────────────────────────────────
+function renderTabBar(){
+  const bar=document.getElementById('tabbar'),addBtn=bar.querySelector('.tab-add');
+  bar.querySelectorAll('.tab-item:not(.pinned)').forEach(el=>el.remove());
+  document.getElementById('online-tab').classList.toggle('active',activeTabId===ONLINE);
+  tabs.forEach(tab=>{
+    const el=document.createElement('div');el.className='tab-item'+(tab.id===activeTabId?' active':'');el.dataset.id=tab.id;
+    el.innerHTML=`<svg class="tab-icon" viewBox="0 0 24 24"><path d="${tab.playlistId?'M8 5v14l11-7z':'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z'}"/></svg><span class="tab-name">${esc(tab.name)}</span><button class="tab-close">×</button>`;
+    el.querySelector('.tab-close').addEventListener('click',e=>{e.stopPropagation();closeTab(tab.id);});
+    el.addEventListener('click',()=>switchTab(tab.id));
+    el.addEventListener('dblclick',()=>openRename(tab.id));
+    bar.insertBefore(el,addBtn);
+  });
+}
+function renderApp(){
+  const app=document.getElementById('app');
+  app.querySelectorAll('.pane:not(#pane-online)').forEach(el=>el.remove());
+  tabs.forEach(tab=>{if(!document.getElementById('pane-'+tab.id)){const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;app.appendChild(p);}});
+  updateActivePane();
+}
+function updateActivePane(){
+  document.querySelectorAll('.pane').forEach(el=>{
+    const isOnline=activeTabId===ONLINE&&el.id==='pane-online';
+    const active=isOnline||(el.id==='pane-'+activeTabId);
+    el.classList.toggle('active',active);
+    if(active&&el.id!=='pane-online'&&!el.children.length){const tab=tabs.find(t=>t.id===activeTabId);if(tab)renderPane(tab);}
+  });
+}
+function switchToOnline(){activeTabId=ONLINE;saveTabs();renderTabBar();updateActivePane();}
+function switchTab(id){
+  activeTabId=id;saveTabs();
+  document.getElementById('online-tab').classList.remove('active');
+  document.querySelectorAll('.tab-item:not(.pinned)').forEach(el=>el.classList.toggle('active',el.dataset.id===id));
+  document.querySelectorAll('.pane').forEach(el=>{const active=el.id==='pane-'+id;el.classList.toggle('active',active);if(active&&!el.children.length){const tab=tabs.find(t=>t.id===id);if(tab)renderPane(tab);}});
+}
+function addTab(){const tab=newTab('新しいタブ','');tabs.push(tab);activeTabId=tab.id;saveTabs();const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;document.getElementById('app').appendChild(p);renderSetup(p,tab);renderTabBar();updateActivePane();}
+function closeTab(id){
+  if(tabs.length===1)return;
+  const idx=tabs.findIndex(t=>t.id===id),tab=tabs[idx];
+  recents.unshift({...tab,deletedAt:Date.now()});if(recents.length>20)recents=recents.slice(0,20);saveRecents();
+  tabs.splice(idx,1);document.getElementById('pane-'+id)?.remove();
+  if(activeTabId===id)activeTabId=tabs[Math.min(idx,tabs.length-1)].id;
+  saveTabs();syncPlaylistsToGitHub();renderTabBar();updateActivePane();
+}
+function renderPane(tab){const p=document.getElementById('pane-'+tab.id);if(!p)return;tab.playlistId?renderVideos(p,tab):renderSetup(p,tab);}
+function extractPlaylistId(raw){const m=raw.match(/[?&]list=([A-Za-z0-9_-]+)/);return m?m[1]:raw.trim();}
+function renderSetup(pane,tab){
+  pane.innerHTML=`<div class="setup-box"><h2>プレイリストを設定</h2>
+    <div class="field"><label>タブ名</label><input type="text" id="sn-${tab.id}" value="${esc(tab.name)}" placeholder="タブ名"></div>
+    <div class="field"><label>YouTube URL または ID</label><input type="text" id="sp-${tab.id}" value="${esc(tab.playlistId)}" placeholder="https://youtube.com/... でもOK"></div>
+    <div class="errmsg" id="se-${tab.id}"></div>
+    <div class="btn-row"><button class="btn-accent" onclick="saveTabPlaylist('${tab.id}')">保存</button>${tab.playlistId?`<button class="btn-outline" onclick="cancelSetup('${tab.id}')">キャンセル</button>`:''}</div>
+  </div>`;
+}
+function cancelSetup(tabId){const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab?.playlistId&&p)renderVideos(p,tab);}
+function saveTabPlaylist(tabId){
+  const raw=document.getElementById(`sp-${tabId}`)?.value.trim()||'';
+  const name=document.getElementById(`sn-${tabId}`)?.value.trim()||'';
+  const errEl=document.getElementById(`se-${tabId}`);
+  const plId=extractPlaylistId(raw);
+  if(!plId){if(errEl){errEl.textContent='URLまたはIDを入力してください';errEl.style.display='block';}return;}
+  const tab=tabs.find(t=>t.id===tabId);if(!tab)return;
+  tab.playlistId=plId;if(name)tab.name=name;delete videoCache[tabId];saveTabs();syncPlaylistsToGitHub();renderTabBar();renderPane(tab);
+}
+async function renderVideos(pane,tab){
+  pane.innerHTML=`<div class="vid-header"><span style="font-size:12px;color:var(--accent)">${esc(tab.name)}</span><span id="vc-${tab.id}" style="font-size:10px;color:var(--muted)"></span><div style="flex:1"></div><button class="btn-outline btn-sm" onclick="editTabPlaylist('${tab.id}')">設定</button><button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button></div><div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
+  if(videoCache[tab.id]){renderGrid(tab.id,videoCache[tab.id]);return;}
+  try{
+    const res=await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);const data=await res.json();
+    if(data.error)throw new Error(data.error);videoCache[tab.id]=data;renderGrid(tab.id,data);
+  }catch(e){const el=document.getElementById(`vg-${tab.id}`);if(el)el.innerHTML=`<div class="empty">エラー: ${esc(e.message)}</div>`;}
+}
+function renderGrid(tabId,videos){
+  const vc=document.getElementById(`vc-${tabId}`),vg=document.getElementById(`vg-${tabId}`);
+  if(vc)vc.textContent=videos.length+'本';if(!vg)return;
+  if(!videos.length){vg.innerHTML='<div class="empty">動画がありません</div>';return;}
+  vg.className='video-grid';
+  vg.innerHTML=videos.map(v=>`<div class="video-card" onclick="location.href='/player.html?v=${v.id}&t=${encodeURIComponent(v.title)}'"><img src="${v.thumb}" loading="lazy" onerror="this.style.background='var(--bg3)'"><div class="vc-title">${esc(v.title)}</div></div>`).join('');
+}
+function editTabPlaylist(tabId){const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab&&p)renderSetup(p,tab);}
+async function refreshTab(tabId){delete videoCache[tabId];const tab=tabs.find(t=>t.id===tabId);const p=document.getElementById('pane-'+tabId);if(tab&&p)renderVideos(p,tab);}
+
+// ── Rename ────────────────────────────────────────────────────────────────────
+function openRename(id){renameTabId=id;const tab=tabs.find(t=>t.id===id);document.getElementById('rename-input').value=tab?.name||'';document.getElementById('rename-modal').classList.add('open');setTimeout(()=>{document.getElementById('rename-input').focus();document.getElementById('rename-input').select();},50);}
+function confirmRename(){const name=document.getElementById('rename-input').value.trim();if(!name||!renameTabId)return closeModal('rename-modal');const tab=tabs.find(t=>t.id===renameTabId);if(tab){tab.name=name;saveTabs();renderTabBar();}closeModal('rename-modal');}
+document.getElementById('rename-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmRename();if(e.key==='Escape')closeModal('rename-modal');});
+
+// ── Recents ───────────────────────────────────────────────────────────────────
+function toggleRecent(){recentOpen=!recentOpen;document.getElementById('recent-panel').classList.toggle('open',recentOpen);if(recentOpen)renderRecentList();}
+function renderRecentList(){
+  const el=document.getElementById('rp-list');
+  if(!recents.length){el.innerHTML='<div class="empty" style="padding:16px">削除したタブはありません</div>';return;}
+  el.innerHTML=recents.map((r,i)=>`<div class="recent-item"><div class="ri-info"><div class="ri-name">${esc(r.name)}</div><div class="ri-pl">${esc(r.playlistId||'未設定')}</div><div class="ri-time">${fmtTime(r.deletedAt)}</div></div><button class="btn-accent btn-sm" onclick="restoreTab(${i})">復元</button></div>`).join('');
+}
+function restoreTab(idx){
+  const r=recents[idx];if(!r)return;
+  const tab={...newTab(r.name,r.playlistId)};tabs.push(tab);recents.splice(idx,1);saveRecents();saveTabs();syncPlaylistsToGitHub();
+  const p=document.createElement('div');p.className='pane';p.id='pane-'+tab.id;document.getElementById('app').appendChild(p);
+  renderTabBar();renderRecentList();
+}
+
+// ── Sync ──────────────────────────────────────────────────────────────────────
+async function syncPlaylistsToGitHub(){
+  const pl=tabs.filter(t=>t.playlistId).map(t=>({id:t.playlistId,title:t.name,autoDownload:false}));
+  if(!pl.length)return;
+  try{await fetch(`${WORKER}/playlists`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({playlists:pl})});}catch{}
+}
+
+// ── Push ──────────────────────────────────────────────────────────────────────
+async function togglePush(){
+  if(!swReg){alert('Service Workerが利用できません');return;}
+  if(pushSub){await pushSub.unsubscribe();pushSub=null;updatePushBadge();updatePushDebug();return;}
+  const perm=await Notification.requestPermission();if(perm!=='granted'){alert('ブラウザの設定で通知を許可してください');return;}
+  if(!VAPID){alert('VAPID_PUBLICがWorkerに設定されていません');return;}
+  try{
+    await navigator.serviceWorker.ready;
+    pushSub=await swReg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(VAPID)});
+    const res=await fetch(`${WORKER}/subscribe`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:pushSub.toJSON()})});
+    if(!res.ok)throw new Error(`Worker: ${res.status}`);
+    updatePushBadge();updatePushDebug();
+  }catch(e){alert('登録エラー: '+e.message);}
+}
+function updatePushBadge(){const on=!!pushSub;document.getElementById('push-badge').textContent=on?'PUSH ON':'PUSH OFF';document.getElementById('push-badge').className=on?'badge':'badge off';}
+function updatePushDebug(){const el=document.getElementById('push-debug');if(!el)return;el.textContent=pushSub?'登録済: '+pushSub.endpoint.slice(0,50)+'...':'未登録';}
+async function testLocalNotif(){
+  const perm=await Notification.requestPermission();if(perm!=='granted'){alert('通知を許可してください');return;}
+  if(swReg)await swReg.showNotification('テスト通知',{body:'通知が正常に届いています',tag:'test'});
+  else new Notification('テスト通知',{body:'通知が届いています'});
+}
+
+async function runServerCheck(){
+  const el=document.getElementById('server-check-result');
+  if(!el)return;
+  el.textContent='実行中...';
+  try{
+    const res=await fetch(`${WORKER}/run-check`);
+    const data=await res.json();
+    if(data.error){el.textContent='エラー: '+data.error;return;}
+    let lines=[];
+    lines.push(`購読者: ${data.subscribers}件`);
+    (data.playlists||[]).forEach(p=>{
+      if(p.error)lines.push(`✗ ${p.title}: ${p.error}`);
+      else lines.push(`${p.title}: 全${p.total} / 新着${p.new}`);
+    });
+    lines.push(`予定通知: ${data.scheduleSent}件送信`);
+    if(data.errors?.length)lines.push(...data.errors.map(e=>'✗ '+e));
+    el.innerHTML=lines.map(esc).join('<br>');
+  }catch(e){el.textContent='通信エラー: '+e.message;}
+}
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+function toggleNotifPanel(){notifOpen=!notifOpen;document.getElementById('notif-panel').classList.toggle('open',notifOpen);if(notifOpen)renderNotifList();}
+function renderNotifList(){
+  const el=document.getElementById('np-list');
+  const hdr=`<div style="padding:8px;border-bottom:1px solid var(--border)"><button class="btn-outline btn-sm" onclick="testLocalNotif()" style="width:100%;margin-bottom:6px">通知テスト(ローカル)</button><button class="btn-accent btn-sm" onclick="runServerCheck()" style="width:100%;margin-bottom:6px">サーバーチェック実行</button><div id="server-check-result" style="font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:6px"></div><div id="push-debug" style="font-size:10px;color:var(--muted);line-height:1.6;word-break:break-all"></div></div>`;
+  if(!notifs.length){el.innerHTML=hdr+'<div class="empty" style="padding:16px">通知はありません</div>';updatePushDebug();return;}
+  el.innerHTML=hdr+notifs.map(n=>`<div class="notif-item"><div class="ni-title">${esc(n.title)}</div><div class="ni-body">${esc(n.body)}</div>${n.url?`<a class="ni-link" href="${n.url}" target="_blank">▶ 開く</a>`:''}<div class="ni-time">${fmtTime(n.time)}</div></div>`).join('');
+  updatePushDebug();
+}
+function clearNotifs(){notifs=[];localStorage.setItem('yt_notifs','[]');updateNotifBadge();renderNotifList();}
+function updateNotifBadge(){document.getElementById('notif-badge').textContent=notifs.length+'件';document.getElementById('notif-badge').className=notifs.length?'badge warn':'badge off';}
+navigator.serviceWorker?.addEventListener('message',e=>{
+  if(e.data?.type==='push'){notifs.unshift({...e.data,time:new Date().toISOString()});if(notifs.length>50)notifs=notifs.slice(0,50);localStorage.setItem('yt_notifs',JSON.stringify(notifs));updateNotifBadge();if(notifOpen)renderNotifList();}
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtTime=ts=>{const d=new Date(ts);return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;};
+function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const raw=atob((b+pad).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));}
+</script>
+</body>
+</html>
