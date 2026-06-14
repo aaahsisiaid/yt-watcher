@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
-<head>
+<html lang="ja"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <meta name="theme-color" content="#000">
@@ -10,7 +9,6 @@
 html,body{height:100%;background:#000;color:#fff;font-family:'Space Mono',monospace;overflow:hidden;touch-action:manipulation}
 #wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000}
 video{width:100%;height:100%;object-fit:contain;display:block}
-/* controls overlay */
 #ctrl{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .25s}
 #ctrl.hidden{opacity:0;pointer-events:none}
 #top{display:flex;align-items:center;gap:10px;padding:14px 14px 20px;background:linear-gradient(rgba(0,0,0,.7),transparent)}
@@ -18,25 +16,21 @@ video{width:100%;height:100%;object-fit:contain;display:block}
 #ttl{flex:1;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
 #author{font-size:10px;color:#999}
 #bot{padding:6px 14px 20px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
-/* seek */
 #seek-wrap{position:relative;height:22px;display:flex;align-items:center;margin-bottom:4px;cursor:pointer;touch-action:none}
 #seek-bg{position:absolute;height:3px;width:100%;background:rgba(255,255,255,.2);border-radius:2px}
 #seek-buf{position:absolute;height:3px;background:rgba(255,255,255,.35);border-radius:2px;width:0}
-#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0;transition:width .1s}
+#seek-fill{position:absolute;height:3px;background:#7fffb2;border-radius:2px;width:0}
 #seek-thumb{position:absolute;width:14px;height:14px;background:#7fffb2;border-radius:50%;transform:translateX(-50%);left:0;top:50%;margin-top:-7px}
-/* row */
 #row{display:flex;align-items:center;gap:8px}
 .ibtn{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:20px;line-height:1;border-radius:50%}
 .ibtn:active{background:rgba(255,255,255,.15)}
 .ibtn svg{width:20px;height:20px;fill:#fff;display:block}
 #time{font-size:11px;color:#bbb;white-space:nowrap}
 .sp{flex:1}
-/* quality menu */
 #qmenu{position:absolute;bottom:72px;right:14px;background:#111;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;display:none;z-index:20;min-width:90px}
 #qmenu.open{display:block}
 #qmenu button{display:block;width:100%;padding:9px 18px;background:none;border:none;color:#ccc;font-size:12px;font-family:inherit;cursor:pointer;text-align:left;white-space:nowrap}
 #qmenu button:active,#qmenu button.sel{background:#1e1e1e;color:#7fffb2}
-/* center overlays */
 #center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:10px}
 #play-icon{width:60px;height:60px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 #play-icon.show{opacity:1}
@@ -45,45 +39,31 @@ video{width:100%;height:100%;object-fit:contain;display:block}
 #spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:#7fffb2;border-radius:50%;animation:spin 1s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 #err{background:rgba(200,50,50,.85);padding:10px 18px;border-radius:8px;font-size:12px;display:none;text-align:center;max-width:280px}
-/* tap zone */
 #tap{position:absolute;top:56px;left:0;right:0;bottom:72px}
 </style>
 </head>
 <body>
-
 <div id="wrap">
   <video id="v" playsinline preload="auto"></video>
-
   <div id="center">
     <div id="spinner"></div>
-    <div id="play-icon">
-      <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
-    </div>
+    <div id="play-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>
     <div id="speed-badge"></div>
     <div id="err"></div>
   </div>
-
   <div id="tap"></div>
-
   <div id="ctrl">
     <div id="top">
-      <button id="back">&#8592;</button>
-      <div>
-        <div id="ttl"></div>
-        <div id="author"></div>
-      </div>
+      <button id="back">←</button>
+      <div><div id="ttl"></div><div id="author"></div></div>
     </div>
     <div id="bot">
       <div id="seek-wrap">
-        <div id="seek-bg"></div>
-        <div id="seek-buf"></div>
-        <div id="seek-fill"></div>
-        <div id="seek-thumb"></div>
+        <div id="seek-bg"></div><div id="seek-buf"></div>
+        <div id="seek-fill"></div><div id="seek-thumb"></div>
       </div>
       <div id="row">
-        <button class="ibtn" id="play-btn">
-          <svg id="play-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
+        <button class="ibtn" id="play-btn"><svg id="play-svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
         <span id="time">0:00 / 0:00</span>
         <div class="sp"></div>
         <button class="ibtn" id="q-btn" title="画質">
@@ -95,36 +75,36 @@ video{width:100%;height:100%;object-fit:contain;display:block}
       </div>
     </div>
   </div>
-
   <div id="qmenu"></div>
 </div>
-
 <script>
-const WORKER = 'https://yt-push-register.a6068376.workers.dev';
-const params = new URLSearchParams(location.search);
+const WORKER = window.__CFG?.worker || location.origin;
+const params  = new URLSearchParams(location.search);
 const videoId = params.get('v') || '';
 const initTitle = decodeURIComponent(params.get('t') || '');
 
 const v = document.getElementById('v');
-let streams = [], curStreamIdx = 0;
-let ctrlTimer, ctrlVisible = true;
-let longTimer, isLong = false, isSeeking = false;
+let streams = [], curIdx = 0;
+let ctrlTimer, isSeeking = false, isLong = false, longTimer;
 
 document.getElementById('ttl').textContent = initTitle;
 document.getElementById('back').onclick = () => history.back();
 
-// Load stream info
+// ── Load stream info ──────────────────────────────────────────────────────────
 (async () => {
   showSpinner(true);
   try {
-    const res = await fetch(`${WORKER}/stream?v=${videoId}`);
+    const res = await fetch(`${WORKER}/stream?v=${encodeURIComponent(videoId)}`);
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) throw new Error('Worker未デプロイ — worker.jsをCloudflareにデプロイしてください');
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    streams = data.streams;
+    streams = data.streams || [];
     document.getElementById('ttl').textContent = data.title || initTitle;
     document.getElementById('author').textContent = data.author || '';
     buildQMenu();
-    playStream(0);
+    if (streams.length) playStream(0);
+    else throw new Error('ストリームが見つかりませんでした');
   } catch(e) {
     showErr(e.message);
   } finally {
@@ -134,70 +114,59 @@ document.getElementById('back').onclick = () => history.back();
 
 function playStream(idx) {
   if (!streams[idx]) return;
-  curStreamIdx = idx;
-  const t = v.currentTime;
+  curIdx = idx;
+  const t = v.currentTime || 0;
   v.src = streams[idx].url;
   v.load();
-  v.currentTime = t;
+  if (t > 0) v.currentTime = t;
   v.play().catch(() => {});
   document.querySelectorAll('#qmenu button').forEach((b, i) => b.classList.toggle('sel', i === idx));
 }
 
 function buildQMenu() {
-  const m = document.getElementById('qmenu');
-  m.innerHTML = streams.map((s, i) =>
+  document.getElementById('qmenu').innerHTML = streams.map((s, i) =>
     `<button onclick="playStream(${i})">${s.quality}</button>`
   ).join('');
 }
 
 // Video events
-v.addEventListener('waiting', () => showSpinner(true));
-v.addEventListener('playing', () => showSpinner(false));
-v.addEventListener('canplay', () => showSpinner(false));
+v.addEventListener('waiting',   () => showSpinner(true));
+v.addEventListener('playing',   () => showSpinner(false));
+v.addEventListener('canplay',   () => showSpinner(false));
 v.addEventListener('timeupdate', tickSeek);
-v.addEventListener('progress', tickBuf);
-v.addEventListener('ended', () => updatePlayBtn(false));
-v.addEventListener('play', () => updatePlayBtn(true));
-v.addEventListener('pause', () => updatePlayBtn(false));
+v.addEventListener('progress',   tickBuf);
+v.addEventListener('play',   () => updatePlayBtn(true));
+v.addEventListener('pause',  () => updatePlayBtn(false));
+v.addEventListener('ended',  () => updatePlayBtn(false));
+v.addEventListener('error',  () => showErr('動画の読み込みに失敗しました'));
 
 function tickSeek() {
   if (isSeeking) return;
-  const pct = v.duration ? (v.currentTime / v.duration) * 100 : 0;
-  document.getElementById('seek-fill').style.width = pct + '%';
-  document.getElementById('seek-fill').style.transition = 'none';
+  const pct = v.duration ? v.currentTime / v.duration * 100 : 0;
+  document.getElementById('seek-fill').style.cssText = `width:${pct}%;transition:none`;
   document.getElementById('seek-thumb').style.left = pct + '%';
   document.getElementById('time').textContent = fmt(v.currentTime) + ' / ' + fmt(v.duration);
 }
-
 function tickBuf() {
   if (!v.duration) return;
   try {
-    const buf = v.buffered.length ? (v.buffered.end(v.buffered.length - 1) / v.duration) * 100 : 0;
+    const buf = v.buffered.length ? v.buffered.end(v.buffered.length-1) / v.duration * 100 : 0;
     document.getElementById('seek-buf').style.width = buf + '%';
   } catch {}
 }
-
-function fmt(s) {
-  s = Math.floor(s || 0);
-  return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
-}
-
+function fmt(s) { s=Math.floor(s||0); return Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60); }
 function updatePlayBtn(playing) {
   document.getElementById('play-svg').innerHTML = playing
     ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
     : '<path d="M8 5v14l11-7z"/>';
 }
 
-// Play/pause button
-document.getElementById('play-btn').onclick = () => {
-  v.paused ? v.play() : v.pause();
-  showCtrl();
-};
+// Controls
+document.getElementById('play-btn').onclick = () => { v.paused ? v.play() : v.pause(); showCtrl(); };
 
-// Tap zone — tap = play/pause, longpress = 2x
 const tap = document.getElementById('tap');
 tap.addEventListener('click', () => {
-  if (isLong) return;
+  if (isLong) { isLong = false; return; }
   v.paused ? v.play() : v.pause();
   flashPlayIcon();
   showCtrl();
@@ -207,73 +176,58 @@ tap.addEventListener('touchstart', e => {
   longTimer = setTimeout(() => {
     isLong = true;
     v.playbackRate = 2;
-    showBadge('2x');
+    showBadge('2x ▶▶');
   }, 500);
 }, { passive: true });
 tap.addEventListener('touchend', () => {
   clearTimeout(longTimer);
-  if (isLong) {
-    v.playbackRate = 1;
-    showBadge('1x', 600);
-  }
-  isLong = false;
+  if (isLong) { v.playbackRate = 1; showBadge('1x', 600); }
 });
 tap.addEventListener('touchmove', () => clearTimeout(longTimer), { passive: true });
 
 function flashPlayIcon() {
   const el = document.getElementById('play-icon');
-  el.querySelector('path').setAttribute('d', v.paused
-    ? 'M8 5v14l11-7z'
-    : 'M6 19h4V5H6v14zm8-14v14h4V5h-4z');
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 600);
+  el.querySelector('path').setAttribute('d', v.paused ? 'M6 19h4V5H6v14zm8-14v14h4V5h-4z' : 'M8 5v14l11-7z');
+  el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 600);
 }
-
-function showBadge(txt, dur = 99999) {
+function showBadge(txt, dur) {
   const b = document.getElementById('speed-badge');
   b.textContent = txt; b.classList.add('show');
-  if (dur < 99999) setTimeout(() => b.classList.remove('show'), dur);
+  if (dur) setTimeout(() => b.classList.remove('show'), dur);
 }
 
-// Seek bar
+// Seek
 const sw = document.getElementById('seek-wrap');
-function seekAt(clientX) {
+function seekAt(cx) {
   const r = sw.getBoundingClientRect();
-  const pct = Math.max(0, Math.min((clientX - r.left) / r.width, 1));
-  document.getElementById('seek-fill').style.width = (pct * 100) + '%';
-  document.getElementById('seek-thumb').style.left = (pct * 100) + '%';
-  v.currentTime = pct * (v.duration || 0);
+  const pct = Math.max(0, Math.min((cx - r.left) / r.width, 1));
+  document.getElementById('seek-fill').style.width = (pct*100)+'%';
+  document.getElementById('seek-thumb').style.left = (pct*100)+'%';
+  v.currentTime = pct * (v.duration||0);
 }
-sw.addEventListener('touchstart', e => { isSeeking = true; seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
-sw.addEventListener('touchmove', e => { if (isSeeking) seekAt(e.touches[0].clientX); e.stopPropagation(); }, { passive: true });
-sw.addEventListener('touchend', e => { isSeeking = false; e.stopPropagation(); }, { passive: true });
-sw.addEventListener('mousedown', e => { isSeeking = true; seekAt(e.clientX); });
-window.addEventListener('mousemove', e => { if (isSeeking) seekAt(e.clientX); });
-window.addEventListener('mouseup', () => { isSeeking = false; });
+sw.addEventListener('touchstart',  e => { isSeeking=true; seekAt(e.touches[0].clientX); e.stopPropagation(); }, {passive:true});
+sw.addEventListener('touchmove',   e => { if(isSeeking) seekAt(e.touches[0].clientX); e.stopPropagation(); }, {passive:true});
+sw.addEventListener('touchend',    e => { isSeeking=false; e.stopPropagation(); }, {passive:true});
+sw.addEventListener('mousedown',   e => { isSeeking=true; seekAt(e.clientX); });
+window.addEventListener('mousemove', e => { if(isSeeking) seekAt(e.clientX); });
+window.addEventListener('mouseup',   () => { isSeeking=false; });
 
 // Quality menu
-document.getElementById('q-btn').onclick = e => {
-  e.stopPropagation();
-  document.getElementById('qmenu').classList.toggle('open');
-  showCtrl();
-};
-document.getElementById('wrap').addEventListener('click', () => {
-  document.getElementById('qmenu').classList.remove('open');
-});
+document.getElementById('q-btn').onclick = e => { e.stopPropagation(); document.getElementById('qmenu').classList.toggle('open'); showCtrl(); };
+document.getElementById('wrap').addEventListener('click', () => document.getElementById('qmenu').classList.remove('open'));
 
-// Fullscreen + auto landscape
+// Fullscreen
 document.getElementById('fs-btn').onclick = async () => {
   if (!document.fullscreenElement) {
-    await document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
-    await screen.orientation?.lock('landscape').catch(() => {});
+    await document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+    await screen.orientation?.lock('landscape').catch(()=>{});
   } else {
-    await document.exitFullscreen().catch(() => {});
+    await document.exitFullscreen().catch(()=>{});
     await screen.orientation?.unlock();
   }
 };
 document.addEventListener('fullscreenchange', () => {
-  const in_fs = !!document.fullscreenElement;
-  document.getElementById('fs-svg').innerHTML = in_fs
+  document.getElementById('fs-svg').innerHTML = document.fullscreenElement
     ? '<path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>'
     : '<path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>';
 });
@@ -281,24 +235,14 @@ document.addEventListener('fullscreenchange', () => {
 // Controls visibility
 function showCtrl() {
   document.getElementById('ctrl').classList.remove('hidden');
-  ctrlVisible = true;
   clearTimeout(ctrlTimer);
-  ctrlTimer = setTimeout(() => {
-    document.getElementById('ctrl').classList.add('hidden');
-    ctrlVisible = false;
-  }, 3000);
+  ctrlTimer = setTimeout(() => document.getElementById('ctrl').classList.add('hidden'), 3000);
 }
 document.getElementById('ctrl').addEventListener('click', showCtrl);
 showCtrl();
 
-function showSpinner(on) { document.getElementById('spinner').style.display = on ? 'block' : 'none'; }
-function showErr(msg) {
-  const e = document.getElementById('err');
-  e.textContent = 'エラー: ' + msg; e.style.display = 'block';
-}
-
-// Prevent context menu
+function showSpinner(on) { document.getElementById('spinner').style.display = on?'block':'none'; }
+function showErr(msg) { const e=document.getElementById('err'); e.textContent='エラー: '+msg; e.style.display='block'; }
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
-</body>
-</html>
+</body></html>
