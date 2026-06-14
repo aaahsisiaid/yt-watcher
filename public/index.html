@@ -1154,9 +1154,18 @@ async function renderVideos(pane,tab){
   pane.innerHTML=`<div class="vid-header"><span style="font-size:12px;color:var(--accent)">${esc(tab.name)}</span><span id="vc-${tab.id}" style="font-size:10px;color:var(--muted)"></span><div style="flex:1"></div><button class="btn-outline btn-sm" onclick="editTabPlaylist('${tab.id}')">設定</button><button class="btn-outline btn-sm" onclick="refreshTab('${tab.id}')">更新</button></div><div id="vg-${tab.id}" class="loading">読み込み中...</div>`;
   if(videoCache[tab.id]){renderGrid(tab.id,videoCache[tab.id]);return;}
   try{
-    const res=await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);const data=await res.json();
-    if(data.error)throw new Error(data.error);videoCache[tab.id]=data;renderGrid(tab.id,data);
-  }catch(e){const el=document.getElementById(`vg-${tab.id}`);if(el)el.innerHTML=`<div class="empty">エラー: ${esc(e.message)}</div>`;}
+    const res=await fetch(`${WORKER}/videos?playlistId=${tab.playlistId}`);
+    const ct=res.headers.get('content-type')||'';
+    if(!ct.includes('application/json')){
+      throw new Error('Worker未デプロイ — 新しいworker.jsをCloudflareにデプロイしてください (HTTPステータス: '+res.status+')');
+    }
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    videoCache[tab.id]=data;renderGrid(tab.id,data);
+  }catch(e){
+    const el=document.getElementById(`vg-${tab.id}`);
+    if(el)el.innerHTML=`<div class="empty" style="color:var(--danger)">エラー: ${esc(e.message)}</div>`;
+  }
 }
 function renderGrid(tabId,videos){
   const vc=document.getElementById(`vc-${tabId}`),vg=document.getElementById(`vg-${tabId}`);
@@ -1222,6 +1231,11 @@ async function runServerCheck(){
   el.textContent='実行中...';
   try{
     const res=await fetch(`${WORKER}/run-check`);
+    const ct=res.headers.get('content-type')||'';
+    if(!ct.includes('application/json')){
+      el.textContent='エラー: Worker未デプロイ — 新しいworker.jsをCloudflareにデプロイしてください';
+      return;
+    }
     const data=await res.json();
     if(data.error){el.textContent='エラー: '+data.error;return;}
     let lines=[];
